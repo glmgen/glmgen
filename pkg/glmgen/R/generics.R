@@ -122,7 +122,7 @@ setMethod("show", signature(object = "summary.glmgen"),
 setMethod("summary", signature(object = "trendfilter"),
           function(object) {
             df = apply(object@beta != 0, 2, sum)
-            rss = colSums((object@y - object@beta)^2)
+            rss = colSums((object@y - predict(object, type="response"))^2)
             mat = cbind(df, object@lambda, rss)
             rownames(mat) = rep("", nrow(mat))
             colnames(mat) = c("df", "lambda", "rss")
