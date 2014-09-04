@@ -1,0 +1,12 @@
+#ifndef INT_CODES_H
+#define INT_CODES_H
+
+#define TF_ADMM 0
+#define TF_PRIMALDUAL_IP 1
+#define TF_PROJECTED_NEWTON 2
+
+#define FAMILY_GAUSSIAN
+#define FAMILY_LOGISTIC
+#define FAMILY_POISSON
+
+#endif
