@@ -15,7 +15,7 @@ double get_control_value(SEXP sControlList, const char * param_name, double para
   {
     if(strcmp(CHAR(STRING_ELT(sControlListNames, i)), param_name) == 0) {
      param_output = REAL(VECTOR_ELT(sControlList, i))[0];
-     //break;
+     break;
     }
   }
   return param_output;
