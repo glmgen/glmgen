@@ -80,8 +80,8 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod, SEXP
   switch(method) {
     case TF_ADMM:
       rho = get_control_value(sControl, "rho", 7);
-      eabs = get_control_value(sControl, "rho", 1e-8);
-      erel = get_control_value(sControl, "rho", 1e-6);
+      eabs = get_control_value(sControl, "eabs", 1e-8);
+      erel = get_control_value(sControl, "erel", 1e-6);
       tf_admm(y, x, n, k, family, maxiter, lam_flag, obj_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj, numiter,
               rho, eabs, erel);
