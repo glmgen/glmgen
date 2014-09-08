@@ -1,0 +1,10 @@
+coef-methods            Coefficients - S4 Methods
+glmgen-class            Class '"glmgen"'
+glmgen-package          Fast generalized lasso solver
+predict-methods         ~~ Methods for Function 'predict' ~~
+print-methods           ~~ Methods for Function 'print' ~~
+show-methods            ~~ Methods for Function 'show' ~~
+summary-methods         ~~ Methods for Function 'summary' ~~
+summary.glmgen-class    Class '"summary.glmgen"'
+trendfilter             a
+trendfilter-class       Class '"trendfilter"'

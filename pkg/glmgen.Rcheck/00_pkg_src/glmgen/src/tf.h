@@ -39,7 +39,7 @@ void tf_admm_pois(double * y, double * x, int n, int k,
 double ts_maxlam(double * y, double * x, int n, int k, double * beta_max);
 void tf_calc_dtd(double * x, int n, int k, double * dtd);
 void tf_getrho(double * rho, double lambda);
-void tf_calc_sparse_qr_kernel(int n, int k, double rho, double * dtd, csn * sparseQR);
+void tf_calc_sparse_qr(int n, int k, double rho, double * dtd, csn * sparseQR);
 
 // Lower level helper functions
 void tf_dp(int n, double *y, double lam, double *beta);

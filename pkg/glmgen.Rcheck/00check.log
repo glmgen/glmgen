@@ -1,0 +1,163 @@
+* using log directory ‘/Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck’
+* using R Under development (unstable) (2014-04-10 r65396)
+* using platform: x86_64-apple-darwin13.1.0 (64-bit)
+* using session charset: UTF-8
+* checking for file ‘glmgen/DESCRIPTION’ ... OK
+* checking extension type ... Package
+* this is package ‘glmgen’ version ‘0.0.1’
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘glmgen’ can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... OK
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... WARNING
+Loading required package: methods
+Error in dyn.load(file, DLLpath = DLLpath, ...) : 
+  unable to load shared object '/Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so':
+  dlopen(/Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so, 6): Symbol not found: _dgels_
+  Referenced from: /Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so
+  Expected in: flat namespace
+ in /Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so
+Error: package or namespace load failed for ‘glmgen’
+Execution halted
+
+It looks like this package (or one of its dependent packages) has an
+unstated dependence on a standard package.  All dependencies must be
+declared in DESCRIPTION.
+See the information on DESCRIPTION files in the chapter ‘Creating R
+packages’ of the ‘Writing R Extensions’ manual.
+* checking whether the package can be unloaded cleanly ... WARNING
+Error in dyn.load(file, DLLpath = DLLpath, ...) : 
+  unable to load shared object '/Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so':
+  dlopen(/Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so, 6): Symbol not found: _dgels_
+  Referenced from: /Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so
+  Expected in: flat namespace
+ in /Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so
+Error: package or namespace load failed for ‘glmgen’
+Execution halted
+* checking whether the namespace can be loaded with stated dependencies ... WARNING
+Error in dyn.load(file, DLLpath = DLLpath, ...) : 
+  unable to load shared object '/Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so':
+  dlopen(/Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so, 6): Symbol not found: _dgels_
+  Referenced from: /Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so
+  Expected in: flat namespace
+ in /Users/taylor/files/pkgs/glmgen/pkg/glmgen.Rcheck/glmgen/libs/glmgen.so
+Calls: loadNamespace -> library.dynam -> dyn.load
+Execution halted
+
+A namespace must be able to be loaded with just the base namespace
+loaded: otherwise if the namespace gets loaded by a saved object, the
+session will be unable to start.
+
+Probably some imports need to be declared in the NAMESPACE file.
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking dependencies in R code ... NOTE
+Error: package or namespace load failed for ‘glmgen’
+Call sequence:
+2: stop(gettextf("package or namespace load failed for %s", sQuote(package)), 
+       call. = FALSE, domain = NA)
+1: library(package, lib.loc = lib.loc, character.only = TRUE, verbose = FALSE)
+Execution halted
+See the information on DESCRIPTION files in the chapter ‘Creating R
+packages’ of the ‘Writing R Extensions’ manual.
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+trendfilter: no visible global function definition for ‘error’
+* checking Rd files ... WARNING
+prepare_Rd: glmgen-class.Rd:10-12: Dropping empty section \description
+prepare_Rd: glmgen-class.Rd:44-46: Dropping empty section \note
+prepare_Rd: glmgen-class.Rd:41-43: Dropping empty section \author
+prepare_Rd: glmgen-class.Rd:38-40: Dropping empty section \references
+prepare_Rd: glmgen-class.Rd:50-53: Dropping empty section \seealso
+checkRd: (5) glmgen-class.Rd:0-58: Must have a \description
+prepare_Rd: glmgen-package.Rd:30-32: Dropping empty section \references
+prepare_Rd: glmgen-package.Rd:34-36: Dropping empty section \examples
+prepare_Rd: summary.glmgen-class.Rd:9-11: Dropping empty section \description
+prepare_Rd: summary.glmgen-class.Rd:33-35: Dropping empty section \note
+prepare_Rd: summary.glmgen-class.Rd:30-32: Dropping empty section \author
+prepare_Rd: summary.glmgen-class.Rd:27-29: Dropping empty section \references
+prepare_Rd: summary.glmgen-class.Rd:39-42: Dropping empty section \seealso
+checkRd: (5) summary.glmgen-class.Rd:0-47: Must have a \description
+prepare_Rd: trendfilter-class.Rd:9-11: Dropping empty section \description
+prepare_Rd: trendfilter-class.Rd:47-49: Dropping empty section \note
+prepare_Rd: trendfilter-class.Rd:44-46: Dropping empty section \author
+prepare_Rd: trendfilter-class.Rd:41-43: Dropping empty section \references
+prepare_Rd: trendfilter-class.Rd:53-56: Dropping empty section \seealso
+checkRd: (5) trendfilter-class.Rd:0-61: Must have a \description
+prepare_Rd: trendfilter.Rd:7-9: Dropping empty section \description
+prepare_Rd: trendfilter.Rd:49-51: Dropping empty section \details
+prepare_Rd: trendfilter.Rd:52-58: Dropping empty section \value
+prepare_Rd: trendfilter.Rd:65-67: Dropping empty section \note
+prepare_Rd: trendfilter.Rd:62-64: Dropping empty section \author
+prepare_Rd: trendfilter.Rd:59-61: Dropping empty section \references
+prepare_Rd: trendfilter.Rd:71-73: Dropping empty section \seealso
+checkRd: (5) trendfilter.Rd:0-147: Must have a \description
+* checking Rd metadata ... WARNING
+Rd files with duplicated alias 'coef,glmgen-method':
+  ‘coef-methods.Rd’ ‘glmgen-class.Rd’
+Rd files with duplicated alias 'predict,trendfilter-method':
+  ‘predict-methods.Rd’ ‘trendfilter-class.Rd’
+Rd files with duplicated alias 'print,glmgen-method':
+  ‘glmgen-class.Rd’ ‘print-methods.Rd’
+Rd files with duplicated alias 'print,summary.glmgen-method':
+  ‘print-methods.Rd’ ‘summary.glmgen-class.Rd’
+Rd files with duplicated alias 'show,glmgen-method':
+  ‘glmgen-class.Rd’ ‘show-methods.Rd’
+Rd files with duplicated alias 'show,summary.glmgen-method':
+  ‘show-methods.Rd’ ‘summary.glmgen-class.Rd’
+Rd files with duplicated alias 'summary,trendfilter-method':
+  ‘summary-methods.Rd’ ‘trendfilter-class.Rd’
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... WARNING
+Codoc mismatches from documentation object 'trendfilter':
+trendfilter
+  Code: function(y, x, k = 0L, family = c("gaussian", "logistic",
+                 "poisson"), lambda, nlambda = 100L, lambda.min.ratio =
+                 1e-05, method = c("admm", "prime_dual"), maxiter =
+                 25L, objective = FALSE, control = list())
+  Docs: function(y, x, k = 0L, family = c("gaussian", "logistic",
+                 "poisson"), lambda, nlambda = 100L, lambda.min.ratio =
+                 1e-05, method = c("admm", "prime_dual"), maxiter =
+                 1e+06, objective = FALSE, control = list())
+  Mismatches in argument default values:
+    Name: 'maxiter' Code: 25L Docs: 1e+06
+
+S4 class codoc mismatches from documentation object 'glmgen-class':
+Slots for class 'glmgen'
+  Code: beta call family lambda m method n obj p y
+  Docs: beta call d family lambda method n obj p y
+
+S4 class codoc mismatches from documentation object 'trendfilter-class':
+Slots for class 'trendfilter'
+  Code: beta call family k lambda m method n obj p x y
+  Inherited: y lambda beta family method n p m obj call
+  Docs: beta call d family k lambda method n obj p x y
+
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking line endings in Makefiles ... OK
+* checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS) ... OK
+* checking compiled code ... OK
+* checking examples ... OK
+* checking PDF version of manual ... OK
+WARNING: There were 6 warnings.
+NOTE: There were 2 notes.

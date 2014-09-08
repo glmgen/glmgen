@@ -6,10 +6,6 @@
 #include "utils.h"
 #include "int_codes.h"
 
-// Need to contruct these (Taylor)
-void tf_get_alpha_max();
-void tf_get_u_max();
-
 void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
               int lam_flag, int obj_flag,  double * lambda, int nlambda, double lambda_min_ratio,
               double * beta, double * obj,
@@ -30,8 +26,6 @@ void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
   u = (double *) malloc(n * sizeof(double));
   alpha = (double *) malloc(n * sizeof(double));
 
-  // Determine the maximum lambda in the path, and initiate the path if needed
-  // using the input lambda_min_ratio and equally spaced log points.
   max_lam = ts_maxlam(y, x, n, k, beta_max);
   if (!lam_flag)
   {
@@ -43,27 +37,14 @@ void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
 
   tf_calc_dtd(x, n, k, dtd);
 
-  // Initiate alpha and u for a warm start
-  if(lambda[0] < sqrt(max_lam))
-  {
-    for(i = 0; i < n; i++) {
-      alpha[i] = 0;
-      u[i] = 0;
-    }
-  } else {
-    tf_get_alpha_max();
-    tf_get_u_max();
-  }
-
   for(i = 0; i < nlambda; i++)
   {
     tf_getrho(&rho, lambda[i]);
-    tf_calc_sparse_qr_kernel(n, k, rho * lambda, dtd, sparseQR); // this is the kernel matrix
+    tf_calc_sparse_qr(n, k, rho, dtd, sparseQR);
     switch(family)
     {
       case FAMILY_GAUSSIAN:
-        tf_admm_gauss(y, x, n, k, max_iter, lambda[i], beta+i*n, alpha, u, obj+i*max_iter,
-                      rho * lambda, obj_tol, sparseQR);
+        tf_admm_gauss(y, x, n, k, max_iter, lambda[i], beta+i*n, alpha, u, obj+i*max_iter, rho, obj_tol, sparseQR);
         break;
 
       case FAMILY_LOGISTIC:
@@ -361,7 +342,7 @@ void tf_getrho(double * rho, double lambda)
   rho[0] = lambda;
 }
 
-void tf_calc_sparse_qr_kernel(int n, int k, double rho, double * dtd, csn * sparseQR)
+void tf_calc_sparse_qr(int n, int k, double rho, double * dtd, csn * sparseQR)
 {
 
 }
