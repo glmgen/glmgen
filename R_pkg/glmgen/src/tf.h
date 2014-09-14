@@ -4,6 +4,15 @@
 #include "cs.h"
 #endif
 
+typedef struct gcs_qr  /* holds numeric and symbol qr together */
+{
+  csi m ;         /* number of rows */
+  csi n ;         /* number of columns */
+  css *S ;        /* symbolic qr output */
+  csn *N ;        /* numeric qr output */
+  double * W ;    /* pre-allocated working space for the solver */
+} gqr ;
+
 // Primary function for calling the admm algorithm
 void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
               int lam_flag, int obj_flag,  double * lambda, int nlambda, double lambda_min_ratio,

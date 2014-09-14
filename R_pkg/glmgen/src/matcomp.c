@@ -13,7 +13,6 @@
 // - drow is the row pattern of Dk, precomputed
 // - a is the vector being multiplied, length n
 // - x is where we put the answer, length n-k
-
 void d(int n, int k, double *drow, double *a, double *x)
 {
   int i;
@@ -37,7 +36,6 @@ void d(int n, int k, double *drow, double *a, double *x)
 // - drow is the row pattern of Dk, precomputed
 // - a is the vector being multiplied, length n-k
 // - x is where we put the answer, length n
-
 void dt(int n, int k, double *drow, double *a, double *x)
 {
   int i;
@@ -118,7 +116,6 @@ void builddmat(int n, int k, double *x, double *dmat)
 // - drow is the row pattern of Dk, precomputed
 // - dtd is where we put the answer, containing only the
 //   lower triangular part, and in column-major order
-
 void buildddt(int n, int k, double *drow, double *ddt)
 {
   // Build one column of ddt (since we're using packed
