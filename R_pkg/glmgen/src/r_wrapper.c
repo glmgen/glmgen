@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "tf.h"
-#include "int_codes.h"
+#include "tf/tf.h"
+#include "utils/int_codes.h"
 
 double get_control_value(SEXP sControlList, const char * param_name, double param_default)
 {
