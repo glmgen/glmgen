@@ -6,6 +6,7 @@ all:
 
 ex:
 	gcc -ansi -Wall -I./src/utils -I./src/tf -I./include/ -L./lib -o examples/bin/test examples/test.c -lglmgen -lm
+	gcc -ansi -Wall -I./src/utils -I./src/tf -I./include/ -L./lib -o examples/bin/test_mult examples/test_multipliers.c -lglmgen -lm
 
 clean:
 	rm obj/*.o

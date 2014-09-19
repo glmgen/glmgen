@@ -1,16 +1,16 @@
-#include <tf.h>
+#include "tf.h"
 
 void tf_dtx(double *x, int n, int k, double *a, double *b)
 {
-  int i=0;
-  int j=0;
+  int i;
+  int j;
 
-  memcpy(b, a, n);
+  memcpy(b, a, n*sizeof(double));
 
   for(i=k; i > 0; --i)
   {
-    /* This was difft; inlining for efficency & to help
-       the number of functions down */
+
+    /* b[0:n-i] = D' * b[0:n-i-1] for 1 <= i < n */
     b[n-i] = b[n-i-1];
     for(j=n-i-1; j > 0; --j)
     {
@@ -26,5 +26,12 @@ void tf_dtx(double *x, int n, int k, double *a, double *b)
       }
     }
   }
+
+  double fact = glmgen_factorial(k-1);
+  for(i=0; i < n; ++i)
+  {
+    b[i] *= fact;
+  }
+
   /* TODO mult(b, factorial(k-1)); */
 }

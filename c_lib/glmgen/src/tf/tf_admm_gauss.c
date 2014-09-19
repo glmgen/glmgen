@@ -21,7 +21,7 @@ void tf_admm_gauss (double * y, double * x, int n, int k,
   {
     /* Update beta: banded least squares
      * Build the response vector
-     *  TODO: First add alpha and u and then pre-multiply by dt */
+     * TODO: First add alpha and u and then pre-multiply by dt */
     tf_dtx(x,n,k,alpha,w);
     tf_dtx(x,n,k,u,z);
     int i=0;
@@ -70,6 +70,13 @@ void tf_admm_gauss (double * y, double * x, int n, int k,
     /* NEW: figure out when to stop
      * Based on a relative difference of objective values
      * being <= obj_tol */
+    if(*iter > 1)
+    {
+      if( pobj < obj_tol || (obj[(*iter)-1] - pobj) / pobj < obj_tol )
+      {
+        break;
+      }
+    }
   }
 
   /* Clip the iteration counter at max_iter */

@@ -21,5 +21,8 @@ csi glmgen_gqr_free (gqr * A);
 
 void soft_thresh(int n, double *y, double lam, double *beta);
 cs * scalar_plus_eye (const cs * A, double b);
+double glmgen_factorial(int n);
+
+double glmgen_factorial(int n);
 
 #endif
