@@ -5,7 +5,7 @@ all:
 	gcc -shared -o lib/libglmgen.so obj/*.o
 
 ex:
-	gcc -ansi -Wall -I./src/utils -I./src/tf -I./include/ -L./lib -lglmgen -o examples/bin/test examples/test.c
+	gcc -ansi -Wall -I./src/utils -I./src/tf -I./include/ -L./lib -o examples/bin/test examples/test.c -lglmgen -lm
 
 clean:
 	rm obj/*.o

@@ -4,7 +4,7 @@
 cs * tf_calc_dk (int n, int k, const double * x)
 {
   long int i;
-  int tk = 1; /* "this" (k+1) - will iterate until ts = k+1 */
+  int tk = 1; /* "this k" (actually, k+1) - will iterate until ts = k+1 */
 
   cs * D1;
   cs * D1_cp;

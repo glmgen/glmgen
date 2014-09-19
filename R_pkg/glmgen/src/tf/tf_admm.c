@@ -89,8 +89,6 @@ void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
     glmgen_gqr_free(kernmat_qr);
   }
 
-  printf("i'm here!\n");
-
   cs_spfree(D);
   cs_spfree(Dt);
   cs_spfree(DDt);
