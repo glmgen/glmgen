@@ -6,6 +6,9 @@ void tf_dtx(double *x, int n, int k, double *a, double *b)
   int j;
 
   memcpy(b, a, n*sizeof(double));
+  
+  if( k < 1 || k >= n )
+    return;
 
   for(i=k; i > 0; --i)
   {
@@ -32,6 +35,4 @@ void tf_dtx(double *x, int n, int k, double *a, double *b)
   {
     b[i] *= fact;
   }
-
-  /* TODO mult(b, factorial(k-1)); */
 }
