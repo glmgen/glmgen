@@ -59,14 +59,13 @@ void poly_coefs(double *x, int n, int k,
   double *beta, double *phi)
 {
   memcpy(phi,beta,(k+1)*sizeof(double));
-  int j=0, ell=0;
+  int j, ell;
 
-  for(j=0; j < k; ++j)
+  for(j=1; j <= k; j++)
   {
-    /* Do not modify phi[j] */
-    for(ell = k; ell > j; --ell)
+    for(ell = k; ell >= j; ell--)
     {
-      phi[ell] = (phi[ell] - phi[ell-1]) / ( x[j+ell] - x[ell] );
+      phi[ell] = (phi[ell] - phi[ell-1]) / ( x[ell] - x[ell-j] );
     }
   }
 }

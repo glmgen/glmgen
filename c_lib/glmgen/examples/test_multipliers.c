@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <time.h>
 #include <stdlib.h>
+#include <math.h>
 
 void test_mult();
 void test_pred();
@@ -30,7 +31,7 @@ void test_mult()
   x = (double*)malloc(n*sizeof(double));
   a = (double*)malloc(n*sizeof(double));
 
-  verb = 1;
+  verb = 0;
   reps = 10;
   num_failed = 0;  
   
@@ -44,7 +45,7 @@ void test_mult()
       if(i)
         x[i] = x[i-1] + (rand() % 100) / 100.;
     }
-    num_failed += test_d(n, 3, x, a, verb);
+    num_failed += test_d(n, 1, x, a, verb);
     num_failed += test_d(n, 2, x, a, verb);
     num_failed += test_d(n, 3, x, a, verb);
     num_failed += test_d(n, 7, x, a, verb);
@@ -56,14 +57,15 @@ void test_mult()
   free(a);
 }
 
+int test_predict(double *x, int n, int k, double *x0, int n0, double *beta, int verb);
 void test_pred()
 {
   double *x, *x0, *beta;
 
   int n, n0, verb, rep, reps, num_failed;
 
-  n = 8;
-  n0 = 5;
+  n = 10;
+  n0 = 6;
 
   if(n0 >= n)
     n0 = n-1;
@@ -72,7 +74,7 @@ void test_pred()
   x0 = (double*)malloc(n0*sizeof(double));
   beta = (double*)malloc(n*sizeof(double));
   
-  verb = 1;
+  verb = 0;
   reps = 10;
   num_failed = 0;
   
@@ -146,7 +148,7 @@ int test_d(int n, int k, double *x, double *a, int verb)
 
   double err = max_diff(b, b1, n-k);
   printf("Dx err=%f\n", err);
-  if(err > 1e-10 * pow(10.0,k/2)) 
+  if(!(err < 1e-12) ) 
   {
     printf("*************D Test failed(n=%d,k=%d,err=%E)**********\n",n,k,err);
     return 1;
@@ -172,7 +174,7 @@ int test_d(int n, int k, double *x, double *a, int verb)
 
   err = max_diff(b, b1, n);
   printf("Dtx err=%f\n", err);
-  if(err > 1e-10* pow(10.0,k/2)) 
+  if(!(err < 1e-12) ) 
   {
     printf("*************Dt Test failed(n=%d,k=%d,err=%E)**********\n",n,k,err);
     return 1;
@@ -197,12 +199,19 @@ int test_predict(double *x, int n, int k, double *x0, int n0, double *beta, int 
   
   double zero_tol = 1e-10;
   tf_predict_gauss(beta, x, n, k, x0, n0, pred, zero_tol);
-  /* predict_gauss_explicit(beta, x, n, k, x0, n0, pred_exp, zero_tol); */
+  predict_gauss_explicit(beta, x, n, k, x0, n0, pred_exp, zero_tol);
   
+  if(verb)
+  {
+    printf("predicted values --------\n");
+    print_array(pred, n0);
+    printf("observed values --------\n");
+    print_array(pred_exp, n0);
+  }
   double err = max_diff(pred, pred_exp, n0);
   
   printf("predict err=%f\n", err);
-  if(err > 1e-12) 
+  if(!(err < 1e-12) )
   {
     printf("*************Predict Test failed(n=%d,k=%d,err=%E)**********\n",n,k,err);
     return 1;
@@ -214,7 +223,7 @@ int test_predict(double *x, int n, int k, double *x0, int n0, double *beta, int 
 }
 void print_array(double *x, size_t n)
 {
-  int i=0;
+  int i;
 
   for(i=0; i<n; i++)
   {
@@ -222,7 +231,8 @@ void print_array(double *x, size_t n)
   }
 }
 
-double norm(double * x, int n) {
+double norm(double * x, int n) 
+{
   assert(x);
   double sum = 0.;
   int i=0;
@@ -231,8 +241,8 @@ double norm(double * x, int n) {
 
   return sqrt(sum);
 }
-double residual(cs * A, double * x, double * b) {
-
+double residual(cs * A, double * x, double * b) 
+{
   int m = A->m;
   double * neg_b = (double*)malloc(m*sizeof(double));
   int i=0;
@@ -246,13 +256,22 @@ double residual(cs * A, double * x, double * b) {
   return res;
 }
 
+double rel_diff(double x, double y)
+{
+  double max_abs = max(fabs(x), fabs(y));
+  
+  return max_abs == 0 ? 0 : fabs(x-y)/max_abs;
+}
 double max_diff(double *x, double *y, int n)
 {
-  int i=0;
+  int i;
   double e=0;
+  double c;
   for(i=0; i<n; i++)
-    if( fabs(x[i] - y[i]) > e)
-      e = fabs(x[i] - y[i]);
+  {
+    c = rel_diff(x[i], y[i]);
+    e = c > e ? c : e;
+  }
 
   return e;
 }

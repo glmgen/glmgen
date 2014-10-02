@@ -68,8 +68,8 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
 
     if (verb) printf("%i\t%0.5e\n",iter,pobj);
 
-    /* NEW: figure out when to stop
-     * Based on a relative difference of objective values
+    /* Figure out when to stop
+     * based on a relative difference of objective values
      * being <= obj_tol */
     if(iter > 1)
     {
