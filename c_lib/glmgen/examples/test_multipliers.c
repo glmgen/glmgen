@@ -30,11 +30,11 @@ void test_mult()
   x = (double*)malloc(n*sizeof(double));
   a = (double*)malloc(n*sizeof(double));
 
-  verb = 0;
+  verb = 1;
   reps = 10;
   num_failed = 0;  
   
-  srand(5489);
+  srand(5499);
 
   for(rep=0; rep<reps; ++rep) {
     int i=0;
@@ -44,7 +44,7 @@ void test_mult()
       if(i)
         x[i] = x[i-1] + (rand() % 100) / 100.;
     }
-    num_failed += test_d(n, 1, x, a, verb);
+    num_failed += test_d(n, 3, x, a, verb);
     num_failed += test_d(n, 2, x, a, verb);
     num_failed += test_d(n, 3, x, a, verb);
     num_failed += test_d(n, 7, x, a, verb);
@@ -76,7 +76,7 @@ void test_pred()
   reps = 10;
   num_failed = 0;
   
-  srand(5489);
+  srand(5499);
   
   for(rep=0; rep<reps; ++rep) {
     int i=0;
@@ -131,7 +131,7 @@ int test_d(int n, int k, double *x, double *a, int verb)
     printf("D^k*a (in place)-----------------\n");
     print_array(b,n-k);
   }
-  D = tf_calc_dk(n, k-1, x); /* D^k, not D^(k-1) */  
+  D = tf_calc_dk(n, k, x);
   if(verb)
   {
     printf("D^%d-------------------------\n", k);
