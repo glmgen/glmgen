@@ -14,30 +14,30 @@
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 
 /* Main glmgen api functions */
-void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
+void tf_admm (double * y, double * x, double * w, int n, int k, int family, int max_iter,
               int lam_flag, int obj_flag,  double * lambda, int nlambda,
               double lambda_min_ratio, double * beta, double * obj,
               double rho, double obj_tol);
 
-void tf_primal_dual (double * y, double * x, int n, int k, int family, int max_iter,
+void tf_primal_dual (double * y, double * x, double * w, int n, int k, int family, int max_iter,
               int lam_flag, int obj_flag,  double * lambda, int nlambda, double lambda_min_ratio,
               double * beta, double * obj);
 
 /* Helper functions for cases of the admm and primal dual algorithms */
 void tf_dp (int n, double *y, double lam, double *beta);
-void tf_admm_gauss (double * y, double * x, int n, int k,
+void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj,
        double rho, double obj_tol,
        gqr * sparseQR);
-void tf_admm_logistic (double * y, double * x, int n, int k,
+void tf_admm_logistic (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj,
        double rho, double obj_tol,
        gqr * sparseQR);
-void tf_admm_pois (double * y, double * x, int n, int k,
+void tf_admm_pois (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj,

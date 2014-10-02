@@ -1,146 +1,84 @@
 \name{trendfilter}
 \alias{trendfilter}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-a%%  ~~function to do ... ~~
+Fit a trendfiltering model
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Find the trendfiltering solution of some degree \code{k} for
+an arbitrary set of penalty values \code{lambda}. Can handle
+link functions of Gaussian, binomial, and Poisson penalized
+loss functions.
 }
 \usage{
-trendfilter(y, x, k = 0L, family = c("gaussian", "logistic", "poisson"), lambda, nlambda = 100L, lambda.min.ratio = 1e-05, method = c("admm", "prime_dual"), maxiter = 1e+06, objective = FALSE, control = list())
+trendfilter(y, x, k = 0L, family = c("gaussian", "logistic", "poisson"), lambda,
+            nlambda = 100L, lambda.min.ratio = 1e-05, method = c("admm", "prime_dual"),
+            maxiter = 25L, objective = FALSE, control = list())
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{y}{
-%%     ~~Describe \code{y} here~~
+vector of observed data
 }
   \item{x}{
-%%     ~~Describe \code{x} here~~
+optional vector of observed data locations, which should be sorted in
+ascending order. If missing, will be assumed to be the integers 1 through
+the length of \code{y}.
 }
   \item{k}{
-%%     ~~Describe \code{k} here~~
+the order to the trendfilter fit; an integer larger than 0 (orders larger
+than 10 are not recommended). For instance, linear trendfiltering uses \code{k}
+equal to one and cubic trendfiltering uses \code{k} equal to three.
 }
   \item{family}{
-%%     ~~Describe \code{family} here~~
+the family to use for the link function in the penalized estimator. Can be
+either "gaussian", "logistic", or "poisson".
 }
   \item{lambda}{
-%%     ~~Describe \code{lambda} here~~
+a sequence of lambda values at which to produce a fit. Can be left blank
+(recommended for general use), at which point the algorithm will determine
+appropriate lamdba values.
 }
   \item{nlambda}{
-%%     ~~Describe \code{nlambda} here~~
+if \code{lambda} is missing, this determines the number of lambda values
+dynamically constructed by the algorithm.
 }
   \item{lambda.min.ratio}{
-%%     ~~Describe \code{lambda.min.ratio} here~~
+if \code{lambda} is missing, this determines the ratio between the largest
+and smallest \code{lambda} values. The values are distributed on a log scale,
+so this ratio should typically be set fairly small.
 }
   \item{method}{
-%%     ~~Describe \code{method} here~~
+the method used to calculate the fit. Can be either "admm" or "prime_dual".
 }
   \item{maxiter}{
-%%     ~~Describe \code{maxiter} here~~
+the maximum number of iterations used until convergence.
 }
   \item{objective}{
-%%     ~~Describe \code{objective} here~~
+logical flag indicating whether objective values of the fit should be
+returned.
 }
   \item{control}{
-%%     ~~Describe \code{control} here~~
+an optional named list of control parameters to pass to the underlying algorithm;
+see Details for more information. Names not matching any valid parameters
+will be silently ignored.
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+an object of class \code{\linkS4class{trendfilter}}
 }
 \references{
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Taylor B. Arnold, Ryan Tibshirani, Veerun Sadhanala
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\linkS4class{trendfilter}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (y, x, k, family = c("gaussian", "logistic", "poisson"),
-    lambda, nlambda = 100L, lambda.min.ratio = 1e-05, method = c("admm",
-        "prime_dual"), maxiter = 1e+06, objective = FALSE, control = list())
-{
-    cl = match.call()
-    n = length(y)
-    nlam = as.integer(nlambda)
-    family = match.arg(family)
-    method = match.arg(method)
-    family_cd = match(family, c("gaussian", "logistic", "poisson")) -
-        1L
-    method_cd = match(method, c("admm", "prime_dual")) - 1L
-    if (k < 0 || k != floor(k))
-        stop("k must be a nonnegative integer.")
-    if (n < k + 2)
-        stop("y must have length >= k+2 for kth order trend filtering.")
-    if (maxiter <= 1L)
-        stop("maxiter must be greater than 1")
-    if (missing(lambda)) {
-        if (nlam <= 0L)
-            stop("nlambda must be a positive number.")
-        if (lambda.min.ratio < 0 | lambda.min.ratio > 1)
-            stop("lamba.min.ratio must be between 0 and 1.")
-    }
-    else {
-        if (length(lambda) == 0L)
-            stop("Must specify at least one lambda value.")
-        if (min(lambda) < 0L)
-            stop("All specified lambda values must be nonnegative.")
-        nlambda = length(lambda)
-    }
-    if (!is.list(control) | (is.null(names(control)) & length(control) !=
-        0L))
-        stop("control must be a named list")
-    control = lapply(control, function(v) ifelse(is.numeric(v),
-        as.double(v[[1]]), stop("Elements of control must be numeric.")))
-    if (is.null(x))
-        x = 1L:length(y)
-    if (missing(lambda)) {
-        lambda = rep(0, nlambda)
-        lambda_flag = FALSE
-    }
-    else lambda_flag = TRUE
-    z = .Call("tf_R", sY = as.double(y), sX = as.double(x), sN = length(y),
-        sK = as.integer(k), sFamily = as.integer(family_cd),
-        sMethod = as.integer(method_cd), sMaxIter = as.integer(maxiter),
-        sLamFlag = as.integer(lambda_flag), sObjFlag = as.integer(objective),
-        sLambda = as.double(lambda), sNlambda = as.integer(nlambda),
-        sLambdaMinRatio = as.double(lambda.min.ratio), sControl = control,
-        package = "glmgen")
-    if (is.null(z))
-        stop("Unspecified error in C code.")
-    if (!is.null(z$obj))
-        z$obj = z$obj[1:z$numiter]
-    else z$obj = NA_real_
-    colnames(z$beta) = as.character(round(z$lambda, 3))
-    out = new("trendfilter", y = y, x = x, k = as.integer(k),
-        lambda = z$lambda, beta = z$beta, family = family, method = method,
-        n = length(y), p = length(y), d = length(y) - as.integer(k) -
-            1L, obj = z$obj, call = cl)
-    out
-  }
+x = runif(25, min=-2*pi, max=2*pi)
+y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
+out = trendfilter(y, pos, k=3)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

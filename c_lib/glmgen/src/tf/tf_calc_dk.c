@@ -4,7 +4,7 @@
 cs * tf_calc_dk (int n, int k, const double * x)
 {
   long int i;
-  int tk = 1; /* "this k" (actually, k+1) - will iterate until ts = k+1 */
+  int tk = 1; /* "this k" - will iterate until ts = k */
 
   cs * D1;
   cs * D1_cp;
@@ -36,7 +36,7 @@ cs * tf_calc_dk (int n, int k, const double * x)
   Dk_cp = cs_compress(Dk);
   cs_spfree(Dk);
 
-  for (tk = 1; tk < k+1; tk++)
+  for (tk = 1; tk < k; tk++)
   {
     /* 'reduce' the virtual size of D1 to: (n-tk-1) x (n-tk),
        compress into compressed column, saving as D1_cp */

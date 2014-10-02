@@ -1,4 +1,4 @@
-trendfilter = function(y, x, k = 0L, family = c("gaussian", "logistic", "poisson"),
+trendfilter = function(y, x, weights, k = 0L, family = c("gaussian", "logistic", "poisson"),
                        lambda, nlambda = 100L, lambda.min.ratio = 1e-05,
                        method = c("admm", "prime_dual"),
                        maxiter = 25L, objective = FALSE, control = list()) {
@@ -12,6 +12,7 @@ trendfilter = function(y, x, k = 0L, family = c("gaussian", "logistic", "poisson
   method_cd = match(method, c("admm", "prime_dual")) - 1L
 
   if (missing(x)) x = 1L:length(y)
+  if (missing(weights)) weights = 1L:length(y)
   x_cond = diff(x)
   x_cond = mean(x_cond) / min(x_cond)
   if(!is.finite(x)) stop("Cannot pass duplicate x values.")
@@ -42,6 +43,7 @@ trendfilter = function(y, x, k = 0L, family = c("gaussian", "logistic", "poisson
   z = .Call("tf_R",
             sY = as.double(y),
             sX = as.double(x),
+            sW = as.double(weights),
             sN = length(y),
             sK = as.integer(k),
             sFamily = as.integer(family_cd),
@@ -59,7 +61,7 @@ trendfilter = function(y, x, k = 0L, family = c("gaussian", "logistic", "poisson
   if (is.null(z$obj)) z$obj = NA_real_
   colnames(z$beta) = as.character(round(z$lambda, 3))
 
-  out = new("trendfilter", y = y, x = x, k = as.integer(k), lambda = z$lambda,
+  out = new("trendfilter", y = y, x = x, w = w, k = as.integer(k), lambda = z$lambda,
             beta = z$beta, family = family, method = method, n = length(y),
             p = length(y), m = length(y) - as.integer(k) - 1L, obj = z$obj,
             call = cl)

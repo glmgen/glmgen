@@ -25,7 +25,7 @@ double get_control_value(SEXP sControlList, const char * param_name, double para
   return param_output;
 }
 
-SEXP tf_R ( SEXP sY, SEXP sX, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod, SEXP sMaxIter,
+SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod, SEXP sMaxIter,
             SEXP sLamFlag, SEXP sObjFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio,
             SEXP sControl )
 {
@@ -34,6 +34,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod, SEXP
   int i;
   double * y;
   double * x;
+  double * w;
   int n;
   int k;
   int family;
@@ -59,6 +60,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod, SEXP
   // Convert input SEXP variables into C style variables
   y = REAL(sY);
   x = REAL(sX);
+  w = REAL(sW);
   n = asInteger(sN);
   k = asInteger(sK);
   family = asInteger(sFamily);
@@ -82,13 +84,13 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod, SEXP
     case TF_ADMM:
       rho = get_control_value(sControl, "rho", 7);
       obj_tol = get_control_value(sControl, "obj_tol", 1e-8);
-      tf_admm(y, x, n, k, family, maxiter, lam_flag, obj_flag, lambda,
+      tf_admm(y, x, w, n, k, family, maxiter, lam_flag, obj_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj,
               rho, obj_tol);
       break;
 
     case TF_PRIMALDUAL_IP:
-      tf_primal_dual(y, x, n, k, family, maxiter, lam_flag, obj_flag, lambda,
+      tf_primal_dual(y, x, w, n, k, family, maxiter, lam_flag, obj_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj);
       break;
 

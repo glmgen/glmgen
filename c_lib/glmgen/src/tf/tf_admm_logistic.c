@@ -1,6 +1,6 @@
 #include "tf.h"
 
-void tf_admm_logistic (double * y, double * x, int n, int k,
+void tf_admm_logistic (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj,

@@ -18,15 +18,16 @@ void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
   cs * DDt;
   cs * Dk;
   cs * Dkt;
-  cs * DktDk;
+  cs * DkDkt;
   gqr * DDt_qr;
+  gqr * DkDkt;
 
   cs * kernmat;
   gqr * kernmat_qr;
 
   beta_max = (double *) malloc(n * sizeof(double));
-  alpha = (double *) malloc(n * sizeof(double));
-  u = (double *) malloc(n * sizeof(double));
+  alpha = (double *) malloc((n - k) * sizeof(double));
+  u = (double *) malloc((n - k) * sizeof(double));
   Dy = (double *) malloc((n - k) * sizeof(double));
 
   D = tf_calc_dk(n, k+1, x);
@@ -34,8 +35,9 @@ void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
   DDt = cs_multiply(D,Dt);
   Dk = tf_calc_dk(n, k, x);
   Dkt = cs_transpose(Dk, 1);
-  DktDk = cs_multiply(Dk,Dkt);
+  DkDkt = cs_multiply(Dk,Dkt);
   DDt_qr = glmgen_qr(DDt);
+  DkDkt_qr = glmgen_qr(DkDkt);
 
   for (i = 0; i < n - k; i++) Dy[i] = 0;
   cs_gaxpy (D, y, Dy);
@@ -64,6 +66,8 @@ void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
     }
   } else {
     /* TODO: alpha_max, u_max, and beta_max */
+    for (i = 0; i < n - k; i++) beta_max[i] = Dy[i];
+    ;
   }
 
   /* Iterate over all lambda values */
@@ -94,8 +98,9 @@ void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
   cs_spfree(DDt);
   cs_spfree(Dk);
   cs_spfree(Dkt);
-  cs_spfree(DktDk);
+  cs_spfree(DkDkt);
   glmgen_gqr_free(DDt_qr);
+  glmgen_gqr_free(DkDkt);
 
   free(beta_max);
   free(alpha);
