@@ -43,6 +43,14 @@ void tf_admm_pois (double * y, double * x, double * w, int n, int k,
        double * obj,
        double rho, double obj_tol,
        gqr * sparseQR);
+typedef double (*func_RtoR)(double);
+void tf_admm_glm (double * y, double * x, int n, int k,
+       int max_iter, double lam,
+       double * beta, double * alpha, double * u,
+       double * obj,
+       double rho, double obj_tol,
+       gqr * sparseQR,
+       func_RtoR f1, func_RtoR f2);
 
 /* Low-level utility functions for trendfiltering */
 cs * tf_calc_dk (int n, int k, const double * x);
