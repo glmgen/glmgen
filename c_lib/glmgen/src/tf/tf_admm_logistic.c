@@ -18,9 +18,9 @@ void tf_admm_logistic (double * y, double * x, double * w, int n, int k,
        double rho, double obj_tol,
        gqr * sparseQR)
 {
-  
-  tf_admm_glm(y, x, n, k, max_iter, lam, beta, alpha, u, obj,
-    rho, obj_tol, sparseQR,
-    &b1, &b2);
-    
+
+  // tf_admm_glm(y, x, n, k, max_iter, lam, beta, alpha, u, obj,
+  //   rho, obj_tol, sparseQR,
+  //   &b1, &b2);
+
 }

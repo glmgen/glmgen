@@ -61,7 +61,7 @@ void test_d(int n, int k, double *x, double *a)
   print_array(b,n-k);
 
   printf("D^%d-------------------------\n", k);
-  D = tf_calc_dk(n, k-1, x); /* D^k, not D^(k-1) */
+  D = tf_calc_dk(n, k, x); /* D^k, not D^(k-1) */
   /* cs_print(D, 0); */
   cs_gaxpy(D,a,b1);
   printf("D^k*a (multiplication)-----------\n");

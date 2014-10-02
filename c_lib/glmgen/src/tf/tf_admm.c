@@ -8,6 +8,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   int i;
   double max_lam;
   double min_lam;
+  double * temp_n_k;
   double * beta_max;
   double * alpha;
   double * u;
@@ -27,9 +28,9 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   gqr * kernmat_qr;
 
   beta_max = (double *) malloc(n * sizeof(double));
-  temp_n_k = (double *) malloc((n - k - 1) * sizeof(double));
-  alpha = (double *) malloc((n - k - 1) * sizeof(double));
-  u = (double *) malloc((n - k - 1) * sizeof(double));
+  temp_n_k = (double *) malloc((n - k) * sizeof(double));
+  alpha = (double *) malloc((n - k) * sizeof(double));
+  u = (double *) malloc((n - k) * sizeof(double));
   Dy = (double *) malloc((n - k - 1) * sizeof(double));
   resid = (double *) malloc(n * sizeof(double));
 
@@ -42,7 +43,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   DDt_qr = glmgen_qr(DDt);
   DkDkt_qr = glmgen_qr(DktDk);
 
-  for (i = 0; i < n - k; i++) Dy[i] = 0;
+  for (i = 0; i < n - k - 1; i++) Dy[i] = 0;
   cs_gaxpy(D, y, Dy);
 
   /* Determine the maximum lambda in the path, and initiate the path if needed
@@ -60,15 +61,15 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   }
 
   /* Initiate beta_max */
-    for (i = 0; i < n - k; i++) temp_n_k[i] = -1*Dy[i];
-    for (i = 0; i < n; i++) beta_max[i] = y[i];
-    glmgen_qrsol (DDt_qr, beta_max);
-    cs_gaxpy(Dt, temp_n_k, beta_max);
+  for (i = 0; i < n - k; i++) temp_n_k[i] = -1*Dy[i];
+  for (i = 0; i < n; i++) beta_max[i] = y[i];
+  glmgen_qrsol (DDt_qr, beta_max);
+  cs_gaxpy(Dt, temp_n_k, beta_max);
 
   /* Initiate alpha and u for a warm start */
   if (lambda[0] < sqrt(max_lam))
   {
-    for (i = 0; i < n; i++)
+    for (i = 0; i < n - k; i++)
     {
       alpha[i] = 0;
       u[i] = 0;
@@ -80,6 +81,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     cs_gaxpy(Dk, beta_max, alpha);
 
     /* u_max */
+    double exp_i;
     switch (family)
     {
       case FAMILY_GAUSSIAN:
@@ -87,10 +89,9 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
         break;
 
       case FAMILY_LOGISTIC:
-        double exp_i = 0;
         for (i = 0; i < n - k; i++) {
           exp_i = exp(beta_max[i]);
-          temp_n_k[i] = exp_i / ((1+exp_i)*(1+exp_i)) (beta_max[i] - y[i]) / (rho * lambda[0]);
+          temp_n_k[i] = exp_i / ((1+exp_i)*(1+exp_i)) * (beta_max[i] - y[i]) / (rho * lambda[0]);
         }
         break;
 
@@ -114,7 +115,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     switch (family)
     {
       case FAMILY_GAUSSIAN:
-        tf_admm_gauss(y, x, n, k, max_iter, lambda[i], beta+i*n, alpha,
+        tf_admm_gauss(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
                       u, obj+i*max_iter, rho * lambda[i], obj_tol,
                       kernmat_qr);
         break;
