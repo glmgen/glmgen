@@ -1,6 +1,6 @@
 #include "tf.h"
 
-void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
+void tf_admm (double * y, double * x, double * w, int n, int k, int family, int max_iter,
               int lam_flag, int obj_flag,  double * lambda, int nlambda,
               double lambda_min_ratio, double * beta, double * obj,
               double rho, double obj_tol)
@@ -32,9 +32,9 @@ void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
   D = tf_calc_dk(n, k+1, x);
   Dt = cs_transpose(D, 1);
   DDt = cs_multiply(D,Dt);
-  Dk = tf_calc_dk(n, k, x);
+  Dk = tf_calc_dk(n, k, x);    /* TODO(V): k or k-1? */
   Dkt = cs_transpose(Dk, 1);
-  DktDk = cs_multiply(Dk,Dkt);
+  DktDk = cs_multiply(Dk,Dkt); /* TODO(V): check the order */
   DDt_qr = glmgen_qr(DDt);
 
   for (i = 0; i < n - k; i++) Dy[i] = 0;
@@ -74,7 +74,7 @@ void tf_admm (double * y, double * x, int n, int k, int family, int max_iter,
     switch (family)
     {
       case FAMILY_GAUSSIAN:
-        tf_admm_gauss(y, x, n, k, max_iter, lambda[i], beta+i*n, alpha,
+        tf_admm_gauss(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
                       u, obj+i*max_iter, rho * lambda[i], obj_tol,
                       kernmat_qr);
         break;
