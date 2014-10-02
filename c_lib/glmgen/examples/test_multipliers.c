@@ -137,7 +137,6 @@ int test_d(int n, int k, double *x, double *a, int verb)
     printf("D^%d-------------------------\n", k);
     cs_print(D, 0); 
   }
-
   cs_gaxpy(D,a,b1);
   if(verb)
   {
