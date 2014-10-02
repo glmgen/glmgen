@@ -213,7 +213,7 @@ int test_predict(double *x, int n, int k, double *x0, int n0, double *beta, int 
   printf("predict err=%f\n", err);
   if(!(err < 1e-12) )
   {
-    printf("*************Predict Test failed(n=%d,k=%d,err=%E)**********\n",n,k,err);
+    printf("*********Predict Test failed(n=%d,k=%d,err=%E)********\n",n,k,err);
     return 1;
   }
   

@@ -7,7 +7,7 @@ void tf_admm_glm (double * y, double * x, int n, int k,
        double * obj,
        double rho, double obj_tol,
        gqr * sparseQR,
-       func_RtoR b1, func_RtoR b2)
+       func_RtoR b, func_RtoR b1, func_RtoR b2)
 {
   
   double * d = (double*)malloc(n*sizeof(double)); /* line search direction */
@@ -25,7 +25,7 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   
   double pobj, loss, pen;
   
-  int verb = 1; /* TODO */
+  int verb = 1; 
   if (verb) printf("Iteration\tObjective");
 
   Dk = tf_calc_dk(n, k-1, x);
@@ -81,7 +81,7 @@ void tf_admm_glm (double * y, double * x, int n, int k,
     loss = 0;
     for (i=0; i<n; i++)
     {
-        loss += (y[i]-beta[i])*(y[i]-beta[i]);
+        loss += -y[i]*beta[i] + b(beta[i]);
     }
     /* Compute penalty */
     tf_dx(x,n,k+1,beta,z); /* IMPORTANT: use k+1 here! */
@@ -90,7 +90,7 @@ void tf_admm_glm (double * y, double * x, int n, int k,
     {
       pen += fabs(z[i]);
     }
-    pobj = loss/2+lam*pen;
+    pobj = loss+lam*pen;
     obj[(iter)-1] = pobj;
 
     if (verb) printf("%i\t%0.5e\n",iter,pobj);
