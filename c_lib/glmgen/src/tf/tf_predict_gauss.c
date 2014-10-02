@@ -13,7 +13,7 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
     poly_coefs(x,n,k,beta,phi);
 
     /* Compute theta (falling fact coefficients) */
-    double *theta = (double *)malloc((n-k-1)*sizeof(double));
+    double *theta = (double *)malloc((n)*sizeof(double));
     tf_dx(x,n,k+1,beta,theta);
     /* Threshold small values */
     for (i=0; i<n-k-1; i++) if (fabs(theta[i])<zero_tol) theta[i]=0;
