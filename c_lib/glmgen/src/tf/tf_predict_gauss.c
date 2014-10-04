@@ -15,6 +15,10 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
     /* Compute theta (falling fact coefficients) */
     double *theta = (double *)malloc((n)*sizeof(double));
     tf_dx(x,n,k+1,beta,theta);
+    double k_fac = glmgen_factorial(k);
+    for(i=0; i<n-k-1;i++)
+      theta[i] /= k_fac;
+
     /* Threshold small values */
     for (i=0; i<n-k-1; i++) if (fabs(theta[i])<zero_tol) theta[i]=0;
 
