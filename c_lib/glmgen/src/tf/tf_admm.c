@@ -85,7 +85,6 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
 
     /* alpha_max */
     tf_dx(x, n, k, beta_max, alpha);
-    for (i = 1; i < n - k; i++) alpha[i] = alpha[0];
 
     /* u_max */
     double exp_i;
