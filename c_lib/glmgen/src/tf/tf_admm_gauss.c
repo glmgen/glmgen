@@ -1,6 +1,7 @@
 #include "tf.h"
 
-void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
+
+void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj,
@@ -12,22 +13,23 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
   double *z = (double*)malloc(n*sizeof(double));
 
   double pobj, loss, pen;
-
-  int verb = 1; /* TODO */
+  int i, verb;
+      
+  verb = 1;
   if (verb) printf("Iteration\tObjective");
 
-  int iter = 0;
-  for (iter=1; iter<=max_iter; (iter)++)
+  int iter;
+  for(iter=1; iter<=max_iter; iter++)
   {
-    /* Update beta: banded least squares
-     * Build the response vector
-     * TODO: First add alpha and u and then pre-multiply by dt */
-    tf_dtx(x,n,k,alpha,v);
-    tf_dtx(x,n,k,u,z);
-    int i=0;
     for (i=0; i<n; i++)
     {
-      beta[i] = y[i] + rho*(v[i]+z[i]); /* y already has the weights */
+      v[i] = alpha[i] + u[i];
+    }
+    tf_dtx(x,n,k,v,z);
+
+    for (i=0; i<n; i++)
+    {
+      beta[i] = Wy[i] + rho*z[i];
     }
     /* Solve the least squares problem with sparse QR */
     glmgen_qrsol(sparseQR, beta);
@@ -53,8 +55,8 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     loss = 0;
     for (i=0; i<n; i++)
     {
-      if( fabs(w[i]) != 0 )
-        loss += (y[i]-w[i]*beta[i])*(y[i]-w[i]*beta[i])/w[i];
+      if( w[i] != 0 )
+        loss += (Wy[i]-w[i]*beta[i])*(Wy[i]-w[i]*beta[i])/w[i];
     }
     /* Compute penalty */
     tf_dx(x,n,k+1,beta,z); /* IMPORTANT: use k+1 here! */
@@ -68,8 +70,8 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
 
     if (verb) printf("%i\t%0.5e\n",iter,pobj);
 
-    /* NEW: figure out when to stop
-     * Based on a relative difference of objective values
+    /* Figure out when to stop
+     * based on a relative difference of objective values
      * being <= obj_tol */
     if(iter > 1)
     {

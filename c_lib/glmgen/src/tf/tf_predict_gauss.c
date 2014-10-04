@@ -13,8 +13,12 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
     poly_coefs(x,n,k,beta,phi);
 
     /* Compute theta (falling fact coefficients) */
-    double *theta = (double *)malloc((n-k-1)*sizeof(double));
+    double *theta = (double *)malloc((n)*sizeof(double));
     tf_dx(x,n,k+1,beta,theta);
+    double k_fac = glmgen_factorial(k);
+    for(i=0; i<n-k-1;i++)
+      theta[i] /= k_fac;
+
     /* Threshold small values */
     for (i=0; i<n-k-1; i++) if (fabs(theta[i])<zero_tol) theta[i]=0;
 
@@ -59,14 +63,13 @@ void poly_coefs(double *x, int n, int k,
   double *beta, double *phi)
 {
   memcpy(phi,beta,(k+1)*sizeof(double));
-  int j=0, ell=0;
+  int j, ell;
 
-  for(j=0; j < k; ++j)
+  for(j=1; j <= k; j++)
   {
-    /* Do not modify phi[j] */
-    for(ell = k; ell > j; --ell)
+    for(ell = k; ell >= j; ell--)
     {
-      phi[ell] = (phi[ell] - phi[ell-1]) / ( x[j+ell] - x[ell] );
+      phi[ell] = (phi[ell] - phi[ell-1]) / ( x[ell] - x[ell-j] );
     }
   }
 }

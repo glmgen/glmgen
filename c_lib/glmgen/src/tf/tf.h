@@ -25,7 +25,7 @@ void tf_primal_dual (double * y, double * x, double * w, int n, int k, int famil
 
 /* Helper functions for cases of the admm and primal dual algorithms */
 void tf_dp (int n, double *y, double lam, double *beta);
-void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
+void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj,
@@ -43,6 +43,7 @@ void tf_admm_pois (double * y, double * x, double * w, int n, int k,
        double * obj,
        double rho, double obj_tol,
        gqr * sparseQR);
+       
 typedef double (*func_RtoR)(double);
 void tf_admm_glm (double * y, double * x, int n, int k,
        int max_iter, double lam,
@@ -50,7 +51,13 @@ void tf_admm_glm (double * y, double * x, int n, int k,
        double * obj,
        double rho, double obj_tol,
        gqr * sparseQR,
-       func_RtoR f1, func_RtoR f2);
+       func_RtoR b, func_RtoR b1, func_RtoR b2);
+
+/* Functions to predict */       
+void tf_predict_gauss(double * beta, double * x, int n, int k,
+	    double * x0, int n0, double * pred,
+	    double zero_tol);
+
 
 /* Low-level utility functions for trendfiltering */
 cs * tf_calc_dk (int n, int k, const double * x);

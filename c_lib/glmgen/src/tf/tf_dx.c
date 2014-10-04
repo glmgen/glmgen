@@ -1,14 +1,20 @@
 #include "tf.h"
 
-/* NEW: These functions compute b = D*a or b = D^T*a,
+/* This function computes b = D*a,
  * for D the difference operator of order k, defined
  * over the inputs x
  * See "The Falling Factorial Basis" paper for pseudocode
- * of how these can be implemented directly in O(nk) time */
+ * of how these can be implemented directly in O(nk) time 
+ * Note: b should have size n, not n-k. The result is in the first n-k elements.
+ */
 void tf_dx(double *x, int n, int k,double *a, double *b)
 {
 
   memcpy(b, a, n*sizeof(double));
+  
+  if( k < 1 || k >= n )
+    return;
+
   int i=0, j=0;
 
   for(i=0; i < k; ++i)
