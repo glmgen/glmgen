@@ -24,6 +24,7 @@ int main()
   double lambda_min_ratio;
   double * beta;
   double * obj;
+  int * iter;
   double rho;
   double obj_tol;
 
@@ -46,6 +47,7 @@ int main()
   lambda = (double *) malloc(nlambda * sizeof(double));
   beta = (double *) malloc(n * nlambda * sizeof(double));
   obj = (double *) malloc(max_iter * nlambda * sizeof(double));
+  iter = (int *) malloc(max_iter * nlambda * sizeof(int));
 
   for (i = 0; i < n; i++) y[i] = i + (i > 2)*3;
   for (i = 0; i < n; i++) x[i] = i;
@@ -53,7 +55,7 @@ int main()
 
   /* Call the tf_admm function */
   tf_admm(y, x, w, n, k, family, max_iter, lam_flag, obj_flag,
-          lambda, nlambda, lambda_min_ratio, beta, obj, rho, obj_tol);
+          lambda, nlambda, lambda_min_ratio, beta, obj, iter, rho, obj_tol);
 
   printf("\n---------- lambda -------------------------------\n");
   for (i = 0; i < nlambda; i++) printf("%f\n", lambda[i]);
@@ -75,4 +77,5 @@ int main()
   free(lambda);
   free(beta);
   free(obj);
+  free(iter);
 }

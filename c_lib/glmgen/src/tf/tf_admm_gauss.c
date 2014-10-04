@@ -1,10 +1,9 @@
 #include "tf.h"
 
-
-void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
+void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
-       double * obj,
+       double * obj, int * iter,
        double rho, double obj_tol,
        gqr * sparseQR)
 {
@@ -18,8 +17,7 @@ void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
   verb = 0;
   if (verb) printf("Iteration\tObjective");
 
-  int iter;
-  for(iter=1; iter<=max_iter; iter++)
+  for(*iter=1; *iter<=max_iter; (*iter)++)
   {
     for (i=0; i<n; i++)
     {
@@ -29,7 +27,7 @@ void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
 
     for (i=0; i<n; i++)
     {
-      beta[i] = Wy[i] + rho*z[i];
+      beta[i] = w[i]*y[i] + rho*z[i];
     }
     /* Solve the least squares problem with sparse QR */
     glmgen_qrsol(sparseQR, beta);
@@ -56,7 +54,7 @@ void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
     for (i=0; i<n; i++)
     {
       if( w[i] != 0 )
-        loss += (Wy[i]-w[i]*beta[i])*(Wy[i]-w[i]*beta[i])/w[i];
+        loss += w[i]*(y[i]-beta[i])*(y[i]-beta[i]);
     }
     /* Compute penalty */
     tf_dx(x,n,k+1,beta,z); /* IMPORTANT: use k+1 here! */
@@ -66,16 +64,16 @@ void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
       pen += fabs(z[i]);
     }
     pobj = loss/2+lam*pen;
-    obj[(iter)-1] = pobj;
+    obj[(*iter)-1] = pobj;
 
-    if (verb) printf("%i\t%0.5e\n",iter,pobj);
+    if (verb) printf("%i\t%0.5e\n",*iter,pobj);
 
     /* Figure out when to stop
      * based on a relative difference of objective values
      * being <= obj_tol */
-    if(iter > 1)
+    if(*iter > 1)
     {
-      if( pobj < obj_tol || (obj[(iter)-1] - pobj) / pobj < obj_tol )
+      if( pobj < obj_tol || (obj[(*iter)-1] - pobj) / pobj < obj_tol )
       {
         break;
       }
@@ -83,7 +81,7 @@ void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
   }
 
   /* Clip the iteration counter at max_iter */
-  if (iter>max_iter) iter = max_iter;
+  if (*iter>max_iter) *iter = max_iter;
 
   free(v);
   free(z);

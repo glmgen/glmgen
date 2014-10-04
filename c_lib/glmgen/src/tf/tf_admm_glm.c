@@ -4,7 +4,7 @@
 void tf_admm_glm (double * y, double * x, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
-       double * obj,
+       double * obj, int * iter,
        double rho, double obj_tol,
        gqr * sparseQR,
        func_RtoR b, func_RtoR b1, func_RtoR b2)
@@ -13,8 +13,9 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   double * d = (double*)malloc(n*sizeof(double)); /* line search direction */
   double * yt = (double*)malloc(n*sizeof(double));/* intermediate y: ytilde */
   double * H = (double*)malloc(n*sizeof(double)); /* Hessian */
-  double * obj_admm = (double*)malloc(max_iter*sizeof(double)); 
   double * z = (double*)malloc(n*sizeof(double));
+  double * obj_admm = (double*)malloc(max_iter*sizeof(double)); 
+  int * iter_admm = (int*)malloc(max_iter*sizeof(int)); 
   
   cs * Dk;
   cs * Dkt;
@@ -31,17 +32,19 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   Dk = tf_calc_dk(n, k-1, x);
   Dkt = cs_transpose(Dk, 1);
   DktDk = cs_multiply(Dkt,Dk);
-
-  int iter;  
+ 
   /* One prox-Newton step per iteration */
-  for (iter=1; iter<=max_iter; (iter)++)
+  for (*iter=1; *iter<=max_iter; (*iter)++)
   {    
     /* set yt with weights and H */
     int i;
     for(i=0; i<n; i++)
     {
       H[i] = b2(beta[i]);
-      yt[i] = H[i]*beta[i] + y[i] - b1(beta[i]);      
+      if( fabs(H[i]) > 1e-12 )
+        yt[i] = beta[i] + (y[i] - b1(beta[i])) / H[i];
+      else
+        yt[i] = 0;
     }
     
     /* QR factorization */
@@ -51,11 +54,12 @@ void tf_admm_glm (double * y, double * x, int n, int k,
     /* prox-Newton step */
     /* Set max_iter, tol appropriately */
     double admm_tol = obj_tol * 1e3;
-
+    int max_iter_admm = max_iter;
+    
     tf_admm_gauss (yt, x, H, n, k,
-       max_iter, lam,
+       max_iter_admm, lam,
        d, alpha, u,
-       obj_admm, rho, admm_tol,
+       obj_admm, iter_admm, rho, admm_tol,
        kernmat_qr);
 
     cs_spfree(kernmat);
@@ -91,13 +95,13 @@ void tf_admm_glm (double * y, double * x, int n, int k,
       pen += fabs(z[i]);
     }
     pobj = loss+lam*pen;
-    obj[(iter)-1] = pobj;
+    obj[(*iter)-1] = pobj;
 
-    if (verb) printf("%i\t%0.5e\n",iter,pobj);
+    if (verb) printf("%i\t%0.5e\n",*iter,pobj);
 
-    if(iter > 1)
+    if(*iter > 1)
     {
-      if( pobj < obj_tol || (obj[(iter)-1] - pobj) / pobj < obj_tol )
+      if( pobj < obj_tol || (obj[(*iter)-1] - pobj) / pobj < obj_tol )
       {
         break;
       }
@@ -108,8 +112,9 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   free(d);
   free(yt);
   free(H);
-  free(obj_admm);
   free(z);
+  free(obj_admm);
+  free(iter_admm);
   cs_spfree(Dk);
   cs_spfree(Dkt);
   cs_spfree(DktDk);

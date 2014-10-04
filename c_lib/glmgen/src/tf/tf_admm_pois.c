@@ -19,11 +19,11 @@ static double b2(double x)
 void tf_admm_pois (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
-       double * obj,
+       double * obj, int * iter,
        double rho, double obj_tol,
        gqr * sparseQR)
 {
-  tf_admm_glm(y, x, n, k, max_iter, lam, beta, alpha, u, obj,
+  tf_admm_glm(y, x, n, k, max_iter, lam, beta, alpha, u, obj, iter,
      rho, obj_tol, sparseQR,
      &b, &b1, &b2);
 }

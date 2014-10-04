@@ -5,7 +5,7 @@
 void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               int max_iter, int lam_flag, int obj_flag,  double * lambda,
               int nlambda, double lambda_min_ratio, double * beta,
-              double * obj, double rho, double obj_tol)
+              double * obj, int * iter, double rho, double obj_tol)
 {
   int i;
   double max_lam;
@@ -122,7 +122,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     {
       case FAMILY_GAUSSIAN:
         tf_admm_gauss(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
-                      u, obj+i*max_iter, rho * lambda[i], obj_tol,
+                      u, obj+i*max_iter, iter+i*max_iter, rho * lambda[i], obj_tol,
                       kernmat_qr);
         break;
 
