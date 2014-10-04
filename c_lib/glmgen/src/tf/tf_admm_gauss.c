@@ -14,8 +14,8 @@ void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
 
   double pobj, loss, pen;
   int i, verb;
-      
-  verb = 1;
+
+  verb = 0;
   if (verb) printf("Iteration\tObjective");
 
   int iter;

@@ -11,12 +11,12 @@
 void test_mult();
 void test_pred();
 
-int main() 
+int main()
 {
-  
+
   test_mult();
   test_pred();
-  
+
   return 0;
 }
 
@@ -27,14 +27,14 @@ void test_mult()
   double *x, *a;
 
   int n, verb, rep, reps, num_failed;
-  n = 8;  
+  n = 8;
   x = (double*)malloc(n*sizeof(double));
   a = (double*)malloc(n*sizeof(double));
 
   verb = 0;
   reps = 10;
-  num_failed = 0;  
-  
+  num_failed = 0;
+
   srand(5499);
 
   for(rep=0; rep<reps; ++rep) {
@@ -69,21 +69,21 @@ void test_pred()
 
   if(n0 >= n)
     n0 = n-1;
-  
+
   x = (double*)malloc(n*sizeof(double));
   x0 = (double*)malloc(n0*sizeof(double));
   beta = (double*)malloc(n*sizeof(double));
-  
+
   verb = 0;
   reps = 10;
   num_failed = 0;
-  
+
   srand(5499);
-  
+
   for(rep=0; rep<reps; ++rep) {
     int i=0;
     x[0] = 0;
-    for(i=1; i<n;++i) 
+    for(i=1; i<n;++i)
     {
       x[i] = x[i-1] + (rand() % 100) / 100.;
     }
@@ -91,11 +91,11 @@ void test_pred()
     {
       x0[i] = (x[i] + x[i+1]) / 2;
     }
-    
+
     for(i=0; i<n; i++)
     {
       beta[i] = i*i;
-    }  
+    }
     int k;
     for( k=1; k < n; k++)
       num_failed += test_predict(x,n,k,x0,n0,beta,verb);
@@ -119,7 +119,7 @@ int test_d(int n, int k, double *x, double *a, int verb)
   b1 = (double*)calloc(n-k,sizeof(double));
 
   printf("\nTesting n=%d, k=%d--------------\n\n", n, k);
-  if(verb) 
+  if(verb)
   {
     printf("x-------------------------------\n");
     print_array(x,n);
@@ -127,7 +127,7 @@ int test_d(int n, int k, double *x, double *a, int verb)
     printf("a-------------------------------\n");
     print_array(a,n);
   }
-  
+
   tf_dx(x,n,k,a,b);
   if(verb)
   {
@@ -138,7 +138,7 @@ int test_d(int n, int k, double *x, double *a, int verb)
   if(verb)
   {
     printf("D^%d-------------------------\n", k);
-    cs_print(D, 0); 
+    cs_print(D, 0);
   }
   cs_gaxpy(D,a,b1);
   if(verb)
@@ -149,7 +149,7 @@ int test_d(int n, int k, double *x, double *a, int verb)
 
   double err = max_diff(b, b1, n-k);
   printf("Dx err=%f\n", err);
-  if(!(err < 1e-12) ) 
+  if(!(err < 1e-12) )
   {
     printf("*************D Test failed(n=%d,k=%d,err=%E)**********\n",n,k,err);
     return 1;
@@ -175,7 +175,7 @@ int test_d(int n, int k, double *x, double *a, int verb)
 
   err = max_diff(b, b1, n);
   printf("Dtx err=%f\n", err);
-  if(!(err < 1e-12) ) 
+  if(!(err < 1e-12) )
   {
     printf("*************Dt Test failed(n=%d,k=%d,err=%E)**********\n",n,k,err);
     return 1;
@@ -185,23 +185,23 @@ int test_d(int n, int k, double *x, double *a, int verb)
   free(b1);
   cs_spfree(D);
   cs_spfree(Dt);
-  
+
   return 0;
 }
-void predict_gauss_explicit(double * beta, double * x, int n, int k, 
+void predict_gauss_explicit(double * beta, double * x, int n, int k,
 	double * x0, int n0, double * pred,
 	double zero_tol);
-	
+
 int test_predict(double *x, int n, int k, double *x0, int n0, double *beta, int verb)
 {
 
   double *pred_exp = (double*)calloc(n0, sizeof(double));
   double *pred = (double*)calloc(n0, sizeof(double));
-  
+
   double zero_tol = 1e-10;
   tf_predict_gauss(beta, x, n, k, x0, n0, pred, zero_tol);
   predict_gauss_explicit(beta, x, n, k, x0, n0, pred_exp, zero_tol);
-  
+
   if(verb)
   {
     printf("predicted values --------\n");
@@ -210,17 +210,17 @@ int test_predict(double *x, int n, int k, double *x0, int n0, double *beta, int 
     print_array(pred_exp, n0);
   }
   double err = max_diff(pred, pred_exp, n0);
-  
+
   printf("predict err=%f\n", err);
   if(!(err < 1e-12) )
   {
     printf("*********Predict Test failed(n=%d,k=%d,err=%E)********\n",n,k,err);
     return 1;
   }
-  
+
   free(pred_exp);
   free(pred);
-  return 0;  
+  return 0;
 }
 void print_array(double *x, size_t n)
 {
@@ -232,7 +232,7 @@ void print_array(double *x, size_t n)
   }
 }
 
-double norm(double * x, int n) 
+double norm(double * x, int n)
 {
   assert(x);
   double sum = 0.;
@@ -242,7 +242,7 @@ double norm(double * x, int n)
 
   return sqrt(sum);
 }
-double residual(cs * A, double * x, double * b) 
+double residual(cs * A, double * x, double * b)
 {
   int m = A->m;
   double * neg_b = (double*)malloc(m*sizeof(double));
@@ -259,8 +259,8 @@ double residual(cs * A, double * x, double * b)
 
 double rel_diff(double x, double y)
 {
-  double max_abs = max(fabs(x), fabs(y));
-  
+  double max_abs = MAX(fabs(x), fabs(y));
+
   return max_abs == 0 ? 0 : fabs(x-y)/max_abs;
 }
 double max_diff(double *x, double *y, int n)
@@ -277,25 +277,25 @@ double max_diff(double *x, double *y, int n)
   return e;
 }
 
-static void poly_coefs(double *x, int n, int k, 
+static void poly_coefs(double *x, int n, int k,
   double *beta, double *phi)
 {
   int i;
 
   double *u = (double *)malloc((n)*sizeof(double));
-  
+
   phi[0] = beta[0];
-  
+
   for(i=1; i<k+1; i++)
   {
     tf_dx(x,n,i,beta,u);
     phi[i] = u[0] / ( (x[i]-x[0]) * glmgen_factorial(i-1));
   }
-  
+
   free(u);
 }
 
-void predict_gauss_explicit(double * beta, double * x, int n, int k, 
+void predict_gauss_explicit(double * beta, double * x, int n, int k,
 	double * x0, int n0, double * pred,
 	double zero_tol)
 {
@@ -308,14 +308,14 @@ void predict_gauss_explicit(double * beta, double * x, int n, int k,
   tf_dx(x,n,k+1,beta,theta);
 
   for (i=0; i<n-k-1; i++) if (fabs(theta[i])<zero_tol) theta[i]=0;
-  
+
   /* Compute the predictions at each new point x0 */
   double h;
   for (j=0; j<n0; j++) {
     pred[j] = 0;
-   
+
     /* Loop over x points, polynomial basis */
-    for (i=0; i<k+1; i++) {  
+    for (i=0; i<k+1; i++) {
       h = 1;
       int l=0;
       for (l=0; l<i; l++) {
@@ -341,5 +341,5 @@ void predict_gauss_explicit(double * beta, double * x, int n, int k,
   }
 
   free(phi);
-  free(theta);    
+  free(theta);
 }

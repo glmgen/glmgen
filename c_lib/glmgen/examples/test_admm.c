@@ -33,11 +33,11 @@ int main()
   family = FAMILY_GAUSSIAN;
   max_iter = 25;
   lam_flag = 0;
-  obj_flag = 0;
+  obj_flag = 1;
   nlambda = 3;
   lambda_min_ratio = 1e-4;
   rho = 1;
-  obj_tol = 1e-8;
+  obj_tol = 1e-12;
 
   y = (double *) malloc(n * sizeof(double));
   x = (double *) malloc(n * sizeof(double));
