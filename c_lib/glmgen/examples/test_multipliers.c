@@ -95,12 +95,13 @@ void test_pred()
     for(i=0; i<n; i++)
     {
       beta[i] = i*i;
-    }    
-    
-    num_failed += test_predict(x,n,2,x0,n0,beta,verb);
+    }  
+    int k;
+    for( k=1; k < n; k++)
+      num_failed += test_predict(x,n,k,x0,n0,beta,verb);
   }
 
-  printf("\nNumber of failed tests: %d/%d\n", num_failed, reps);
+  printf("\nNumber of failed tests: %d/%d\n", num_failed, reps * n);
 
   free(x);
   free(x0);
