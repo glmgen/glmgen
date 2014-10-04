@@ -1,6 +1,6 @@
 library(genlasso)
-n = 20
-k = 2
+n = 8
+k = 3
 nlambda = 3
 lambda_min_ratio = 1e-4
 rho = 1
