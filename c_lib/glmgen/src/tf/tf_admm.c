@@ -1,5 +1,7 @@
 #include "tf.h"
 
+#define TEST_FLAG 1
+
 void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               int max_iter, int lam_flag, int obj_flag,  double * lambda,
               int nlambda, double lambda_min_ratio, double * beta,
@@ -20,9 +22,11 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   cs * DDt;
   cs * Dk;
   cs * Dkt;
+  cs * DkDkt;
   cs * DktDk;
   gqr * DDt_qr;
   gqr * DkDkt_qr;
+  gqr * DktDk_qr;
 
   cs * kernmat;
   gqr * kernmat_qr;
@@ -39,9 +43,12 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   DDt = cs_multiply(D,Dt);
   Dk = tf_calc_dk(n, k, x);
   Dkt = cs_transpose(Dk, 1);
-  DktDk = cs_multiply(Dk,Dkt);
+  DkDkt = cs_multiply(Dk,Dkt);
+  DktDk = cs_multiply(Dkt,Dk);
   DDt_qr = glmgen_qr(DDt);
-  DkDkt_qr = glmgen_qr(DktDk);
+  DkDkt_qr = glmgen_qr(DkDkt);
+  DktDk_qr = glmgen_qr(DktDk);
+
 
   for (i = 0; i < n - k - 1; i++) Dy[i] = 0;
   cs_gaxpy(D, y, Dy);
@@ -63,11 +70,11 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   /* Initiate beta_max */
   for (i = 0; i < n - k; i++) temp_n_k[i] = -1*Dy[i];
   for (i = 0; i < n; i++) beta_max[i] = y[i];
-  glmgen_qrsol (DDt_qr, beta_max);
+  glmgen_qrsol (DDt_qr, temp_n_k);
   cs_gaxpy(Dt, temp_n_k, beta_max);
 
   /* Initiate alpha and u for a warm start */
-  if (lambda[0] < sqrt(max_lam))
+  if (lambda[0] < max_lam * 1e-5)
   {
     for (i = 0; i < n - k; i++)
     {
@@ -78,6 +85,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
 
     /* alpha_max */
     for (i = 0; i < n - k; i++) alpha[i] = 0;
+    cs_print(Dk, 0);
     cs_gaxpy(Dk, beta_max, alpha);
 
     /* u_max */
@@ -85,24 +93,34 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     switch (family)
     {
       case FAMILY_GAUSSIAN:
-        for (i = 0; i < n - k; i++) temp_n_k[i] = (beta_max[i] - y[i]) / (rho * lambda[0]);
+        for (i = 0; i < n; i++) temp_n_k[i] = (beta_max[i] - y[i]) / (rho * lambda[0]);
         break;
 
       case FAMILY_LOGISTIC:
-        for (i = 0; i < n - k; i++) {
+        for (i = 0; i < n; i++) {
           exp_i = exp(beta_max[i]);
           temp_n_k[i] = exp_i / ((1+exp_i)*(1+exp_i)) * (beta_max[i] - y[i]) / (rho * lambda[0]);
         }
         break;
 
       case FAMILY_POISSON:
-        for (i = 0; i < n - k; i++) temp_n_k[i] = exp(beta_max[i]) * (beta_max[i] - y[i]) / (rho * lambda[0]);
+        for (i = 0; i < n; i++) temp_n_k[i] = exp(beta_max[i]) * (beta_max[i] - y[i]) / (rho * lambda[0]);
         break;
     }
     for (i = 0; i < n - k; i++) u[i] = 0;
     cs_gaxpy(Dk, temp_n_k, u);
     glmgen_qrsol (DkDkt_qr, u);
 
+  }
+
+
+  if (TEST_FLAG) {
+    printf("\n---------- beta_max -------------------------------\n");
+    for (i = 0; i < n; i++) printf("%f\n", beta_max[i]);
+    printf("\n---------- alpha_max -------------------------------\n");
+    for (i = 0; i < (n - k); i++) printf("%f\n", alpha[i]);
+    printf("\n---------- u_max -------------------------------\n");
+    for (i = 0; i < (n - k); i++) printf("%f\n", u[i]);
   }
 
   /* Iterate lower level functions over all lambda values;
@@ -135,9 +153,11 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   cs_spfree(DDt);
   cs_spfree(Dk);
   cs_spfree(Dkt);
+  cs_spfree(DkDkt);
   cs_spfree(DktDk);
   glmgen_gqr_free(DDt_qr);
   glmgen_gqr_free(DkDkt_qr);
+  glmgen_gqr_free(DktDk_qr);
 
   free(temp_n_k);
   free(beta_max);
