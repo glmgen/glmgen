@@ -1,10 +1,9 @@
 #include "tf.h"
 
-
-void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
+void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
-       double * obj,
+       double * obj, int * iter,
        double rho, double obj_tol,
        gqr * sparseQR)
 {
@@ -13,15 +12,14 @@ void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
   double *z = (double*)malloc(n*sizeof(double));
 
   double pobj, loss, pen;
-  int i, verb;
+  int i, verb, it;
 
   verb = 0;
-  if (verb) printf("Iteration\tObjective");
+  if (verb) printf("Iteration\tObjective\n");
 
-  int iter;
-  for(iter=1; iter<=max_iter; iter++)
+  for(it=0; it < max_iter; it++)
   {
-    for (i=0; i<n; i++)
+    for (i=0; i<n-k; i++)
     {
       v[i] = alpha[i] + u[i];
     }
@@ -29,7 +27,8 @@ void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
 
     for (i=0; i<n; i++)
     {
-      beta[i] = Wy[i] + rho*z[i];
+      /* beta[i] = w[i]*y[i] + rho*z[i]; */
+      beta[i] = y[i] + rho*z[i]; /* Wy, i.e, y has weights */
     }
     /* Solve the least squares problem with sparse QR */
     glmgen_qrsol(sparseQR, beta);
@@ -55,8 +54,9 @@ void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
     loss = 0;
     for (i=0; i<n; i++)
     {
-      if( w[i] != 0 )
-        loss += (Wy[i]-w[i]*beta[i])*(Wy[i]-w[i]*beta[i])/w[i];
+      /* loss += w[i]*(y[i]-beta[i])*(y[i]-beta[i]); */
+      if( !( fabs(w[i]) < 1e-14 ) )
+        loss += (y[i]-w[i]*beta[i])*(y[i]-w[i]*beta[i])/w[i];
     }
     /* Compute penalty */
     tf_dx(x,n,k+1,beta,z); /* IMPORTANT: use k+1 here! */
@@ -66,24 +66,21 @@ void tf_admm_gauss (double * Wy, double * x, double * w, int n, int k,
       pen += fabs(z[i]);
     }
     pobj = loss/2+lam*pen;
-    obj[(iter)-1] = pobj;
+    obj[it] = pobj;
 
-    if (verb) printf("%i\t%0.5e\n",iter,pobj);
+    if (verb) printf("%i\t%0.5e\n",it,pobj);
 
-    /* Figure out when to stop
-     * based on a relative difference of objective values
-     * being <= obj_tol */
-    if(iter > 1)
+    /* Stop if relative difference of objective values <= obj_tol */
+    if(it > 0)
     {
-      if( pobj < obj_tol || (obj[(iter)-1] - pobj) / pobj < obj_tol )
+      if( fabs(pobj) < obj_tol || fabs((obj[it-1] - pobj) / pobj) < obj_tol )
       {
         break;
       }
     }
   }
 
-  /* Clip the iteration counter at max_iter */
-  if (iter>max_iter) iter = max_iter;
+  *iter = it;
 
   free(v);
   free(z);

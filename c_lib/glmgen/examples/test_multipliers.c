@@ -1,12 +1,12 @@
 #include "cs.h"
 #include "utils.h"
 #include "tf.h"
+#include "test_utils.h"
 #include <string.h>
-#include <tgmath.h>
+#include <math.h>
 #include <assert.h>
 #include <time.h>
 #include <stdlib.h>
-#include <math.h>
 
 void test_mult();
 void test_pred();
@@ -21,7 +21,7 @@ int main()
 }
 
 int test_d(int n, int k, double *x, double *a, int verbose);
-double max_diff(double *x, double *y, int n);
+
 void test_mult()
 {
   double *x, *a;
@@ -107,8 +107,6 @@ void test_pred()
   free(x0);
   free(beta);
 }
-void print_array(double *x, size_t n);
-
 
 int test_d(int n, int k, double *x, double *a, int verb)
 {
@@ -222,62 +220,8 @@ int test_predict(double *x, int n, int k, double *x0, int n0, double *beta, int 
   free(pred);
   return 0;
 }
-void print_array(double *x, size_t n)
-{
-  int i;
 
-  for(i=0; i<n; i++)
-  {
-    printf("%f\n", x[i]);
-  }
-}
-
-double norm(double * x, int n)
-{
-  assert(x);
-  double sum = 0.;
-  int i=0;
-  for(i=0; i<n; ++i)
-    sum += (x[i] * x[i]);
-
-  return sqrt(sum);
-}
-double residual(cs * A, double * x, double * b)
-{
-  int m = A->m;
-  double * neg_b = (double*)malloc(m*sizeof(double));
-  int i=0;
-  for(i=0; i < m; ++i)
-    neg_b[i] = -b[i];
-  cs_gaxpy(A,x,neg_b);
-
-  double res = norm(neg_b,m);
-
-  cs_free(neg_b);
-  return res;
-}
-
-double rel_diff(double x, double y)
-{
-  double max_abs = MAX(fabs(x), fabs(y));
-
-  return max_abs == 0 ? 0 : fabs(x-y)/max_abs;
-}
-double max_diff(double *x, double *y, int n)
-{
-  int i;
-  double e=0;
-  double c;
-  for(i=0; i<n; i++)
-  {
-    c = rel_diff(x[i], y[i]);
-    e = c > e ? c : e;
-  }
-
-  return e;
-}
-
-static void poly_coefs(double *x, int n, int k,
+static void poly_coefs_explicit(double *x, int n, int k,
   double *beta, double *phi)
 {
   int i;
@@ -302,7 +246,7 @@ void predict_gauss_explicit(double * beta, double * x, int n, int k,
   int i=0, j=0;
 
   double *phi = (double *)malloc((k+1)*sizeof(double));
-  poly_coefs(x,n,k,beta,phi);
+  poly_coefs_explicit(x,n,k,beta,phi);
 
   double *theta = (double *)malloc((n)*sizeof(double));
   tf_dx(x,n,k+1,beta,theta);

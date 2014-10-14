@@ -5,7 +5,7 @@
 void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               int max_iter, int lam_flag, int obj_flag,  double * lambda,
               int nlambda, double lambda_min_ratio, double * beta,
-              double * obj, double rho, double obj_tol)
+              double * obj, int * iter, double rho, double obj_tol)
 {
   int i;
   double max_lam;
@@ -55,7 +55,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
 
   /* Determine the maximum lambda in the path, and initiate the path if needed
      using the input lambda_min_ratio and equally spaced log points. */
-  max_lam = ts_maxlam(n - k, Dy, DDt_qr, family);
+  max_lam = ts_maxlam(n - k-1, Dy, DDt_qr, family);
   if (!lam_flag)
   {
     min_lam = max_lam * lambda_min_ratio;
@@ -78,7 +78,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   } else {
 
     /* beta_max */
-    for (i = 0; i < n - k; i++) temp_n[i] = -1*Dy[i];
+    for (i = 0; i < n-k-1; i++) temp_n[i] = -1*Dy[i];
     for (i = 0; i < n; i++) beta_max[i] = y[i];
     glmgen_qrsol (DDt_qr, temp_n);
     cs_gaxpy(Dt, temp_n, beta_max);
@@ -116,24 +116,30 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
      warm starts */
   for (i = 0; i < nlambda; i++)
   {
-    kernmat = scalar_plus_eye(DktDk, rho * lambda[i]);
-    kernmat_qr = glmgen_qr(kernmat);
     switch (family)
     {
       case FAMILY_GAUSSIAN:
+        kernmat = scalar_plus_eye(DktDk, rho * lambda[i]);
+        kernmat_qr = glmgen_qr(kernmat);        
+        
         tf_admm_gauss(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
-                      u, obj+i*max_iter, rho * lambda[i], obj_tol,
+                      u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
                       kernmat_qr);
+                      
+        cs_spfree(kernmat);
+        glmgen_gqr_free(kernmat_qr);
         break;
 
       case FAMILY_LOGISTIC:
+        tf_admm_logistic(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
+                      u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol);
         break;
 
       case FAMILY_POISSON:
+        tf_admm_pois(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
+                      u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol);
         break;
     }
-    cs_spfree(kernmat);
-    glmgen_gqr_free(kernmat_qr);
   }
 
   cs_spfree(D);
