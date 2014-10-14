@@ -35,14 +35,12 @@ void tf_admm_logistic (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj, int * iter,
-       double rho, double obj_tol,
-       gqr * sparseQR);
+       double rho, double obj_tol);
 void tf_admm_pois (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj, int * iter,
-       double rho, double obj_tol,
-       gqr * sparseQR);
+       double rho, double obj_tol);
        
 typedef double (*func_RtoR)(double);
 void tf_admm_glm (double * y, double * x, int n, int k,
@@ -50,7 +48,6 @@ void tf_admm_glm (double * y, double * x, int n, int k,
        double * beta, double * alpha, double * u,
        double * obj, int * iter,
        double rho, double obj_tol,
-       gqr * sparseQR,
        func_RtoR b, func_RtoR b1, func_RtoR b2);
 
 /* Functions to predict */       

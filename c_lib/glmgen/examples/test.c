@@ -81,4 +81,6 @@ int main()
   free(y);
   free(b);
   free(Dy);
+
+  return 0;
 }
