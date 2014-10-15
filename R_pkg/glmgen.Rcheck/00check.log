@@ -1,0 +1,106 @@
+* using log directory ‘/Users/taylor/Desktop/glmgen/R_pkg/glmgen.Rcheck’
+* using R Under development (unstable) (2014-04-10 r65396)
+* using platform: x86_64-apple-darwin13.1.0 (64-bit)
+* using session charset: UTF-8
+* checking for file ‘glmgen/DESCRIPTION’ ... OK
+* checking extension type ... Package
+* this is package ‘glmgen’ version ‘0.0.1’
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... WARNING
+Subdirectory ‘src’ contains:
+  testing_glmgen.R
+These are unlikely file names for src files.
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘glmgen’ can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... OK
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+trendfilter: no visible global function definition for ‘error’
+* checking Rd files ... NOTE
+prepare_Rd: glmgen-class.Rd:84-86: Dropping empty section \references
+prepare_Rd: glmgen-package.Rd:30-32: Dropping empty section \references
+prepare_Rd: glmgen-package.Rd:34-36: Dropping empty section \examples
+prepare_Rd: trendfilter-class.Rd:57-59: Dropping empty section \references
+prepare_Rd: trendfilter.Rd:65-67: Dropping empty section \details
+prepare_Rd: trendfilter.Rd:71-73: Dropping empty section \references
+* checking Rd metadata ... WARNING
+Rd files with duplicated alias 'coef,glmgen-method':
+  ‘coef-methods.Rd’ ‘glmgen-class.Rd’
+Rd files with duplicated alias 'predict,trendfilter-method':
+  ‘predict-methods.Rd’ ‘trendfilter-class.Rd’
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... WARNING
+Codoc mismatches from documentation object 'trendfilter':
+trendfilter
+  Code: function(y, x, weights, k = 3L, family = c("gaussian",
+                 "logistic", "poisson"), lambda, nlambda = 100L,
+                 lambda.min.ratio = 1e-05, method = c("admm",
+                 "prime_dual"), maxiter = 25L, objective = FALSE,
+                 control = list())
+  Docs: function(y, x, k = 0L, family = c("gaussian", "logistic",
+                 "poisson"), lambda, nlambda = 100L, lambda.min.ratio =
+                 1e-05, method = c("admm", "prime_dual"), maxiter =
+                 25L, objective = FALSE, control = list())
+  Argument names in code not in docs:
+    weights
+  Mismatches in argument names (first 3):
+    Position: 3 Code: weights Docs: k
+    Position: 4 Code: k Docs: family
+    Position: 5 Code: family Docs: lambda
+  Mismatches in argument default values:
+    Name: 'k' Code: 3L Docs: 0L
+
+S4 class codoc mismatches from documentation object 'trendfilter-class':
+Slots for class 'trendfilter'
+  Code: beta call family k lambda m method n obj p w x y
+  Inherited: y lambda beta family method n p m obj call
+  Docs: beta call family k lambda m method n obj p x y
+
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking line endings in Makefiles ... OK
+* checking compilation flags in Makevars ... OK
+* checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS) ... OK
+* checking compiled code ... OK
+* checking examples ... ERROR
+Running examples in ‘glmgen-Ex.R’ failed
+The error most likely occurred in:
+
+> ### Name: trendfilter-class
+> ### Title: Class '"trendfilter"'
+> ### Aliases: trendfilter-class predict,trendfilter-method
+> ###   summary,trendfilter-method
+> ### Keywords: classes
+> 
+> ### ** Examples
+> 
+> x = runif(25, min=-2*pi, max=2*pi)
+> y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
+> out = trendfilter(y, pos, k=3)
+Error in diff(x) : object 'pos' not found
+Calls: trendfilter -> diff
+Execution halted
