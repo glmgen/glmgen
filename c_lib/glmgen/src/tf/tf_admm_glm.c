@@ -34,7 +34,7 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   obj_admm = (double*)malloc(max_iter_admm*sizeof(double)); 
   
   int verb = 1; 
-  if (verb) printf("Iteration\tObjective");
+  if (verb) printf("Iteration\tObjective\tLoss\t\tPenalty\n");
 
   Dk = tf_calc_dk(n, k, x);
   Dkt = cs_transpose(Dk, 1);
@@ -55,12 +55,14 @@ void tf_admm_glm (double * y, double * x, int n, int k,
       else
         yt[i] = 0;
       */
-      /* set yt = Wyt */
+      /* IMPORTANT: set yt = Wyt */
       yt[i] = H[i]*beta[i] + y[i] - b1(beta[i]);
 
     }
     
-    /*for(i=0; i<n; i++) printf("beta=%0.2e\tH=%0.2e\n", beta[i], H[i]);*/
+    if( verb ){
+      /* for(i=0; i<n; i++) printf("beta=%0.2e\tH=%0.2e\n", beta[i], H[i]); */
+    }
     
     /* QR factorization */
     kernmat = scalar_plus_diag(DktDk, rho, H);
@@ -85,7 +87,7 @@ void tf_admm_glm (double * y, double * x, int n, int k,
     /* bt linesearch. Also see Dinh et. al ICML 2013*/
     /* TODO: f( x + gamma^s ) \leq f(x) + c gamma^s < f', d> */
     /* double t = linesearch_bt(y, x, H, n, k, d, beta, c, gamma, tol); */
-    double t = 1;
+    double t = 0.0001;
     
     for(i=0; i<n; i++)
     {
@@ -109,7 +111,7 @@ void tf_admm_glm (double * y, double * x, int n, int k,
     pobj = loss+lam*pen;
     obj[it] = pobj;
 
-    if (verb) printf("GLM \t%i\t%0.5e\n",it,pobj);
+    if (verb) printf("GLM \t%i\t%0.3e\t%0.3e\t%0.3e\n",it,pobj, loss, lam*pen);
 
     if(it > 0)
     {

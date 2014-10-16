@@ -5,6 +5,7 @@
 #include "int_codes.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 void test_admm_gauss();
 
@@ -40,9 +41,9 @@ void test_admm_gauss(int mode)
 
   /* Input parameters; will usually be given by parent function to tf_admm */
   n = 8;
-  k = 1;
+  k = 3;
   family = FAMILY_GAUSSIAN;
-  max_iter = 5;
+  max_iter = 100;
   lam_flag = 1;
   obj_flag = 1;
   nlambda = 1;
@@ -60,11 +61,12 @@ void test_admm_gauss(int mode)
   obj = (double *) malloc(max_iter * nlambda * sizeof(double));
   iter = (int *) malloc( nlambda * sizeof(int));
 
-  srand(5489);
+  srand(5490);
+  srand(time(NULL));
 
   x[0] = 0;
-  for (i = 1; i < n; i++) x[i] = x[i-1] + (rand() % 100)/100.;
-  for (i = 0; i < n; i++) y[i] = x[i] * x[i] + 0.5 * (rand() % 100)/100.;
+  for (i = 1; i < n; i++) x[i] = x[i-1] + ((rand() % 100)+1)/100.;
+  for (i = 0; i < n; i++) y[i] = x[i] * x[i] + 0.5 * ((rand() % 100)+1)/100.;
   for (i = 0; i < n; i++) w[i] = 0;
 
   lambda[0] = 1;
@@ -105,19 +107,19 @@ void test_admm_gauss(int mode)
   
   
   family = FAMILY_LOGISTIC;
-  double prob1, prob2;
+  double bernouli_p, uniform;
   for (i = 0; i < n; i++)
   {
-    prob1 = 1/ ( 1 + exp(-x[i]) );
-    prob2 = (rand() % 101)/100.;    
-    y[i] = prob1 <= prob2 ? 1 : 0;
+    bernouli_p = 1/ ( 1 + exp(-(x[i]-n/4.)*(x[i]-n/4.)) );
+    uniform = (rand() % 101)/100.;    
+    y[i] = uniform <= bernouli_p ? 1 : 0;
   }
 
   printf("\n--------------- (x,y) ---------------------------\n");
 
   for (i = 0; i < n; i++) printf("%.3f\t%1.f\n", x[i], y[i]);
   
-  lambda[0] = 1e9; 
+  lambda[0] = 1; 
   tf_admm(y, x, w, n, k, family, max_iter, lam_flag, obj_flag,
           lambda, nlambda, lambda_min_ratio, beta, obj, iter, rho, obj_tol);
   
