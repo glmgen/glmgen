@@ -15,6 +15,10 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   double * z = (double*)malloc(n*sizeof(double));
   double * obj_admm;
   
+  /* Buffer for line search. Dbn : Dbnew */
+  double * Db = (double*)malloc(n*sizeof(double));
+  double * Dd = (double*)malloc(n*sizeof(double));
+  double * Dbn = (double*)malloc(n*sizeof(double));
   int * iter_ls = (int*)malloc(sizeof(int));
   
   cs * Dk;
@@ -92,7 +96,7 @@ void tf_admm_glm (double * y, double * x, int n, int k,
     double gamma = 0.5;
     int max_iter_ls = 50;
 
-    t = tf_line_search(y, x, n, k, lam, b, b1, beta, d, alpha_ls, gamma, max_iter_ls, iter_ls); 
+    t = tf_line_search(y, x, n, k, lam, b, b1, beta, d, alpha_ls, gamma, max_iter_ls, iter_ls, Db, Dd, Dbn); 
 
     /* if(verb) printf("Stepsize t=%.2e,\titers=%d\n", t, *iter_ls); */
     for(i=0; i<n; i++)
@@ -135,6 +139,10 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   free(yt);
   free(H);
   free(z);
+  free(iter_ls);
+  free(Db);
+  free(Dd);
+  free(Dbn);
   free(obj_admm);
   cs_spfree(Dk);
   cs_spfree(Dkt);

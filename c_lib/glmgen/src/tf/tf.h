@@ -68,5 +68,6 @@ double tf_line_search(double * y, double * x, int n, int k,
     func_RtoR b, func_RtoR b1, 
     double * beta, double * d, 
     double alpha, double gamma, int max_iter,
-    int * iter);
+    int * iter,
+    double * Db, double * Dd, double * Dbn);
 #endif

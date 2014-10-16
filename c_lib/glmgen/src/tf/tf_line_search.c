@@ -16,7 +16,8 @@ double tf_line_search(double * y, double * x, int n, int k,
     func_RtoR b, func_RtoR b1, 
     double * beta, double * d, 
     double alpha, double gamma, int max_iter,
-    int * iter)
+    int * iter,
+    double * Db, double * Dd, double * Dbn)
 {
   int i, it;
   double norm_Db, norm_Dbn;
@@ -24,12 +25,6 @@ double tf_line_search(double * y, double * x, int n, int k,
   double theta;
   double t;
   double descent;
-
-  double * Db, * Dd, *Dbn; /* Dbn : Dbnew */
-  
-  Db = (double*)malloc(n*sizeof(double));
-  Dd = (double*)malloc(n*sizeof(double));
-  Dbn = (double*)malloc(n*sizeof(double));
 
   tf_dx(x, n, k+1, beta, Db);
   tf_dx(x, n, k+1, d, Dd);
