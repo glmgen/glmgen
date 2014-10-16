@@ -43,7 +43,7 @@ void test_admm_gauss(int mode)
   n = 8;
   k = 3;
   family = FAMILY_GAUSSIAN;
-  max_iter = 100;
+  max_iter = 10;
   lam_flag = 1;
   obj_flag = 1;
   nlambda = 2;

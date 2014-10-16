@@ -62,4 +62,11 @@ double ts_maxlam (int len, double * Dy, gqr * DDt_qr, int family);
 void tf_dx(double *x, int n, int k,double *a, double *b);
 void tf_dtx(double *x, int n, int k, double *a, double *b);
 
+
+double tf_line_search(double * y, double * x, int n, int k, 
+    double lam, 
+    func_RtoR b, func_RtoR b1, 
+    double * beta, double * d, 
+    double alpha, double gamma, int max_iter,
+    int * iter);
 #endif

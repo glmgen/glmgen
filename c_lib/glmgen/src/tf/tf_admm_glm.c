@@ -15,6 +15,8 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   double * z = (double*)malloc(n*sizeof(double));
   double * obj_admm;
   
+  int * iter_ls = (int*)malloc(sizeof(int));
+  
   cs * Dk;
   cs * Dkt;
   cs * DktDk;
@@ -23,6 +25,7 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   gqr * kernmat_qr;
   
   double pobj, loss, pen;
+  double t; /* stepsize */
   int it;
   double admm_tol;
   int max_iter_admm;
@@ -83,12 +86,15 @@ void tf_admm_glm (double * y, double * x, int n, int k,
     {
       d[i] = d[i] - beta[i];
     }
-    
-    /* bt linesearch. Also see Dinh et. al ICML 2013*/
-    /* TODO: f( x + gamma^s ) \leq f(x) + c gamma^s < f', d> */
-    /* double t = linesearch_bt(y, x, H, n, k, d, beta, c, gamma, tol); */
-    double t = 0.0001;
-    
+   
+    /* TODO: take the bt line search parameters as inputs */
+    double alpha_ls = 0.4;
+    double gamma = 0.5;
+    int max_iter_ls = 50;
+
+    t = tf_line_search(y, x, n, k, lam, b, b1, beta, d, alpha_ls, gamma, max_iter_ls, iter_ls); 
+
+    /* if(verb) printf("Stepsize t=%.2e,\titers=%d\n", t, *iter_ls); */
     for(i=0; i<n; i++)
     {
       beta[i] = beta[i] + t * d[i];
