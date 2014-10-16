@@ -1,0 +1,18 @@
+useDynLib(glmgen)
+
+importFrom("methods", show)
+
+export(trendfilter)
+
+exportMethods(
+    "coef",
+    "predict",
+    "print",
+    "show",
+    "summary"
+)
+exportClasses(
+    "glmgen",
+     "summary.glmgen",
+     "trendfilter"
+)

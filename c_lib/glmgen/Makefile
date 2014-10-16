@@ -1,4 +1,6 @@
 all:
+	mkdir -p lib
+	mkdir -p obj
 	cd obj; gcc -g -ansi -Wall -c -fPIC ../src/csparse/*.c -I../src/csparse
 	cd obj; gcc -g -ansi -Wall -c -fPIC ../src/utils/*.c -I../src/csparse -I../src/utils
 	cd obj; gcc -g -ansi -Wall -c -fPIC ../src/tf/*.c -I../src/csparse -I../src/utils -I../src/tf
