@@ -1,4 +1,5 @@
 #include "tf.h"
+#include <stdio.h>
 
 /* Creates \tilde{D}k = k. (delta_k)^-1 Dk */
 cs * tf_calc_dktil (int n, int k, const double * x)
@@ -11,6 +12,10 @@ cs * tf_calc_dktil (int n, int k, const double * x)
   int i;
 
   Dk = tf_calc_dk(n, k, x);
+  
+  /* Deal with k=0 separately */
+  if(k == 0)
+    return Dk;
 
   /* Construct diagonal matrix of differences: */
   delta_k = cs_spalloc(n-k, n-k, (n-k), 1, 1);

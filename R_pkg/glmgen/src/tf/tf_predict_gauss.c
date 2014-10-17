@@ -40,7 +40,7 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
       /* Loop over x points, falling fact basis */
       for (i=0; i<n-k-1; i++) {
         /* If the current x0 is too small, then break */
-        if (x0[j]<x[i+k]) break;
+        if (x0[j]<=x[i+k]) break;
 
         /* Otherwise check the ith coef, and if it is nonzero,
          * compute the contribution of the ith basis function */
