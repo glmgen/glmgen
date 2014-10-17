@@ -85,7 +85,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     /* Stop if relative difference of objective values <= obj_tol */
     if(it > 0)
     {
-      if( fabs(pobj) < obj_tol || fabs((obj[it-1] - pobj) / pobj) < obj_tol )
+      if( fabs(pobj - obj[it-1]) < fabs(pobj) * obj_tol )
       {
         break;
       }

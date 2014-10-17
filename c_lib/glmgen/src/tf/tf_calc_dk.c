@@ -4,6 +4,7 @@
 cs * tf_calc_dk (int n, int k, const double * x)
 {
   long int i;
+  
   int tk = 1; /* "this k" - will iterate until ts = k */
 
   cs * D1;
@@ -14,6 +15,18 @@ cs * tf_calc_dk (int n, int k, const double * x)
   cs * delta_k_cp;
   cs * D1_x_delta;
   cs * Dk_next;
+  cs * T;
+  cs * eye;
+
+  /* Deal with k=0 separately */
+  if(k == 0)
+  {    
+    T = cs_spalloc (n, n, n, 1, 1) ;
+    for (i = 0 ; i < n; i++) cs_entry (T, i, i, 1);
+    eye = cs_compress (T);
+    cs_spfree (T);
+    return eye;
+  }
 
   /* Contruct one 'full D1', which persists throughout
      and another copy as Dk */
