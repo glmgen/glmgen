@@ -13,7 +13,19 @@ void test_pred();
 
 int main()
 {
-
+/*  cs * D;*/
+/*  int n=8, k=0;*/
+/*  double *x = (double*)malloc(n*sizeof(double));*/
+/*  int i;*/
+/*  for(i = 0; i < n; i++) x[i] = i;*/
+/*  */
+/*  D = tf_calc_dktil(n, k, x);*/
+/*  */
+/*  cs_print(D,0);*/
+/*  */
+/*  cs_spfree(D);*/
+/*  free(x);*/
+  
   test_mult();
   test_pred();
 
@@ -204,15 +216,15 @@ int test_predict(double *x, int n, int k, double *x0, int n0, double *beta, int 
   {
     printf("predicted values --------\n");
     print_array(pred, n0);
-    printf("observed values --------\n");
+    printf("expected values --------\n");
     print_array(pred_exp, n0);
   }
   double err = max_diff(pred, pred_exp, n0);
 
-  printf("predict err=%f\n", err);
+  printf("predict err=%g\n", err);
   if(!(err < 1e-12) )
   {
-    printf("*********Predict Test failed(n=%d,k=%d,err=%E)********\n",n,k,err);
+    printf("*********Predict Test failed(n=%d,k=%d,err=%g)********\n",n,k,err);
     return 1;
   }
 
@@ -250,7 +262,9 @@ void predict_gauss_explicit(double * beta, double * x, int n, int k,
 
   double *theta = (double *)malloc((n)*sizeof(double));
   tf_dx(x,n,k+1,beta,theta);
-
+  double k_fac = glmgen_factorial(k);
+  for(i=0; i<n-k-1;i++)
+    theta[i] /= k_fac;
   for (i=0; i<n-k-1; i++) if (fabs(theta[i])<zero_tol) theta[i]=0;
 
   /* Compute the predictions at each new point x0 */

@@ -15,6 +15,12 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   double * z = (double*)malloc(n*sizeof(double));
   double * obj_admm;
   
+  /* Buffer for line search. Dbn : Dbnew */
+  double * Db = (double*)malloc(n*sizeof(double));
+  double * Dd = (double*)malloc(n*sizeof(double));
+  double * Dbn = (double*)malloc(n*sizeof(double));
+  int * iter_ls = (int*)malloc(sizeof(int));
+  
   cs * Dk;
   cs * Dkt;
   cs * DktDk;
@@ -23,6 +29,7 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   gqr * kernmat_qr;
   
   double pobj, loss, pen;
+  double t; /* stepsize */
   int it;
   double admm_tol;
   int max_iter_admm;
@@ -33,10 +40,10 @@ void tf_admm_glm (double * y, double * x, int n, int k,
 
   obj_admm = (double*)malloc(max_iter_admm*sizeof(double)); 
   
-  int verb = 1; 
-  if (verb) printf("Iteration\tObjective");
+  int verb = 0; 
+  if (verb) printf("Iteration\tObjective\tLoss\t\tPenalty\n");
 
-  Dk = tf_calc_dk(n, k, x);
+  Dk = tf_calc_dktil(n, k, x);
   Dkt = cs_transpose(Dk, 1);
   DktDk = cs_multiply(Dkt,Dk);
  
@@ -55,12 +62,14 @@ void tf_admm_glm (double * y, double * x, int n, int k,
       else
         yt[i] = 0;
       */
-      /* set yt = Wyt */
+      /* IMPORTANT: set yt = Wyt */
       yt[i] = H[i]*beta[i] + y[i] - b1(beta[i]);
 
     }
     
-    /*for(i=0; i<n; i++) printf("beta=%0.2e\tH=%0.2e\n", beta[i], H[i]);*/
+    if( verb ){
+      /* for(i=0; i<n; i++) printf("beta=%0.2e\tH=%0.2e\n", beta[i], H[i]); */
+    }
     
     /* QR factorization */
     kernmat = scalar_plus_diag(DktDk, rho, H);
@@ -81,12 +90,15 @@ void tf_admm_glm (double * y, double * x, int n, int k,
     {
       d[i] = d[i] - beta[i];
     }
-    
-    /* bt linesearch. Also see Dinh et. al ICML 2013*/
-    /* TODO: f( x + gamma^s ) \leq f(x) + c gamma^s < f', d> */
-    /* double t = linesearch_bt(y, x, H, n, k, d, beta, c, gamma, tol); */
-    double t = 1;
-    
+   
+    /* TODO: take the bt line search parameters as inputs */
+    double alpha_ls = 0.4;
+    double gamma = 0.5;
+    int max_iter_ls = 50;
+
+    t = tf_line_search(y, x, n, k, lam, b, b1, beta, d, alpha_ls, gamma, max_iter_ls, iter_ls, Db, Dd, Dbn); 
+
+    /* if(verb) printf("Stepsize t=%.2e,\titers=%d\n", t, *iter_ls); */
     for(i=0; i<n; i++)
     {
       beta[i] = beta[i] + t * d[i];
@@ -109,11 +121,11 @@ void tf_admm_glm (double * y, double * x, int n, int k,
     pobj = loss+lam*pen;
     obj[it] = pobj;
 
-    if (verb) printf("GLM \t%i\t%0.5e\n",it,pobj);
+    if (verb) printf("GLM \t%i\t%0.3e\t%0.3e\t%0.3e\n",it,pobj, loss, lam*pen);
 
     if(it > 0)
     {
-      if( fabs(pobj) < obj_tol || fabs((obj[it-1] - pobj) / pobj) < obj_tol )
+      if( fabs(pobj - obj[it-1]) < fabs(pobj) * obj_tol )
       {
         break;
       }
@@ -127,6 +139,10 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   free(yt);
   free(H);
   free(z);
+  free(iter_ls);
+  free(Db);
+  free(Dd);
+  free(Dbn);
   free(obj_admm);
   cs_spfree(Dk);
   cs_spfree(Dkt);

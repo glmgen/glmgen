@@ -18,4 +18,4 @@ clean:
 cleanall:
 	rm obj/*.o
 	rm lib/*.so
-	rm examples/bin/*
+	rm -rf examples/bin/*

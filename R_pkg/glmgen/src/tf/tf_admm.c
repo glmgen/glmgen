@@ -41,7 +41,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   D = tf_calc_dk(n, k+1, x);
   Dt = cs_transpose(D, 1);
   DDt = cs_multiply(D,Dt);
-  Dk = tf_calc_dk(n, k, x);
+  Dk = tf_calc_dktil(n, k, x);
   Dkt = cs_transpose(Dk, 1);
   DkDkt = cs_multiply(Dk,Dkt);
   DktDk = cs_multiply(Dkt,Dk);
@@ -111,21 +111,29 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
 
   }
 
+
+  int j;
   /* Iterate lower level functions over all lambda values;
      the alpha and u vectors get used each time of subsequent
      warm starts */
   for (i = 0; i < nlambda; i++)
   {
+    /* warm start */
+    if(i == 0)
+      for(j = 0; j < n; j++) beta[j] = beta_max[j];
+    else
+      for(j = 0; j < n; j++) beta[i*n + j] = beta[(i-1)*n + j];
+
     switch (family)
     {
       case FAMILY_GAUSSIAN:
         kernmat = scalar_plus_eye(DktDk, rho * lambda[i]);
         kernmat_qr = glmgen_qr(kernmat);
-
+        
         tf_admm_gauss(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
                       u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
                       kernmat_qr);
-
+                      
         cs_spfree(kernmat);
         glmgen_gqr_free(kernmat_qr);
         break;

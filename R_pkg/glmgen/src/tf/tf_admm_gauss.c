@@ -7,6 +7,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
        double rho, double obj_tol,
        gqr * sparseQR)
 {
+  
   /* Some things that will be useful during our iterations */
   double *v = (double*)malloc(n*sizeof(double));
   double *z = (double*)malloc(n*sizeof(double));
@@ -15,14 +16,20 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
   int i, verb, it;
 
   verb = 0;
-  if (verb) printf("Iteration\tObjective\n");
+  if (verb) printf("Iteration\tObjective\tPenalty\n");
 
   for(it=0; it < max_iter; it++)
   {
-    for (i=0; i<n-k; i++)
+    for (i=0; i < n-k; i++)
     {
       v[i] = alpha[i] + u[i];
     }
+    /* z = \tilde{D}^T v = k D^T \Delta^-1 v */
+    if( k > 0 )
+      for(i=0; i < n-k; i++)
+      {
+        v[i] = v[i] * k/( x[k+i] - x[i] );
+      }
     tf_dtx(x,n,k,v,z);
 
     for (i=0; i<n; i++)
@@ -36,6 +43,11 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     /* Update alpha: 1d fused lasso
      * Build the response vector */
     tf_dx(x,n,k,beta,v);
+    if( k > 0 )
+      for(i=0; i < n-k; i++)
+      {
+        v[i] = v[i] * k/( x[k+i] - x[i] );
+      }
     for (i=0; i<n-k; i++)
     {
       z[i] = v[i]-u[i];
@@ -68,12 +80,12 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     pobj = loss/2+lam*pen;
     obj[it] = pobj;
 
-    if (verb) printf("%i\t%0.5e\n",it,pobj);
+    if (verb) printf("%i\t%0.5e\t%0.5e\n",it,pobj, pen);
 
     /* Stop if relative difference of objective values <= obj_tol */
     if(it > 0)
     {
-      if( fabs(pobj) < obj_tol || fabs((obj[it-1] - pobj) / pobj) < obj_tol )
+      if( fabs(pobj - obj[it-1]) < fabs(pobj) * obj_tol )
       {
         break;
       }

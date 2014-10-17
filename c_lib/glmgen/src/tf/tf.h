@@ -58,8 +58,17 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
 
 /* Low-level utility functions for trendfiltering */
 cs * tf_calc_dk (int n, int k, const double * x);
+cs * tf_calc_dktil (int n, int k, const double * x);
 double ts_maxlam (int len, double * Dy, gqr * DDt_qr, int family);
 void tf_dx(double *x, int n, int k,double *a, double *b);
 void tf_dtx(double *x, int n, int k, double *a, double *b);
 
+
+double tf_line_search(double * y, double * x, int n, int k, 
+    double lam, 
+    func_RtoR b, func_RtoR b1, 
+    double * beta, double * d, 
+    double alpha, double gamma, int max_iter,
+    int * iter,
+    double * Db, double * Dd, double * Dbn);
 #endif
