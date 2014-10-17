@@ -41,7 +41,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   D = tf_calc_dk(n, k+1, x);
   Dt = cs_transpose(D, 1);
   DDt = cs_multiply(D,Dt);
-  Dk = tf_calc_dk(n, k, x);
+  Dk = tf_calc_dktil(n, k, x);
   Dkt = cs_transpose(Dk, 1);
   DkDkt = cs_multiply(Dk,Dkt);
   DktDk = cs_multiply(Dkt,Dk);
