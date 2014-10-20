@@ -7,18 +7,19 @@
 #include <stdio.h>
 #include <time.h>
 
-void test_admm_gauss();
+#define PI 3.14159265
+
+void test_admm_gauss(int n, int k);
 
 int main()
 {
-
-  int n=8;
-  int k;
-  
-  for(k = 0; k < n; k++)
+  int n=500;
+  int k=2;
+  test_admm_gauss(n, k);
+  /*for(k = 1; k < 2; k++)
   {
     test_admm_gauss(n, k);
-  }
+  }*/
   return 0;
 }
 void test_admm_gauss(int n, int k)
@@ -47,10 +48,10 @@ void test_admm_gauss(int n, int k)
   verb = 0;
   /* Input parameters; will usually be given by parent function to tf_admm */
   family = FAMILY_GAUSSIAN;
-  max_iter = 10;
+  max_iter = 100;
   lam_flag = 0;
   obj_flag = 1;
-  nlambda = 2;
+  nlambda = 5;
   lambda_min_ratio = 1e-4;
   rho = 1;
   obj_tol = 1e-12;
@@ -69,9 +70,10 @@ void test_admm_gauss(int n, int k)
   srand(time(NULL));
 
   x[0] = 0;
-  for (i = 1; i < n; i++) x[i] = x[i-1] + ((rand() % 100)+1)/100.;
-  for (i = 0; i < n; i++) y[i] = x[i] * x[i] + 0.5 * ((rand() % 100)+1)/100.;
-/*  for (i = 0; i < n; i++) x[i] = i;*/
+  /* for (i = 1; i < n; i++) x[i] = x[i-1] + ((rand() % 100)+1)/100.; */
+  for (i = 1; i < n; i++) x[i] = i;
+  for (i = 0; i < n; i++) y[i] = sin(x[i] * 3.*PI/n);
+ /* for (i = 0; i < n; i++) y[i] = x[i] * x[i] + 0.5 * ((rand() % 100)+1)/100.;*/
 /*  for (i = 0; i < n; i++) y[i] = i;*/
   for (i = 0; i < n; i++) w[i] = 1;
 
@@ -91,10 +93,9 @@ void test_admm_gauss(int n, int k)
   printf("\n---------- beta_2 -------------------------------\n");
   for (i = 0; i < n; i++) printf("%f\n", beta[i + n]);
 
+
+  /* Prediction */
   /*
-  printf("\n---------- beta_3 -------------------------------\n");
-  for (i = 0; i < n; i++) printf("%f\n", beta[i + n*2]);
-  */
   predict_zero_tol = 1e-12;
 
   double err;
@@ -115,8 +116,10 @@ void test_admm_gauss(int n, int k)
     if(!(err < 1e-12 ))
       printf("Prediction failed at input points (n=%d,k=%d,lam=%.4f,err=%E)\n",n,k,lambda[i], err);
   }
-  /* Logistic loss */
+  */
 
+  /* Logistic loss */
+/*
   
   family = FAMILY_LOGISTIC;
   double bernouli_p, uniform;
@@ -140,7 +143,7 @@ void test_admm_gauss(int n, int k)
 
   printf("\n---------- beta_1 (logistic) -----------------------\n");
   for (i = 0; i < n; i++) printf("%f\n", beta[i]);
-  
+*/
   /* Free the allocated arrays */
   free(y);
   free(x);
