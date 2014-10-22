@@ -81,7 +81,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     for (i = 0; i < n-k-1; i++) temp_n[i] = -1*Dy[i];
     for (i = 0; i < n; i++) beta_max[i] = y[i];
     glmgen_qrsol (DDt_qr, temp_n);
-    cs_gaxpy(Dt, temp_n, beta_max);
+    cs_gaxpy(Dt, temp_n, beta_max); 
 
     /* alpha_max */
     tf_dx(x, n, k, beta_max, alpha);
@@ -127,6 +127,8 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     switch (family)
     {
       case FAMILY_GAUSSIAN:
+        if( lambda[i] >= max_lam )
+          break;
         kernmat = scalar_plus_eye(DktDk, rho * lambda[i]);
         kernmat_qr = glmgen_qr(kernmat);
         
