@@ -14,19 +14,15 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   double * beta_max;
   double * alpha;
   double * u;
-  double * Dy;
   double * resid;
 
   cs * D;
   cs * Dt;
-  cs * DDt;
   cs * Dk;
   cs * Dkt;
-  cs * DkDkt;
   cs * DktDk;
-  gqr * DDt_qr;
-  gqr * DkDkt_qr;
-  gqr * DktDk_qr;
+  gqr * Dt_qr;
+  gqr * Dkt_qr;
 
   cs * kernmat;
   gqr * kernmat_qr;
@@ -34,28 +30,20 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   beta_max = (double *) malloc(n * sizeof(double));
   temp_n = (double *) malloc(n * sizeof(double));
   alpha = (double *) malloc(n * sizeof(double)); /* only size n-k, but may need extra buffer */
-  u = (double *) malloc((n - k) * sizeof(double));
-  Dy = (double *) malloc((n - k - 1) * sizeof(double));
+  u = (double *) malloc(n * sizeof(double));/* only size n-k, but may need extra buffer */
   resid = (double *) malloc(n * sizeof(double));
 
   D = tf_calc_dk(n, k+1, x);
   Dt = cs_transpose(D, 1);
-  DDt = cs_multiply(D,Dt);
   Dk = tf_calc_dktil(n, k, x);
   Dkt = cs_transpose(Dk, 1);
-  DkDkt = cs_multiply(Dk,Dkt);
   DktDk = cs_multiply(Dkt,Dk);
-  DDt_qr = glmgen_qr(DDt);
-  DkDkt_qr = glmgen_qr(DkDkt);
-  DktDk_qr = glmgen_qr(DktDk);
-
-
-  for (i = 0; i < n - k - 1; i++) Dy[i] = 0;
-  cs_gaxpy(D, y, Dy);
+  Dt_qr = glmgen_qr(Dt);
+  Dkt_qr = glmgen_qr(Dkt);
 
   /* Determine the maximum lambda in the path, and initiate the path if needed
      using the input lambda_min_ratio and equally spaced log points. */
-  max_lam = ts_maxlam(n - k-1, Dy, DDt_qr, family);
+  max_lam = ts_maxlam(n, y, Dt_qr, family);
   if (!lam_flag)
   {
     min_lam = max_lam * lambda_min_ratio;
@@ -78,39 +66,36 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   } else {
 
     /* beta_max */
-    for (i = 0; i < n-k-1; i++) temp_n[i] = -1*Dy[i];
+    for (i = 0; i < n; i++) temp_n[i] = -y[i];
     for (i = 0; i < n; i++) beta_max[i] = y[i];
-    glmgen_qrsol (DDt_qr, temp_n);
+    glmgen_qrsol (Dt_qr, temp_n);
     cs_gaxpy(Dt, temp_n, beta_max);
 
     /* alpha_max */
-    tf_dx(x, n, k, beta_max, alpha);
+    tf_dxtil(x, n, k, beta_max, alpha);
 
     /* u_max */
     double exp_i;
     switch (family)
     {
       case FAMILY_GAUSSIAN:
-        for (i = 0; i < n; i++) temp_n[i] = (beta_max[i] - y[i]) / (rho * lambda[0]);
+        for (i = 0; i < n; i++) u[i] = (beta_max[i] - y[i]) / (rho * lambda[0]);
         break;
 
       case FAMILY_LOGISTIC:
         for (i = 0; i < n; i++) {
           exp_i = exp(beta_max[i]);
-          temp_n[i] = exp_i / ((1+exp_i)*(1+exp_i)) * (beta_max[i] - y[i]) / (rho * lambda[0]);
+          u[i] = exp_i / ((1+exp_i)*(1+exp_i)) * (beta_max[i] - y[i]) / (rho * lambda[0]);
         }
         break;
 
       case FAMILY_POISSON:
-        for (i = 0; i < n; i++) temp_n[i] = exp(beta_max[i]) * (beta_max[i] - y[i]) / (rho * lambda[0]);
+        for (i = 0; i < n; i++) u[i] = exp(beta_max[i]) * (beta_max[i] - y[i]) / (rho * lambda[0]);
         break;
     }
-    for (i = 0; i < n - k; i++) u[i] = 0;
-    cs_gaxpy(Dk, temp_n, u);
-    glmgen_qrsol (DkDkt_qr, u);
+    glmgen_qrsol (Dkt_qr, u);
 
   }
-
 
   int j;
   /* Iterate lower level functions over all lambda values;
@@ -127,6 +112,8 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     switch (family)
     {
       case FAMILY_GAUSSIAN:
+        if( lambda[i] >= max_lam )
+          break;
         kernmat = scalar_plus_eye(DktDk, rho * lambda[i]);
         kernmat_qr = glmgen_qr(kernmat);
         
@@ -152,19 +139,15 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
 
   cs_spfree(D);
   cs_spfree(Dt);
-  cs_spfree(DDt);
   cs_spfree(Dk);
   cs_spfree(Dkt);
-  cs_spfree(DkDkt);
   cs_spfree(DktDk);
-  glmgen_gqr_free(DDt_qr);
-  glmgen_gqr_free(DkDkt_qr);
-  glmgen_gqr_free(DktDk_qr);
+  glmgen_gqr_free(Dt_qr);
+  glmgen_gqr_free(Dkt_qr);
 
   free(temp_n);
   free(beta_max);
   free(alpha);
   free(u);
-  free(Dy);
   free(resid);
 }

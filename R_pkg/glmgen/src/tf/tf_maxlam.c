@@ -1,32 +1,32 @@
 #include "tf.h"
 
-double ts_maxlam (int len, double * Dy, gqr * DDt_qr, int family)
+double ts_maxlam (int len, double * y, gqr * Dt_qr, int family)
 {
   int i;
-  double * Dy_work;
+  double * y_work;
   double maxlam;
-  Dy_work = (double *) malloc(len * sizeof(double));
+  y_work = (double *) malloc(len * sizeof(double));
 
   switch (family)
   {
     case FAMILY_GAUSSIAN:
-      for (i = 0; i < len; i++) Dy_work[i] = Dy[i];
+      for (i = 0; i < len; i++) y_work[i] = y[i];
       break;
 
     case FAMILY_LOGISTIC:
-      for (i = 0; i < len; i++) Dy_work[i] = Dy[i] - 0.5;
+      for (i = 0; i < len; i++) y_work[i] = y[i] - 0.5;
       break;
 
     case FAMILY_POISSON:
-      for (i = 0; i < len; i++) Dy_work[i] = Dy[i] - 1;
+      for (i = 0; i < len; i++) y_work[i] = y[i] - 1;
       break;
   }
 
-  glmgen_qrsol(DDt_qr, Dy_work);
+  glmgen_qrsol(Dt_qr, y_work);
 
   maxlam = 0;
-  for(i = 0; i < len; i++) maxlam = MAX(maxlam, fabs(Dy_work[i]));
+  for(i = 0; i < len; i++) maxlam = MAX(maxlam, fabs(y_work[i]));
 
-  free(Dy_work);
+  free(y_work);
   return maxlam;
 }
