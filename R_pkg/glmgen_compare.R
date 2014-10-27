@@ -15,7 +15,7 @@ objective = function(x, y, k, lambda, beta) {
 
 kvals = c(1,2,3)
 nvals = c(50,1e3,1e5)
-xpows = c(1,1/2,1/4)
+xpows = c(1, 1/4)
 
 # Test glmgen versus genlasso; uses varying x inputs
 set.seed(42)
@@ -28,7 +28,7 @@ for (k in kvals) {
 
       path = genlasso:::trendfilter(y, x, ord=k, maxsteps=20L)
       admm = glmgen::trendfilter(y, x, k=k, lambda = path$lambda,
-                                          maxiter=20L, control=list(obj_tol=0))
+                                          maxiter=200L, control=list(obj_tol=0))
 
       outtemp = cbind(k, n, p, 1:20L, rep(NA, 20L), rep(NA, 20L))
       colnames(outtemp)[4:6] = c("step", "path", "admm")
@@ -49,14 +49,14 @@ colnames(output02) = c("k", "n", "p", "step", "old", "new")
 colnames(output03) = c("k", "n", "p", "step", "old", "new")
 for (k in kvals) {
   for (n in nvals) {
-    x = (seq(0,1,length.out=n))
+    x = (seq(0,n-1,length.out=n))
     y = sin(x * (2*pi)) + rnorm(n, sd=0.2)
 
     t0 = system.time({
-      admm_old = trendfilterSim::trendfilter(y=y, k=k, eabs=0, erel=0, maxiter=25L)
+      admm_old = trendfilterSim::trendfilter(y=y, k=k, eabs=0, erel=0, maxiter=200L)
     })
     t1 = system.time({
-      admm_new = glmgen::trendfilter(y, x, k=k, maxiter=25L, lambda=admm_old$lambda, control=list(obj_tol=0))
+      admm_new = glmgen::trendfilter(y, x, k=k, maxiter=200L, lambda=admm_old$lambda, control=list(obj_tol=0))
     })
 
     output03 = rbind(output03, c(k, n, 1, 1, t0[["elapsed"]], t1[["elapsed"]]))
