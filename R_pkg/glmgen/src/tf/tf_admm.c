@@ -55,6 +55,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     }
   }
 
+  rho = rho * pow( (x[n-1] - x[0])/n, (double)k);
   /* Initiate alpha and u for a warm start */
   if (lambda[0] < max_lam * 1e-5)
   {
