@@ -19,7 +19,7 @@ objective = function(x,y, k, lambda, beta) {
       Db = diff( i * (1/diff(x,i)) * Db)
     }
   }
-  
+
   0.5 * sum((y-beta)*(y-beta)) + lambda * sum(abs(Db))
 }
 n = 10
