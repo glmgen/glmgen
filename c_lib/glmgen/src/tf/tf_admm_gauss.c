@@ -35,6 +35,13 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     /* Solve the least squares problem with sparse QR */
     glmgen_qrsol(sparseQR, beta);
 
+    int num_nans;
+    if(verb) {
+      printf("it = %d\tb = %g", it, beta[0]);
+      num_nans = count_nans(beta,n); if(num_nans) printf(", #nans=%d", num_nans);
+    }
+    
+
     /* Update alpha: 1d fused lasso
      * Build the response vector */
     tf_dxtil(x,n,k,beta,v);
@@ -45,12 +52,20 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     /* Use Nick's DP algorithm */
     tf_dp(n-k,z,lam/rho,alpha);
 
+    if(verb) {
+      printf("\ta = %g", alpha[0]);
+      num_nans = count_nans(alpha,n); if(num_nans) printf(", #nans=%d", num_nans);
+    }    
     /* Update u: dual update */
     for (i=0; i<n-k; i++)
     {
       u[i] = u[i]+alpha[i]-v[i];
     }
-
+    if(verb) {
+      printf("\tu = %g", u[0]);
+      num_nans = count_nans(u,n); if(num_nans) printf(", #nans=%d", num_nans);
+    }    
+    if(verb) printf("\n");
     /* Compute objective, if we are told to
      * Compute loss */
     loss = 0;
@@ -70,7 +85,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     pobj = loss/2+lam*pen;
     obj[it] = pobj;
 
-    if (verb) printf("%i\t%0.5e\t%0.5e\n",it,pobj, pen);
+/*    if (verb) printf("%i\t%0.5e\t%0.5e\n",it,pobj, pen);*/
 
     /* Stop if relative difference of objective values <= obj_tol */
     if(it > 0)

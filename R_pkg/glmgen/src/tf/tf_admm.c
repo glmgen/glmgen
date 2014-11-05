@@ -5,7 +5,7 @@
 void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               int max_iter, int lam_flag, int obj_flag,  double * lambda,
               int nlambda, double lambda_min_ratio, double * beta,
-              double * obj, int * iter, double rho, double obj_tol)
+              double * obj, int * iter, int * status, double rho, double obj_tol)
 {
   int i;
   double max_lam;
@@ -113,23 +113,10 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
      warm starts */
   for (i = 0; i < nlambda; i++)
   {
-    /* warm start or cold start */
-    double * beta_init = (i == 0) ? beta_max : beta + (i-1)*n;    
-    
-    warm_start = has_no_nan(beta_init, n);
-    if(warm_start) {
-      for(j = 0; j < n; j++) beta[i*n + j] = beta_init[j];      
-    }
-    else {
-      for(j = 0; j < n; j++) beta[i*n + j] = beta_max[j];
-      memcpy(alpha, alpha_max, n*sizeof(double));
-      memcpy(u, u_max, n*sizeof(double));
-    }
-    
-/*    if(i == 0)*/
-/*      for(j = 0; j < n; j++) beta[j] = beta_max[j];*/
-/*    else*/
-/*      for(j = 0; j < n; j++) beta[i*n + j] = beta[(i-1)*n + j];*/
+    /* warm start */
+    double * beta_init = (i == 0) ? beta_max : beta + (i-1)*n;
+
+    for(j = 0; j < n; j++) beta[i*n + j] = beta_init[j];      
     
     switch (family)
     {
@@ -158,6 +145,15 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
         tf_admm_pois(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
                       u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol);
         break;
+    }
+    
+    /* If there any NaNs in beta, set it(and alpha,u) to default values */
+    if(!has_no_nan(beta + i * n, n)) {
+      for(j = 0; j < n; j++) beta[i*n + j] = beta_max[j];
+      memcpy(alpha, alpha_max, n*sizeof(double));
+      memcpy(u, u_max, n*sizeof(double));
+      
+      status[i] = 1;
     }
   }
 

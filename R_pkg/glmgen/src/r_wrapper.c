@@ -48,11 +48,13 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   double * beta;
   double * obj;
   int * iter;
-
+  int * status;
+  
   SEXP sLambdaNew;
   SEXP sBeta;
   SEXP sObj;
   SEXP sIter;
+  SEXP sStatus;
   SEXP sOutput;
   SEXP sOutputNames;
 
@@ -82,6 +84,9 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   PROTECT(sIter = allocVector(INTSXP, nlambda));
   iter = INTEGER(sIter);
   for(i = 0; i < nlambda; i++) iter[i] = 0;
+  PROTECT(sStatus = allocVector(INTSXP, nlambda));
+  status = INTEGER(sStatus);
+  for(i = 0; i < nlambda; i++) status[i] = 0;
 
   // Switch on the method, and access low-level C functions
   switch(method)
@@ -91,7 +96,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
       obj_tol = get_control_value(sControl, "obj_tol", 1e-12);
 
       tf_admm(y, x, w, n, k, family, maxiter, lam_flag, obj_flag, lambda,
-              nlambda, lambda_min_ratio, beta, obj, iter,
+              nlambda, lambda_min_ratio, beta, obj, iter, status,
               rho, obj_tol);
       break;
 
@@ -120,6 +125,6 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   setAttrib(sOutput, R_NamesSymbol, sOutputNames);
 
   // Free the allocated objects for the gc and return the output as a list
-  UNPROTECT(6);
+  UNPROTECT(7);
   return sOutput;
 }

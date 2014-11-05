@@ -40,6 +40,7 @@ void test_admm_gauss(int n, int k)
   double * pred;
   double * obj;
   int * iter;
+  int * status;
   double rho;
   double obj_tol;
   double predict_zero_tol;
@@ -65,6 +66,7 @@ void test_admm_gauss(int n, int k)
   pred = (double *) malloc(n * sizeof(double));
   obj = (double *) malloc(max_iter * nlambda * sizeof(double));
   iter = (int *) malloc( nlambda * sizeof(int));
+  status = (int *) malloc( nlambda * sizeof(int));
 
   srand(5490);
   srand(time(NULL));
@@ -79,7 +81,7 @@ void test_admm_gauss(int n, int k)
 
   /* Call the tf_admm function */
   tf_admm(y, x, w, n, k, family, max_iter, lam_flag, obj_flag,
-          lambda, nlambda, lambda_min_ratio, beta, obj, iter, rho, obj_tol);
+          lambda, nlambda, lambda_min_ratio, beta, obj, iter, status, rho, obj_tol);
 
   printf("\n--------------- (x,y) ---------------------------\n");
   for (i = 0; i < n; i++) printf("%.2f\t%.2f\n", x[i], y[i]);
@@ -136,7 +138,7 @@ void test_admm_gauss(int n, int k)
   
   lambda[0] = 1; 
   tf_admm(y, x, w, n, k, family, max_iter, lam_flag, obj_flag,
-          lambda, nlambda, lambda_min_ratio, beta, obj, iter, rho, obj_tol);
+          lambda, nlambda, lambda_min_ratio, beta, obj, iter, status, rho, obj_tol);
 
   printf("\n---------- lambda -------------------------------\n");
   for (i = 0; i < nlambda; i++) printf("%f\n", lambda[i]);
@@ -152,6 +154,7 @@ void test_admm_gauss(int n, int k)
   free(beta);
   free(obj);
   free(iter);
+  free(status);
   free(pred);
 
 }
