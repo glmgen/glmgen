@@ -39,3 +39,27 @@ double glmgen_factorial(int n)
   }
   return x;
 }
+
+int isNaN(double x) {
+  return (x != x);
+}
+
+int count_nans(double * x, int n) {
+  int i;
+  int num_nans = 0;
+  
+  for(i=0; i < n; i++) {
+    num_nans += isNaN(x[i]);
+  }
+  return num_nans;
+}
+
+int has_no_nan(double * x, int n) {
+  int i;
+  for(i=0; i < n; i++) {
+    if(isNaN(x[i]))
+      return 0;
+  }
+  return 1;    
+}
+
