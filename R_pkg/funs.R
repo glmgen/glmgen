@@ -296,7 +296,7 @@ st = function(x,s,r) {
 ## Objective
 objective = function(x, y, k, lambda, beta) {
   Db = diff(beta);
-  if( k > 1 ) {
+  if( k >= 1 ) {
     for( i in 1:k) {
       Db = diff( i * (1/diff(x,i)) * Db)
     }
