@@ -292,3 +292,30 @@ st = function(x,s,r) {
   z[1:r] = x[1:r]
   return(z)
 }
+
+## Objective
+objective = function(x, y, k, lambda, beta) {
+  Db = diff(beta);
+  if( k > 1 ) {
+    for( i in 1:k) {
+      Db = diff( i * (1/diff(x,i)) * Db)
+    }
+  }
+
+  0.5 * sum((y-beta)*(y-beta)) + lambda * sum(abs(Db))
+}
+
+objectives = function(x, y, k, lam, beta ) {
+  nlam = length(lam);
+  obj = numeric(nlam);
+  for(i in 1:nlam) {
+    obj[i] = objective(x, y, k, lam[i], beta[,i]); 
+  }
+  obj
+}
+
+critD = function(y, D, lam, beta) {
+  return (sum((y-beta)^2)/2 + lam*sum(abs(D %*% beta)))
+}
+
+
