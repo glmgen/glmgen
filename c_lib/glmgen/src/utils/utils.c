@@ -1,5 +1,5 @@
 #include "utils.h"
-#include <stdio.h>
+#include <math.h>
 
 double choose(int n, int k)
 {
@@ -63,3 +63,21 @@ int has_no_nan(double * x, int n) {
   return 1;    
 }
 
+double l1norm(double * x, int n) {
+  int i;
+  double s;
+  s = 0;
+  for(i=0; i < n; i++)
+    s += fabs(x[i]);
+
+  return s;
+}
+double l2norm(double * x, int n) {
+  int i;
+  double s;
+  s = 0;
+  for(i=0; i < n; i++)
+    s += x[i] * x[i];
+
+  return sqrt(s);
+}

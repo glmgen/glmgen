@@ -4,16 +4,30 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj, int * iter,
-       double rho, double obj_tol,
-       gqr * sparseQR)
+       double rho, int vary_rho, double obj_tol,
+       gqr * sparseQR, cs * DktDk)
 {
   
   /* Some things that will be useful during our iterations */
   double *v = (double*)malloc(n*sizeof(double));
   double *z = (double*)malloc(n*sizeof(double));
+  double *alpha_old = (double*)calloc(n, sizeof(double));
+  gqr * qrfac;
+  int new_qrfac;
+  
 
   double pobj, loss, pen;
   int i, verb, it;
+
+  double rho_mult;
+  double rho_fac = 5.;
+  double mu = 10.;
+
+  cs * kernmat;
+  double primal_res, dual_res;
+
+  qrfac = sparseQR;
+  new_qrfac = 0;
 
   verb = 0;
   if (verb) printf("Iteration\tObjective\tPenalty\n");
@@ -24,7 +38,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     {
       v[i] = alpha[i] + u[i];
     }
-    
+
     tf_dtxtil(x,n,k,v,z);
 
     for (i=0; i<n; i++)
@@ -33,14 +47,13 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
       beta[i] = y[i] + rho*z[i]; /* Wy, i.e, y has weights */
     }
     /* Solve the least squares problem with sparse QR */
-    glmgen_qrsol(sparseQR, beta);
+    glmgen_qrsol(qrfac, beta);
 
     int num_nans;
     if(verb) {
-      printf("it = %d\tb = %g", it, beta[0]);
+      printf("it = %d\tb = %g", it, l2norm(beta,n));
       num_nans = count_nans(beta,n); if(num_nans) printf(", #nans=%d", num_nans);
     }
-    
 
     /* Update alpha: 1d fused lasso
      * Build the response vector */
@@ -49,11 +62,12 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     {
       z[i] = v[i]-u[i];
     }
+    memcpy(alpha_old, alpha, (n-k) * sizeof(double));
     /* Use Nick's DP algorithm */
     tf_dp(n-k,z,lam/rho,alpha);
 
     if(verb) {
-      printf("\ta = %g", alpha[0]);
+      printf("\taold = %g\t z=%g", l2norm(alpha_old,n-k), l2norm(z,n-k));
       num_nans = count_nans(alpha,n); if(num_nans) printf(", #nans=%d", num_nans);
     }    
     /* Update u: dual update */
@@ -62,7 +76,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
       u[i] = u[i]+alpha[i]-v[i];
     }
     if(verb) {
-      printf("\tu = %g", u[0]);
+      printf("\tu = %g", l2norm(u,n-k));
       num_nans = count_nans(u,n); if(num_nans) printf(", #nans=%d", num_nans);
     }    
     if(verb) printf("\n");
@@ -71,7 +85,6 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     loss = 0;
     for (i=0; i<n; i++)
     {
-      /* loss += w[i]*(y[i]-beta[i])*(y[i]-beta[i]); */
       if( !( fabs(w[i]) < 1e-14 ) )
         loss += (y[i]-w[i]*beta[i])*(y[i]-w[i]*beta[i])/w[i];
     }
@@ -85,7 +98,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     pobj = loss/2+lam*pen;
     obj[it] = pobj;
 
-/*    if (verb) printf("%i\t%0.5e\t%0.5e\n",it,pobj, pen);*/
+    /*    if (verb) printf("%i\t%0.5e\t%0.5e\n",it,pobj, pen);*/
 
     /* Stop if relative difference of objective values <= obj_tol */
     if(it > 0)
@@ -95,12 +108,49 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
         break;
       }
     }
+    if( vary_rho ) {
+
+      /*printf("v=%g\t alpha=%g, ", l2norm(v,n-k), l2norm(alpha,n-k));*/
+      /* Compute primal residual \tilde{D}^{(k)} \beta - \alpha */
+      for(i=0; i < n-k; i++) v[i] = v[i] - alpha[i];
+      primal_res = l2norm(v,n-k);    
+
+      /* Compute dual residual */
+      for(i=0; i < n-k; i++) alpha_old[i] = alpha[i] - alpha_old[i];
+      tf_dtxtil(x,n,k,alpha_old,alpha_old);
+      dual_res = rho * l2norm(alpha_old, n);
+
+      /* printf("r=%g\t s=%g\t rho=%g\n", primal_res, dual_res, rho); */
+
+      /* Update rho, QR factorization and scale u */
+      rho_mult = 1;
+      if(primal_res > mu * dual_res)
+        rho_mult = rho_fac;
+      else if(dual_res > mu * primal_res)
+        rho_mult = 1. / rho_fac;
+
+      rho *= rho_mult;
+
+      if(rho_mult != 1){
+        if(new_qrfac) glmgen_gqr_free(qrfac);
+        kernmat = scalar_plus_diag(DktDk, rho, w);
+        qrfac = glmgen_qr(kernmat);
+        new_qrfac = 1;
+        cs_spfree(kernmat);
+
+        /* scale u */
+        for(i=0; i < n; i++) u[i] /= rho_mult;
+
+      }
+    }
   }
 
   *iter = it;
 
   free(v);
   free(z);
+  free(alpha_old);
+  if(new_qrfac) glmgen_gqr_free(qrfac);
 }
 
 

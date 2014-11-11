@@ -59,8 +59,8 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SEXP sOutputNames;
 
   double rho;
+  int vary_rho;
   double obj_tol;
-
   // Convert input SEXP variables into C style variables
   y = REAL(sY);
   x = REAL(sX);
@@ -93,11 +93,12 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   {
     case TF_ADMM:
       rho = get_control_value(sControl, "rho", 1);
+      vary_rho = get_control_value(sControl, "vary_rho", 0);
       obj_tol = get_control_value(sControl, "obj_tol", 1e-12);
 
       tf_admm(y, x, w, n, k, family, maxiter, lam_flag, obj_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj, iter, status,
-              rho, obj_tol);
+              rho, vary_rho, obj_tol);
       break;
 
     case TF_PRIMALDUAL_IP:

@@ -34,6 +34,10 @@ void tf_admm_glm (double * y, double * x, int n, int k,
   double admm_tol;
   int max_iter_admm;
 
+  int vary_rho;
+
+  vary_rho = 0; /* TODO pass this as an argument */
+
   /* Set max_iter, tol appropriately */
   admm_tol = obj_tol * 1e3;
   max_iter_admm = max_iter;
@@ -80,8 +84,8 @@ void tf_admm_glm (double * y, double * x, int n, int k,
     tf_admm_gauss (yt, x, H, n, k,
        max_iter_admm, lam,
        d, alpha, u,
-       obj_admm, &iter_admm, rho, admm_tol,
-       kernmat_qr);
+       obj_admm, &iter_admm, rho, vary_rho, admm_tol,
+       kernmat_qr, DktDk);
 
     cs_spfree(kernmat);
     glmgen_gqr_free(kernmat_qr);

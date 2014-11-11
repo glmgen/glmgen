@@ -5,7 +5,7 @@
 void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               int max_iter, int lam_flag, int obj_flag,  double * lambda,
               int nlambda, double lambda_min_ratio, double * beta,
-              double * obj, int * iter, int * status, double rho, double obj_tol)
+              double * obj, int * iter, int * status, double rho, int vary_rho, double obj_tol)
 {
   int i;
   double max_lam;
@@ -106,7 +106,6 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     memcpy(u, u_max, n*sizeof(double));
   }
 
-  int warm_start;
   int j;
   /* Iterate lower level functions over all lambda values;
      the alpha and u vectors get used each time of subsequent
@@ -125,12 +124,12 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
           tf_dp(n, y, rho * lambda[i], beta+i*n);
           break;
         }
-        kernmat = scalar_plus_eye(DktDk, rho * lambda[i]);
+        kernmat = scalar_plus_diag(DktDk, rho * lambda[i], w);
         kernmat_qr = glmgen_qr(kernmat);
         
         tf_admm_gauss(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
-                      u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-                      kernmat_qr);
+                      u, obj+i*max_iter, iter+i, rho * lambda[i], vary_rho,
+                      obj_tol, kernmat_qr, DktDk);
                       
         cs_spfree(kernmat);
         glmgen_gqr_free(kernmat_qr);
@@ -148,7 +147,8 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     }
     
     /* If there any NaNs in beta, set it(and alpha,u) to default values */
-    if(!has_no_nan(beta + i * n, n)) {
+    if(!has_no_nan(beta + i * n, n)) {      
+      printf("NaN for n=%d\tk=%d\tlambda[%d]\n",n,k,i);
       for(j = 0; j < n; j++) beta[i*n + j] = beta_max[j];
       memcpy(alpha, alpha_max, n*sizeof(double));
       memcpy(u, u_max, n*sizeof(double));

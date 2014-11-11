@@ -14,11 +14,10 @@
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 
 /* Main glmgen api functions */
-void tf_admm (double * y, double * x, double * w, int n, int k, int family, int max_iter,
-              int lam_flag, int obj_flag,  double * lambda, int nlambda,
-              double lambda_min_ratio, double * beta, double * obj, int * iter,
-              int * status, double rho, double obj_tol);
-
+void tf_admm (double * y, double * x, double * w, int n, int k, int family,
+              int max_iter, int lam_flag, int obj_flag,  double * lambda,
+              int nlambda, double lambda_min_ratio, double * beta,
+              double * obj, int * iter, int * status, double rho, int vary_rho, double obj_tol);
 void tf_primal_dual (double * y, double * x, double * w, int n, int k, int family, int max_iter,
               int lam_flag, int obj_flag,  double * lambda, int nlambda, double lambda_min_ratio,
               double * beta, double * obj);
@@ -29,8 +28,8 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj, int * iter,
-       double rho, double obj_tol,
-       gqr * sparseQR);
+       double rho, int vary_rho, double obj_tol,
+       gqr * sparseQR, cs * DktDt);
 void tf_admm_logistic (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,

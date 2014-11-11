@@ -9,13 +9,12 @@
  */
 void tf_dx(double *x, int n, int k,double *a, double *b)
 {
+  int i, j;
 
-  memcpy(b, a, n*sizeof(double));
+  for(i=0; i < n; i++) b[i] = a[i];
 
   if( k < 1 || k >= n )
     return;
-
-  int i=0, j=0;
 
   for(i=0; i < k; ++i)
   {

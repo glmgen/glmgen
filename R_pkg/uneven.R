@@ -13,23 +13,32 @@ plot.trendpath = function(x, ...) {
   class(x) = c("trendfilter", class(x)[-1])
   genlasso::plot.trendfilter(x, ...)
 }
+
 compare_crit = function(n,k, nlambda) {
   eps = rnorm(n,sd=0.1)
-  #x = 1:n #sort(1:n + rnorm(n,sd=0.1))#seq(0,2*pi,length.out=n)  
-  x = sort(runif(n,0,n))
+  #x = seq(0,1,length.out=n) #sort(1:n + rnorm(n,sd=0.2))#seq(0,2*pi,length.out=n)  
+  #cond = mean(diff(x))/min(diff(x))
+  x = sort(runif(n,0,1))  
+  dx = diff(x)
+  delta = 0 #mean(dx)/500;
+  for(i in 1:(n-1)) {
+    x[i+1] = x[i] + dx[i] + delta
+  }
+  cond = mean(dx+delta)/min(dx+delta)
+  
   y = sin(x/(max(x)-min(x))*3*pi) + eps
 
-  npathsteps = min(2000, round( n * 0.9 ))
-  maxiter = max(100, min(500, round(n*0.1)))
+  npathsteps = min(200, round( n * 0.9 ))
+  maxiter = max(100, min(200, round(n*0.1)))
   
   # Path
   path = trendpath(y, x, ord=k, maxsteps=npathsteps)
-  cat("\nlambda_min(path) = ", min(path$lambda), "lambda_max=", max(path$lambda),"cond=", max(path$lambda)/min(path$lambda), "\n")
+  cat("\nlambda_min(path) = ", min(path$lambda), "lambda_max=", max(path$lambda),"cond=", cond, "\n")
   
   lambda.min.ratio = min(1e-5, 0.9* min(path$lambda)/max(path$lambda))
 
   # New ADMM
-  admm = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=maxiter, lambda.min.ratio = lambda.min.ratio, control=list(obj_tol=0, rho=1) )
+  admm = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=maxiter, lambda.min.ratio = lambda.min.ratio, control=list(obj_tol=1e-10, rho=1, vary_rho=1) )
 
   crit_path = crit_admm = numeric(length(admm$lambda))
 
@@ -53,16 +62,14 @@ compare_crit = function(n,k, nlambda) {
 #  return(list(criterions=criterions, lambda=admm$lambda))
 }
 
-set.seed(401)
-## Test parameters
+set.seed(405)
 kvals = c(0,1,2,3)
 nvals = c(20, 100, 1e3, 1e4, 2e4)
-#kvals = c(2)
-#nvals = c(1e3, 1e4)
-nlambda = 50
+kvals = c(3)
+nvals = c(2e4)
+nlambda = 3
 
 criterions = matrix(NA, ncol=6, nrow=0)
-pdf("uneven_n.pdf", height=4, width=4*length(kvals))
 for(k in kvals) {
   for(n in nvals) {
     cat("k=",k,", n=", n, " ")
@@ -79,12 +86,12 @@ for(k in kvals) {
     criterions = rbind(criterions, crit_nk)
   }
 }
-
-
-save( criterions, nvals, kvals, nlambda, file="criterions_uneven_n.RData")
+save( criterions, nvals, kvals, nlambda, file="uneven_test.RData")
 
 # plot
-load("criterions_uneven_n.RData");
+load("uneven_test.RData");
+pdf("uneven_test.pdf", height=4, width=4*length(kvals))
+
 for(i in 1:length(nvals)) {
   n = nvals[i]
   # One row for each n

@@ -3,6 +3,8 @@
 double ts_maxlam (int len, double * y, gqr * Dt_qr, int family)
 {
   int i;
+  int tmp; /*n-k-1*/
+
   double * y_work;
   double maxlam;
   y_work = (double *) malloc(len * sizeof(double));
@@ -24,8 +26,9 @@ double ts_maxlam (int len, double * y, gqr * Dt_qr, int family)
 
   glmgen_qrsol(Dt_qr, y_work);
 
+  tmp = Dt_qr->n;
   maxlam = 0;
-  for(i = 0; i < len; i++) maxlam = MAX(maxlam, fabs(y_work[i]));
+  for(i = 0; i < tmp; i++) maxlam = MAX(maxlam, fabs(y_work[i]));
 
   free(y_work);
   return maxlam;

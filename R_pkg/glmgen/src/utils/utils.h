@@ -26,6 +26,9 @@ double glmgen_factorial(int n);
 
 double glmgen_factorial(int n);
 
+double l1norm(double * x, int n);
+double l2norm(double * x, int n);
+
 int isNaN(double x);
 int has_no_nan(double * x, int n);
 int count_nans(double * x, int n);
