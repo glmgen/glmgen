@@ -10,6 +10,7 @@
 *.o
 *.so
 
+
 # History files
 .Rhistory
 
@@ -17,4 +18,11 @@
 *-Ex.R
 
 # R data files from past sessions
-.Rdata
+*.RData
+
+# plots
+*.pdf
+
+# tar zips
+*.tar.gz
+
