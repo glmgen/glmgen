@@ -16,13 +16,12 @@ static double b2(double x)
   return exp(x);
 }
 
-void tf_admm_pois (double * y, double * x, double * w, int n, int k,
+void tf_admm_poisson (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj, int * iter, 
        double rho, double obj_tol, cs * DktDk)
 {
-
   tf_admm_glm(y, x, w, n, k, max_iter, lam, beta, alpha, u, obj, iter,
-     rho, obj_tol, DktDk, &b, &b1, &b2);
+       rho, obj_tol, DktDk, &b, &b1, &b2);
 }
