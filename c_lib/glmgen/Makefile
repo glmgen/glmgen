@@ -1,4 +1,4 @@
-CFLAGS = -O2 -g -ansi -Wall
+CFLAGS =  -g  -Wall
 all:
 	mkdir -p lib
 	mkdir -p obj

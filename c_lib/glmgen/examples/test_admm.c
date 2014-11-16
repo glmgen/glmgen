@@ -88,7 +88,9 @@ void test_admm_gauss(int n, int k)
   for (i = 0; i < n; i++) w[i] = 1;
   
   for (i = 0; i < n; i++) z[i] = exp( rand() % 80 ) + exp( rand() % 45 );
-  tf_dp(n-k,z,1e13, alpha);
+/*  for (i = 0; i < n; i++) z[i] = sin(x[i] * 3.*PI/n);;*/
+  for(i=0; i < n; i++) z[i] = z[i] * exp( -75 );
+  tf_dp(n-k,z,1e-17, alpha);
 
   printf("alpha > 1e40 at\n");
   for(i = 0; i < n; i++) {
@@ -98,7 +100,8 @@ void test_admm_gauss(int n, int k)
   printf("\n");
   printf("z=%g, alpha=%g\n", l2norm(z,n-k), l2norm(alpha, n-k));
 
-  for (i = 0; i < n; i++) printf("%g \n", z[i]);
+  for (i = 0; i < n; i++) printf("%g  ", z[i]);
+  printf("\n");
   /* Call the tf_admm function */
 
   /* tf_admm(y, x, w, n, k, family, max_iter, lam_flag, obj_flag,

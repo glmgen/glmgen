@@ -3,9 +3,9 @@
 #define TEST_FLAG 1
 
 void tf_admm (double * y, double * x, double * w, int n, int k, int family,
-              int max_iter, int lam_flag, int obj_flag,  double * lambda,
+              int max_iter, int lam_flag, double * lambda,
               int nlambda, double lambda_min_ratio, double * beta,
-              double * obj, int * iter, int * status, double rho, int vary_rho, double obj_tol)
+              double * obj, int * iter, int * status, double rho, double obj_tol)
 {
   int i;
   double max_lam;
@@ -13,9 +13,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   double * temp_n;
   double * beta_max;
   double * alpha;
-  double * alpha_max;
   double * u;
-  double * u_max;
   double * resid;
 
   cs * D;
@@ -26,40 +24,32 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   gqr * Dt_qr;
   gqr * Dkt_qr;
 
-  cs * kernmat;
-  gqr * kernmat_qr;
-
   beta_max = (double *) malloc(n * sizeof(double));
   temp_n = (double *) malloc(n * sizeof(double));
-  alpha = (double *) malloc(n * sizeof(double)); /* only size n-k, but may need extra buffer */
-  u = (double *) malloc(n * sizeof(double));/* only size n-k, but may need extra buffer */
-  alpha_max = (double *) malloc(n * sizeof(double));
-  u_max = (double *) malloc(n * sizeof(double));
-
-  resid = (double *) malloc(n * sizeof(double));
+  alpha = (double *) malloc(n * sizeof(double)); /* only size n-k, but we use extra buffer */
+  u = (double *) malloc(n * sizeof(double)); /* only size n-k, but we use extra buffer */
+  //resid = (double *) malloc(n * sizeof(double));
 
   D = tf_calc_dk(n, k+1, x);
-  Dt = cs_transpose(D, 1);
   Dk = tf_calc_dktil(n, k, x);
+  Dt = cs_transpose(D, 1);
   Dkt = cs_transpose(Dk, 1);
-  DktDk = cs_multiply(Dkt,Dk);
   Dt_qr = glmgen_qr(Dt);
   Dkt_qr = glmgen_qr(Dkt);
+  DktDk = cs_multiply(Dkt,Dk); 
 
   /* Determine the maximum lambda in the path, and initiate the path if needed
      using the input lambda_min_ratio and equally spaced log points. */
-  max_lam = ts_maxlam(n, y, Dt_qr, family);
+
+  max_lam = tf_maxlam(n, y, Dt_qr, family);
   if (!lam_flag)
   {
     min_lam = max_lam * lambda_min_ratio;
     lambda[0] = max_lam;
-    if (nlambda != 1)
-    {
-      for (i = 1; i < nlambda; i++)
-        lambda[i] = exp((log(max_lam) * (nlambda - i) + log(min_lam) * i) / nlambda);
-    }
+    for (i = 1; i < nlambda; i++)
+      lambda[i] = exp((log(max_lam) * (nlambda - i) + log(min_lam) * i) / nlambda);
   }
-  
+
   rho = rho * pow( (x[n-1] - x[0])/n, (double)k);
 
   /* Initiate alpha and u for a warm start */
@@ -67,8 +57,8 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   {
     for (i = 0; i < n - k; i++)
     {
-      alpha[i] = 0; alpha_max[i] = 0;
-      u[i] = 0; u_max[i] =0;
+      alpha[i] = 0; 
+      u[i] = 0; 
     }
   } else {
 
@@ -79,80 +69,65 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     cs_gaxpy(Dt, temp_n, beta_max);
 
     /* alpha_max */
-    tf_dxtil(x, n, k, beta_max, alpha_max);
-    memcpy(alpha, alpha_max, n*sizeof(double));
+    tf_dxtil(x, n, k, beta_max, alpha);
 
     /* u_max */
     double exp_i;
     switch (family)
     {
       case FAMILY_GAUSSIAN:
-        for (i = 0; i < n; i++) u_max[i] = (beta_max[i] - y[i]) / (rho * lambda[0]);
+        for (i = 0; i < n; i++) u[i] = (beta_max[i] - y[i]) / (rho * lambda[0]);
         break;
 
       case FAMILY_LOGISTIC:
         for (i = 0; i < n; i++) {
           exp_i = exp(beta_max[i]);
-          u_max[i] = exp_i / ((1+exp_i)*(1+exp_i)) * (beta_max[i] - y[i]) / (rho * lambda[0]);
+          u[i] = exp_i / ((1+exp_i)*(1+exp_i)) * (beta_max[i] - y[i]) / (rho * lambda[0]);
         }
         break;
 
       case FAMILY_POISSON:
-        for (i = 0; i < n; i++) u_max[i] = exp(beta_max[i]) * (beta_max[i] - y[i]) / (rho * lambda[0]);
+        for (i = 0; i < n; i++) u[i] = exp(beta_max[i]) * (beta_max[i] - y[i]) / (rho * lambda[0]);
         break;
     }
-    glmgen_qrsol (Dkt_qr, u_max);
-
-    memcpy(u, u_max, n*sizeof(double));
+    glmgen_qrsol (Dkt_qr, u);
   }
 
+  int warm_start;
   int j;
+
   /* Iterate lower level functions over all lambda values;
      the alpha and u vectors get used each time of subsequent
      warm starts */
+
   for (i = 0; i < nlambda; i++)
   {
     /* warm start */
     double * beta_init = (i == 0) ? beta_max : beta + (i-1)*n;
-
     for(j = 0; j < n; j++) beta[i*n + j] = beta_init[j];      
     
     switch (family)
     {
       case FAMILY_GAUSSIAN:
-        if(k == 0) {
-          tf_dp(n, y, rho * lambda[i], beta+i*n);
-          break;
-        }
-        kernmat = scalar_plus_diag(DktDk, rho * lambda[i], w);
-        kernmat_qr = glmgen_qr(kernmat);
-        
         tf_admm_gauss(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
-                      u, obj+i*max_iter, iter+i, rho * lambda[i], vary_rho,
-                      obj_tol, kernmat_qr, DktDk);
-                      
-        cs_spfree(kernmat);
-        glmgen_gqr_free(kernmat_qr);
+                      u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol, DktDk);
         break;
 
       case FAMILY_LOGISTIC:
         tf_admm_logistic(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
-                      u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol);
+			 u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol, DktDk);
         break;
 
       case FAMILY_POISSON:
-        tf_admm_pois(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
-                      u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol);
+        tf_admm_poisson(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
+		        u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol, DktDk);
         break;
     }
     
-    /* If there any NaNs in beta, set it(and alpha,u) to default values */
-    if(!has_no_nan(beta + i * n, n)) {      
-      printf("NaN for n=%d\tk=%d\tlambda[%d]\n",n,k,i);
-      for(j = 0; j < n; j++) beta[i*n + j] = beta_max[j];
-      memcpy(alpha, alpha_max, n*sizeof(double));
-      memcpy(u, u_max, n*sizeof(double));
-      
+    /* If there any NaNs in beta: reset beta, alpha, u */
+    if(!has_no_nan(beta + i * n, n)) {
+      for(j = 0; j < n; j++) beta[i*n + j] = 0;
+      for(j = 0; j < n-k; j++) { alpha[j] = 0; u[j] = 0; }
       status[i] = 1;
     }
   }
@@ -169,7 +144,5 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   free(beta_max);
   free(alpha);
   free(u);
-  free(alpha_max);
-  free(u_max); 
-  free(resid);
+  //free(resid);
 }

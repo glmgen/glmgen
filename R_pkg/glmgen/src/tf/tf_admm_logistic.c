@@ -18,7 +18,7 @@ static double b1(double x)
 /* b2(x) = b''(x), the second derivative */
 static double b2(double x)
 {
-  x = -fabs(x);
+  x = -fabs(x); 
   return exp(x-2*log(1+exp(x)));
   /* return exp(x) / ((1 + exp(x))*(1 + exp(x))); */
 }
@@ -26,12 +26,10 @@ static double b2(double x)
 void tf_admm_logistic (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
-       double * obj, int * iter,
-       double rho, double obj_tol)
+       double * obj, int * iter, 
+       double rho, double obj_tol, cs * DktDk)
 {
 
-  tf_admm_glm(y, x, n, k, max_iter, lam, beta, alpha, u, obj, iter,
-     rho, obj_tol,
-     &b, &b1, &b2);
-
+  tf_admm_glm(y, x, w, n, k, max_iter, lam, beta, alpha, u, obj, iter,
+     rho, obj_tol, DktDk, &b, &b1, &b2);
 }

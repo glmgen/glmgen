@@ -26,8 +26,7 @@ double get_control_value(SEXP sControlList, const char * param_name, double para
 }
 
 SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod, SEXP sMaxIter,
-            SEXP sLamFlag, SEXP sObjFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio,
-            SEXP sControl )
+            SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio, SEXP sControl )
 {
 
   // Initialize all of the variables
@@ -41,7 +40,6 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   int method;
   int maxiter;
   int lam_flag;
-  int obj_flag;
   double * lambda;
   int nlambda;
   double lambda_min_ratio;
@@ -59,8 +57,8 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SEXP sOutputNames;
 
   double rho;
-  int vary_rho;
   double obj_tol;
+
   // Convert input SEXP variables into C style variables
   y = REAL(sY);
   x = REAL(sX);
@@ -71,7 +69,6 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   method = asInteger(sMethod);
   maxiter = asInteger(sMaxIter);
   lam_flag = asInteger(sLamFlag);
-  obj_flag = asInteger(sObjFlag);
   PROTECT(sLambdaNew = duplicate(sLambda));
   lambda = REAL(sLambda);
   nlambda = asInteger(sNlambda);
@@ -93,16 +90,15 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   {
     case TF_ADMM:
       rho = get_control_value(sControl, "rho", 1);
-      vary_rho = get_control_value(sControl, "vary_rho", 0);
       obj_tol = get_control_value(sControl, "obj_tol", 1e-12);
 
-      tf_admm(y, x, w, n, k, family, maxiter, lam_flag, obj_flag, lambda,
+      tf_admm(y, x, w, n, k, family, maxiter, lam_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj, iter, status,
-              rho, vary_rho, obj_tol);
+              rho, obj_tol);
       break;
 
     case TF_PRIMALDUAL_IP:
-      tf_primal_dual(y, x, w, n, k, family, maxiter, lam_flag, obj_flag, lambda,
+      tf_primal_dual(y, x, w, n, k, family, maxiter, lam_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj);
       break;
 
@@ -111,18 +107,18 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   }
 
   // Create a list for the output
-  PROTECT(sOutput = allocVector(VECSXP, 2 + obj_flag));
-  PROTECT(sOutputNames = allocVector(STRSXP, 2 + obj_flag));
+  PROTECT(sOutput = allocVector(VECSXP, 3));
+  PROTECT(sOutputNames = allocVector(STRSXP, 3));
 
-  // Assing beta, lambda, and (possibly) obj to the list
+  // Assing beta, lambda, and obj to the list
   SET_VECTOR_ELT(sOutput, 0, sBeta);
   SET_VECTOR_ELT(sOutput, 1, sLambda);
-  if(obj_flag) SET_VECTOR_ELT(sOutput, 2, sObj);
+  SET_VECTOR_ELT(sOutput, 2, sObj);
 
   // Attach names as an attribute to the returned SEXP
   SET_STRING_ELT(sOutputNames, 0, mkChar("beta"));
   SET_STRING_ELT(sOutputNames, 1, mkChar("lambda"));
-  if(obj_flag) SET_STRING_ELT(sOutputNames, 2, mkChar("obj"));
+  SET_STRING_ELT(sOutputNames, 2, mkChar("obj"));
   setAttrib(sOutput, R_NamesSymbol, sOutputNames);
 
   // Free the allocated objects for the gc and return the output as a list

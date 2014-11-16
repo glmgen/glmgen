@@ -1,7 +1,7 @@
 trendfilter = function(y, x, weights, k = 3L, family = c("gaussian", "logistic", "poisson"),
-                       lambda, nlambda = 100L, lambda.min.ratio = 1e-05,
+                       lambda, nlambda = 50L, lambda.min.ratio = 1e-05,
                        method = c("admm", "prime_dual"),
-                       maxiter = 25L, objective = FALSE, control = list()) {
+                       maxiter = 100L, control = list()) {
 
   cl = match.call()
   n = length(y)
@@ -15,11 +15,11 @@ trendfilter = function(y, x, weights, k = 3L, family = c("gaussian", "logistic",
   if (missing(weights)) weights = rep(1L,length(y))
   x_cond = diff(x)
   x_cond = mean(x_cond) / min(x_cond)
-  if(any(!is.finite(x))) stop("Cannot pass duplicate x values.")
-  if(x_cond > 1e7)
+  if(any(!is.finite(x_cond))) stop("Cannot pass duplicate x values.\nUse observation weights instead.")
+  if(x_cond > 1e6)
     warning("The x values are ill-conditioned.\nSee ?trendfilter for more info.")
   if(x_cond > 1e8)
-    stop("The x values are too ill-conditioned.\nSee ?trendfilter for more info.")
+    warning("The x values are too ill-conditioned.\nSee ?trendfilter for more info.")
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
   if (maxiter <= 1L) stop("maxiter must be greater than 1")
@@ -50,7 +50,6 @@ trendfilter = function(y, x, weights, k = 3L, family = c("gaussian", "logistic",
             sMethod = as.integer(method_cd),
             sMaxIter = as.integer(maxiter),
             sLamFlag = as.integer(lambda_flag),
-            sObjFlag = as.integer(objective),
             sLambda = as.double(lambda),
             sNlambda = as.integer(nlambda),
             sLambdaMinRatio = as.double(lambda.min.ratio),
@@ -61,10 +60,10 @@ trendfilter = function(y, x, weights, k = 3L, family = c("gaussian", "logistic",
   # if (is.null(z$obj)) z$obj = NA_real_
   # colnames(z$beta) = as.character(round(z$lambda, 3))
 
-  # out = new("trendfilter", y = y, x = x, w = weights, k = as.integer(k), lambda = z$lambda,
-  #           beta = z$beta, family = family, method = method, n = length(y),
-  #           p = length(y), m = length(y) - as.integer(k) - 1L, obj = z$obj,
-  #           call = cl)
-  # out
+  ## out = new("trendfilter", y = y, x = x, w = weights, k = as.integer(k), lambda = z$lambda,
+  ##   beta = z$beta, family = family, method = method, n = length(y),
+  ##   p = length(y), m = length(y) - as.integer(k) - 1L, obj = z$obj,
+  ##   call = cl)
+  ## out
   z
 }

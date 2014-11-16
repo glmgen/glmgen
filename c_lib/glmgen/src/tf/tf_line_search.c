@@ -9,18 +9,18 @@ void sum(double * x, double * y, double * z, int n);
  * Find t s.t t = gamma^s, x+ = x + td, 
  * f(x+) - f(x) \leq alpha t theta 
  * where theta = <\nabla g, d> + h(x+d) - h(x)
- * g(x) = -<y,x> + b(x)
+ * g(x) = W * (-<y,x> + b(x))
  * h(x) = lam |Dx|*/
-double tf_line_search(double * y, double * x, int n, int k, 
-    double lam, 
+double tf_line_search(double * y, double * x, double * w, int n, int k, double lam, 
     func_RtoR b, func_RtoR b1, 
     double * beta, double * d, 
     double alpha, double gamma, int max_iter,
-    int * iter,
-    double * Db, double * Dd, double * Dbn)
+    int * iter, double * Db, double * Dd)
 {
   int i, it;
   double norm_Db, norm_Dbn;
+  double grad_term, pen_term;
+  double pen_diff;
   double ip_yd;
   double theta;
   double t;
@@ -30,19 +30,26 @@ double tf_line_search(double * y, double * x, int n, int k,
   tf_dx(x, n, k+1, d, Dd);
 
   /* Compute theta */
-  theta = 0;
+  theta = 0; 
+  norm_Db = 0;
+  norm_Dbn = 0;
+  grad_term = 0;
+  t = 1;
   for(i = 0; i < n; i++)
   {
-    theta += (-y[i] + b1(beta[i])) * d[i];    
+    theta += w[i] * (-y[i] + b1(beta[i])) * d[i];  
+    norm_Db += fabs(Db[i]);
+    norm_Dbn += fabs(Db[i] + t * Dd[i]);
+    grad_term += w[i] * (-y[i] + b1(beta[i])) * d[i];  
   }
-  norm_Db = l1_norm(Db, n);
-  sum(Dd, Db, Dbn, n);
-  theta += lam * ( l1_norm(Dbn, n) - norm_Db );
+  theta += lam * ( norm_Dbn - norm_Db );
+
+  printf("\ntheta=%0.4f",theta);
 
   ip_yd = 0;
-  for(i =0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
-    ip_yd += y[i] * d[i];
+    ip_yd += w[i] * y[i] * d[i];
   }
 
   t = 1;
@@ -53,19 +60,19 @@ double tf_line_search(double * y, double * x, int n, int k,
     norm_Dbn = 0;
     for(i = 0; i < n; i++)
     {
-      descent += b(beta[i] + t * d[i]) - b(beta[i]);
+      descent += w[i] * (b(beta[i] + t * d[i]) - b(beta[i]));
       norm_Dbn += fabs(Db[i] + t * Dd[i]);
     }
     descent += lam * (norm_Dbn - norm_Db);
+    pen_term = lam * (norm_Dbn - norm_Db);
+
+    //double bound = alpha*t*grad_term+alpha*pen_term; // New idea, also doesn't work
+    double bound = alpha * t * theta;
+    printf("\ndescent=%0.4f, bound=%0.4f,",descent,bound);
     
     /* Check if the descent is sufficient */
-    if(descent <= alpha * t * theta)
-    {
-      *iter = it;
-      return t;
-    }
-    else
-      t = t * gamma;
+    if (descent <= bound) break;
+    else t = t * gamma;
   }
 
   *iter = it;
