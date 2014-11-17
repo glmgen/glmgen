@@ -51,11 +51,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     /* Solve the least squares problem with sparse QR */
     glmgen_qrsol(kernmat_qr, beta);
 
-    int num_nans;
-    if(verb) {
-      printf("it = %d\tb = %g", it, beta[0]);
-      num_nans = count_nans(beta,n); if(num_nans) printf(", #nans=%d", num_nans);
-    }
+    if(verb) printf("\tbeta = %g\n", l1norm(beta,n));
     
     /* Update alpha: 1d fused lasso
      * Build the response vector */
@@ -66,21 +62,14 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     }
     /* Use Nick's DP algorithm */
     tf_dp(n-k,z,lam/rho,alpha);
-
-    if(verb) {
-      printf("\ta = %g", alpha[0]);
-      num_nans = count_nans(alpha,n); if(num_nans) printf(", #nans=%d", num_nans);
-    }    
+    if(verb) printf("\talpha = %g\n", l1norm(alpha,n-k));
+    
     /* Update u: dual update */
     for (i=0; i<n-k; i++)
     {
       u[i] = u[i]+alpha[i]-v[i];
     }
-    if(verb) {
-      printf("\tu = %g", u[0]);
-      num_nans = count_nans(u,n); if(num_nans) printf(", #nans=%d", num_nans);
-    }    
-    if(verb) printf("\n");
+    if(verb) printf("\tu = %g\n", l1norm(u,n-k));
 
     /* Compute objective */
     /* Compute loss */

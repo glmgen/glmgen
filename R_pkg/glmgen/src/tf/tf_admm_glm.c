@@ -45,33 +45,33 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
       H[i] = w[i] * b2(beta[i]);
       if (fabs(H[i])>WEIGHT_SMALL)
       {
-	yt[i] = beta[i] - (y[i]-b1(beta[i]))/H[i];
+        yt[i] = beta[i] + (y[i]-b1(beta[i]))/H[i];
       }
       else 
       {
-	yt[i] = beta[i] - (y[i]-b1(beta[i]));
+        yt[i] = beta[i] + (y[i]-b1(beta[i]));
       }
       /* IMPORTANT: set yt = Wyt */
       //yt[i] = H[i]*beta[i] + y[i] - b1(beta[i]);
     }
-    
+
     if( verb ){
       /* for(i=0; i<n; i++) printf("beta=%0.2e\tH=%0.2e\n", beta[i], H[i]); */
     }
-    
+
     /* Prox Newton step */
     int iter_admm = 0;
     tf_admm_gauss (yt, x, H, n, k,
-       max_iter_admm, lam,
-       d, alpha, u,
-       obj_admm, &iter_admm, rho, admm_tol,
-       DktDk);
+        max_iter_admm, lam,
+        d, alpha, u,
+        obj_admm, &iter_admm, rho, admm_tol,
+        DktDk);
 
     for(i=0; i<n; i++)
     {
       d[i] = d[i] - beta[i];
     }
-   
+
     /* TODO: take the bt line search parameters as inputs */
     double alpha_ls = 0.5;
     double gamma = 0.8;
@@ -113,7 +113,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
       }
     }
   }
-  
+
   *iter = it;
 
   /* free */  

@@ -7,6 +7,7 @@ double tf_maxlam (int len, double * y, gqr * Dt_qr, int family)
      only tasked with finding an interesting range for lambdas. */
 
   int i;
+  int tmp; /*n-k-1*/
   double maxlam;
   double * y_work;
 
@@ -28,9 +29,10 @@ double tf_maxlam (int len, double * y, gqr * Dt_qr, int family)
   }
 
   glmgen_qrsol(Dt_qr, y_work);
-
+  
+  tmp = Dt_qr->n;
   maxlam = 0;
-  for(i = 0; i < len; i++) maxlam = MAX(maxlam, fabs(y_work[i]));
+  for(i = 0; i < tmp; i++) maxlam = MAX(maxlam, fabs(y_work[i]));
 
   free(y_work);
   return maxlam;
