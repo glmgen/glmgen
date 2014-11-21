@@ -1,4 +1,6 @@
 #include "tf.h"
+#include <math.h>
+#include <float.h>
 
 /* Dynamic programming algorithm for the 1d fused lasso problem
    (Ryan's implementation of Nick Johnson's algorithm) */
@@ -10,30 +12,34 @@ void tf_dp (int n, double *y, double lam, double *beta)
   int r;
   int lo;
   int hi;
-  double afirst;
-  double alast;
+  int afirst;
+  int alast;
   double bfirst;
   double blast;
-  double alo;
+  int alo;
   double blo;
-  double ahi;
+  int ahi;
   double bhi;
   double * x;
-  double * a;
+  int * a;
   double * b;
   double *tm;
   double *tp;
 
   /* Take care of a few trivial cases */
   if (n==0) return;
-  if (n==1 || lam==0)
+  double maxy = fabs(y[0]);
+  for(i=1; i < n; i++) maxy = max(maxy, fabs(y[i]));
+
+  if (n==1 || lam <= DBL_EPSILON * 100*maxy)
   {
     for (i=0; i<n; i++) beta[i] = y[i];
     return;
   }
+  
 
   x = (double*) malloc(2*n*sizeof(double));
-  a = (double*) malloc(2*n*sizeof(double));
+  a = (int*) malloc(2*n*sizeof(int));
   b = (double*) malloc(2*n*sizeof(double));
 
   /* These are the knots of the back-pointers */
@@ -70,7 +76,8 @@ void tf_dp (int n, double *y, double lam, double *beta)
       alo += a[lo];
       blo += b[lo];
     }
-
+   
+    if(alo == 0) printf("1 k=%d\t  alo == 0\n",k);
     /* Compute the negative knot */
     tm[k] = (-lam-blo)/alo;
     l = lo-1;
@@ -82,16 +89,18 @@ void tf_dp (int n, double *y, double lam, double *beta)
     bhi = blast;
     for (hi=r; hi>=l; hi--)
     {
-      if (-ahi*x[hi]-bhi < lam) break;
+      if (-ahi*x[hi]-bhi < lam ) break;
       ahi += a[hi];
       bhi += b[hi];
     }
 
+    if(ahi == 0) printf("2 k=%d\t  ahi == 0, hi=%d, l=%d\n",k, hi,l);
     /* Compute the positive knot */
     tp[k] = (lam+bhi)/(-ahi);
     r = hi+1;
     x[r] = tp[k];
 
+    if(alo == 0 || ahi == 0) printf("lam=%g, maxy=%g, lam/maxy=%g\n", lam, maxy, lam/maxy);
     /* Update a and b */
     a[l] = alo;
     b[l] = blo+lam;

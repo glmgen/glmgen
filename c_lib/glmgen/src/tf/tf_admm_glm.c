@@ -32,7 +32,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
 
   obj_admm = (double*)malloc(max_iter_admm*sizeof(double)); 
   
-  int verb = 1; 
+  int verb = 0; 
   if (verb) printf("Iteration\tObjective\tLoss\t\tPenalty\n");
  
   /* One Prox Newton step per iteration */

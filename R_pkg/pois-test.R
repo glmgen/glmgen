@@ -1,35 +1,46 @@
 library("glmgen")
 
-n = 100
-x = 1:n
-f = sin(x/(max(x)-min(x))*3*pi)
-u = exp(f)
-y = rpois(n,u)
+set.seed(1)
+nvals=c(100, 1000, 1e4, 1e5)
+kvals=c(0,1,2,3)
+#nvals=c(1000)
+#kvals=c(2)
+nlambda=5
 
-nlam = 20
-time0 = proc.time()
-a0 = trendfilter(y, x, k=0, nlambda=nlam, maxiter=20, family="poisson",
+plot_fit = function(n,k, nlambda) {
+
+  x = 1:n
+  f = sin(x/(max(x)-min(x))*3.1*pi) 
+  u = exp(f)
+  y = rpois(n,u)
+  
+  fit = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=10, family="poisson",
   control=list(obj_tol=0, rho=1))
-proc.time()-time0
-
-time1 = proc.time()
-a1 = trendfilter(y, x, k=1, nlambda=nlam, maxiter=20, family="poisson",
-  control=list(obj_tol=0, rho=1))
-proc.time()-time0
-
-time2 = proc.time()
-a2 = trendfilter(y, x, k=2, nlambda=nlam, maxiter=20, family="poisson",
-  control=list(obj_tol=0, rho=1))
-proc.time()-time0
-
-par(ask=TRUE)
-for (l in 1:nlam) {
-par(mfrow=c(1,3))
-plot(1:nrow(a0$obj),a0$obj[,l],type="l",lty=1,main=sprintf("k=1\nlam=%0.3f",a1$lambda[l]))
-plot(1:nrow(a1$obj),a1$obj[,l],type="l",lty=1,main=sprintf("k=1\nlam=%0.3f",a1$lambda[l]))
-plot(1:nrow(a2$obj),a2$obj[,l],type="l",lty=1,main=sprintf("k=1\nlam=%0.3f",a1$lambda[l]))
+  
+  par(mfrow=c(1,nlambda))
+  for(i in 1:nlambda) {
+    plot(x,f,type="l",col=1,
+      xlab="x",ylab="f",ylim=range( c(f,fit$beta[,i]), na.rm=TRUE))
+    lines(x,fit$beta[,i],col=i+1)
+    
+    title(paste("n=", n, ", k=", k, sprintf(",lam=%g", fit$lambda[i])))
+  }
+  fit  
 }
 
-plot(x,f,type="l")
-lines(x,a1$beta[,10],col=2)
-lines(x,a2$beta[,10],col=4)
+pdf("plots/pois_fits.pdf", height=4, width=4*nlambda)
+for(k in kvals) {
+  for(n in nvals) {
+    cat("k=",k,", n=", n, " ")
+    time0 = proc.time()
+    tryCatch({    
+      plot_fit(n, k, nlambda);
+    }, error = function(err) { 
+      cat("Failed for n=",n,", k=",k, "\nERROR:"); print(err)       
+    }, finally = {
+    })
+    print(proc.time()-time0)
+  }
+}
+
+dev.off()

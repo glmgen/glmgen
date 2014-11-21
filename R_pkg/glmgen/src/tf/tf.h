@@ -13,7 +13,7 @@
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define WEIGHT_SMALL 1e-16
-#define ADMM_MAX_ITER 75
+#define ADMM_MAX_ITER 100
 
 /* Main glmgen api functions */
 void tf_admm (double * y, double * x, double * w, int n, int k, int family, int max_iter,

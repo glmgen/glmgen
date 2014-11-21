@@ -38,7 +38,8 @@ compare_crit = function(n,k, nlambda) {
   lambda.min.ratio = min(1e-5, 0.9* min(path$lambda)/max(path$lambda))
 
   # New ADMM
-  admm = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=maxiter, lambda.min.ratio = lambda.min.ratio, control=list(obj_tol=1e-10, rho=1, vary_rho=1) )
+  #admm = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=maxiter, lambda.min.ratio = lambda.min.ratio, control=list(obj_tol=1e-10, rho=1) )
+  admm = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=maxiter, lambda.min.ratio = lambda.min.ratio )
 
   crit_path = crit_admm = numeric(length(admm$lambda))
 
@@ -65,9 +66,9 @@ compare_crit = function(n,k, nlambda) {
 set.seed(405)
 kvals = c(0,1,2,3)
 nvals = c(20, 100, 1e3, 1e4, 2e4)
-kvals = c(3)
-nvals = c(2e4)
-nlambda = 3
+kvals = c(2)
+nvals = c(1e4)
+nlambda = 50
 
 criterions = matrix(NA, ncol=6, nrow=0)
 for(k in kvals) {

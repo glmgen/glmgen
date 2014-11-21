@@ -44,7 +44,7 @@ double tf_line_search(double * y, double * x, double * w, int n, int k, double l
   }
   theta += lam * ( norm_Dbn - norm_Db );
 
-  printf("\ntheta=%0.4f",theta);
+  //printf("\ntheta=%0.4f",theta);
 
   ip_yd = 0;
   for(i = 0; i < n; i++)
@@ -68,7 +68,7 @@ double tf_line_search(double * y, double * x, double * w, int n, int k, double l
 
     //double bound = alpha*t*grad_term+alpha*pen_term; // New idea, also doesn't work
     double bound = alpha * t * theta;
-    printf("\ndescent=%0.4f, bound=%0.4f,",descent,bound);
+    //printf("\ndescent=%0.4f, bound=%0.4f,",descent,bound);
     
     /* Check if the descent is sufficient */
     if (descent <= bound) break;

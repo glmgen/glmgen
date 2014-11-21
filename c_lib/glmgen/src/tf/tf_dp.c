@@ -1,4 +1,6 @@
 #include "tf.h"
+#include <math.h>
+#include <float.h>
 
 /* Dynamic programming algorithm for the 1d fused lasso problem
    (Ryan's implementation of Nick Johnson's algorithm) */
@@ -70,7 +72,8 @@ void tf_dp (int n, double *y, double lam, double *beta)
       alo += a[lo];
       blo += b[lo];
     }
-
+   
+    if(alo == 0) printf("1 k=%d\t  alo == 0, lo=%d, r=%d\n",k,lo,r);
     /* Compute the negative knot */
     tm[k] = (-lam-blo)/alo;
     l = lo-1;
@@ -82,16 +85,19 @@ void tf_dp (int n, double *y, double lam, double *beta)
     bhi = blast;
     for (hi=r; hi>=l; hi--)
     {
-      if (-ahi*x[hi]-bhi < lam) break;
+      if (-ahi*x[hi]-bhi < lam ) break;
       ahi += a[hi];
       bhi += b[hi];
     }
 
+    if(hi <= l) printf("3 k=%d hi=%d, l=%d",k,hi,l);
+    if(ahi == 0) printf("2 k=%d\t  ahi == 0, hi=%d, l=%d\n",k, hi,l);
     /* Compute the positive knot */
     tp[k] = (lam+bhi)/(-ahi);
     r = hi+1;
     x[r] = tp[k];
 
+    //printf("k=%d, alo=%g, ahi=%g, blo=%g, bhi=%g\n",k,alo,ahi,blo,bhi);
     /* Update a and b */
     a[l] = alo;
     b[l] = blo+lam;

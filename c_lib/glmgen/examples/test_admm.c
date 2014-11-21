@@ -13,8 +13,8 @@ void test_admm_gauss(int n, int k);
 
 int main()
 {
-  int n=25;
-  int k=3;
+  int n=50000;
+  int k=0;
   test_admm_gauss(n, k);
   /*for(k = 1; k < 2; k++)
   {
@@ -77,8 +77,8 @@ void test_admm_gauss(int n, int k)
   status = (int *) malloc( nlambda * sizeof(int));
 
 
-  srand(5);
-  /* srand(time(NULL)); */
+  srand(15);
+  //srand(time(NULL));
 
   x[0] = 0;
   /* for (i = 1; i < n; i++) x[i] = x[i-1] + ((rand() % 100)+1)/100.; */
@@ -89,19 +89,19 @@ void test_admm_gauss(int n, int k)
   
   for (i = 0; i < n; i++) z[i] = exp( rand() % 80 ) + exp( rand() % 45 );
 /*  for (i = 0; i < n; i++) z[i] = sin(x[i] * 3.*PI/n);;*/
-  for(i=0; i < n; i++) z[i] = z[i] * exp( -75 );
-  tf_dp(n-k,z,1e-17, alpha);
+  for(i=0; i < n; i++) z[i] = exp( rand() % 185 );
+  tf_dp(n-k,z,1e40, alpha);
 
-  printf("alpha > 1e40 at\n");
+  printf("alpha > exp(250) at\n");
   for(i = 0; i < n; i++) {
-    if( fabs(alpha[i]) > 1e35 )
+    if( fabs(alpha[i]) > exp(185) )
       printf("%d:%g  ", i, alpha[i]);
   }
   printf("\n");
   printf("z=%g, alpha=%g\n", l2norm(z,n-k), l2norm(alpha, n-k));
 
-  for (i = 0; i < n; i++) printf("%g  ", z[i]);
-  printf("\n");
+  //for (i = 0; i < n; i++) printf("%g  ", z[i]);
+  //printf("\n");
   /* Call the tf_admm function */
 
   /* tf_admm(y, x, w, n, k, family, max_iter, lam_flag, obj_flag,
