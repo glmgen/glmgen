@@ -1,6 +1,4 @@
 #include "tf.h"
-#include <math.h>
-#include <float.h>
 
 /* Dynamic programming algorithm for the 1d fused lasso problem
    (Ryan's implementation of Nick Johnson's algorithm) */
@@ -12,34 +10,30 @@ void tf_dp (int n, double *y, double lam, double *beta)
   int r;
   int lo;
   int hi;
-  int afirst;
-  int alast;
+  double afirst;
+  double alast;
   double bfirst;
   double blast;
-  int alo;
+  double alo;
   double blo;
-  int ahi;
+  double ahi;
   double bhi;
-  double * x;
-  int * a;
-  double * b;
+  double *x;
+  double *a;
+  double *b;
   double *tm;
   double *tp;
 
   /* Take care of a few trivial cases */
   if (n==0) return;
-  double maxy = fabs(y[0]);
-  for(i=1; i < n; i++) maxy = max(maxy, fabs(y[i]));
-
-  if (n==1 || lam <= DBL_EPSILON * 100*maxy)
+  if (n==1 || lam==0)
   {
     for (i=0; i<n; i++) beta[i] = y[i];
     return;
   }
   
-
   x = (double*) malloc(2*n*sizeof(double));
-  a = (int*) malloc(2*n*sizeof(int));
+  a = (double*) malloc(2*n*sizeof(double));
   b = (double*) malloc(2*n*sizeof(double));
 
   /* These are the knots of the back-pointers */
@@ -63,7 +57,6 @@ void tf_dp (int n, double *y, double lam, double *beta)
   blast = -lam+y[1];
 
   /* Now iterations 2 through n-1 */
-
   for (k=1; k<n-1; k++)
   {
     /* Compute lo: step up from l until the
@@ -77,30 +70,27 @@ void tf_dp (int n, double *y, double lam, double *beta)
       blo += b[lo];
     }
    
-    if(alo == 0) printf("1 k=%d\t  alo == 0\n",k);
-    /* Compute the negative knot */
-    tm[k] = (-lam-blo)/alo;
-    l = lo-1;
-    x[l] = tm[k];
-
-    /* Compute hi: step down from r until the
+   /* Compute hi: step down from r until the
        derivative is less than lam */
     ahi = alast;
     bhi = blast;
-    for (hi=r; hi>=l; hi--)
+    for (hi=r; hi>=lo; hi--)
     {
-      if (-ahi*x[hi]-bhi < lam ) break;
+      if (-ahi*x[hi]-bhi < lam) break;
       ahi += a[hi];
       bhi += b[hi];
     }
 
-    if(ahi == 0) printf("2 k=%d\t  ahi == 0, hi=%d, l=%d\n",k, hi,l);
+    /* Compute the negative knot */
+    tm[k] = (-lam-blo)/alo;
+    l = lo-1;
+    x[l] = tm[k];
+ 
     /* Compute the positive knot */
     tp[k] = (lam+bhi)/(-ahi);
     r = hi+1;
     x[r] = tp[k];
 
-    if(alo == 0 || ahi == 0) printf("lam=%g, maxy=%g, lam/maxy=%g\n", lam, maxy, lam/maxy);
     /* Update a and b */
     a[l] = alo;
     b[l] = blo+lam;
@@ -110,6 +100,13 @@ void tf_dp (int n, double *y, double lam, double *beta)
     bfirst = -lam-y[k+1];
     alast = -1;
     blast = -lam+y[k+1];
+
+    /* double check=0; */
+    /* check += afirst+alast; */
+    /* for (i=l; i<=r; i++) check += a[i]; */
+    /* if (check!=0) printf("k=%i, check=%f\n",k,check); */
+    /* if (alo==0) printf("k=%d, alo=%f, lo=%d, r=%d, tm[k]=%e, x[lo]=%e\n",k,alo,lo,r,tm[k],x[lo]); */
+    /* if (ahi==0) printf("k=%d, ahi=%f, hi=%d, l=%d, tp[k]=%e, x[hi]=%e\n",k,ahi,hi,l,tp[k],x[hi]); */
   }
 
   /* Compute the last coefficient: this is where
