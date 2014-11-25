@@ -9,8 +9,8 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
   /* Special case for k=0: skip the ADMM algorithm */
   if (k==0) 
   {
-    /* Use Nick's DP algorithm */
-    tf_dp(n,y,lam,beta);
+    /* Use Nick's DP algorithm, weighted version */
+    tf_dp_weight(n,y,w,lam,beta);
 
     int i;
     double loss, pen;

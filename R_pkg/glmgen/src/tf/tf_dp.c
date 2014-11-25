@@ -52,9 +52,9 @@ void tf_dp (int n, double *y, double lam, double *beta)
   a[r] = -1;
   b[r] = y[0]+lam;
   afirst = 1;
-  bfirst = -lam-y[1];
+  bfirst = -y[1]-lam;
   alast = -1;
-  blast = -lam+y[1];
+  blast = y[1]-lam;
 
   /* Now iterations 2 through n-1 */
   for (k=1; k<n-1; k++)
@@ -97,9 +97,9 @@ void tf_dp (int n, double *y, double lam, double *beta)
     a[r] = ahi;
     b[r] = bhi+lam;
     afirst = 1;
-    bfirst = -lam-y[k+1];
+    bfirst = -y[k+1]-lam;
     alast = -1;
-    blast = -lam+y[k+1];
+    blast = y[k+1]-lam;
 
     /* double check=0; */
     /* check += afirst+alast; */

@@ -27,6 +27,7 @@ void tf_primal_dual (double * y, double * x, double * w, int n, int k, int famil
 
 /* Helper functions for cases of the admm and primal dual algorithms */
 void tf_dp (int n, double *y, double lam, double *beta);
+void tf_dp_weight (int n, double *y, double *w, double lam, double *beta);
 void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
