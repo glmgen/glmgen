@@ -107,18 +107,20 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   }
 
   // Create a list for the output
-  PROTECT(sOutput = allocVector(VECSXP, 3));
-  PROTECT(sOutputNames = allocVector(STRSXP, 3));
+  PROTECT(sOutput = allocVector(VECSXP, 4));
+  PROTECT(sOutputNames = allocVector(STRSXP, 4));
 
   // Assing beta, lambda, and obj to the list
   SET_VECTOR_ELT(sOutput, 0, sBeta);
   SET_VECTOR_ELT(sOutput, 1, sLambda);
   SET_VECTOR_ELT(sOutput, 2, sObj);
+  SET_VECTOR_ELT(sOutput, 3, sIter);
 
   // Attach names as an attribute to the returned SEXP
   SET_STRING_ELT(sOutputNames, 0, mkChar("beta"));
   SET_STRING_ELT(sOutputNames, 1, mkChar("lambda"));
   SET_STRING_ELT(sOutputNames, 2, mkChar("obj"));
+  SET_STRING_ELT(sOutputNames, 3, mkChar("iter"));
   setAttrib(sOutput, R_NamesSymbol, sOutputNames);
 
   // Free the allocated objects for the gc and return the output as a list
