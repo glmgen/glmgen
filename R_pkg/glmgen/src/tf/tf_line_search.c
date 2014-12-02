@@ -1,9 +1,6 @@
 #include "tf.h"
 #include <math.h>
 
-double l1_norm(double * x, int n);
-void sum(double * x, double * y, double * z, int n);
-
 /* backtracking linesearch. See Jason Lee et. al (2012)
  * f = g + h, g differentiable, h not necessarily so
  * Find t s.t t = gamma^s, x+ = x + td, 
@@ -44,7 +41,7 @@ double tf_line_search(double * y, double * x, double * w, int n, int k, double l
   }
   theta += lam * ( norm_Dbn - norm_Db );
 
-  //printf("\ntheta=%0.4f",theta);
+  //printf("\nt=%g theta=%g grad_term=%g dh=%g", t, theta, grad_term, lam * ( norm_Dbn - norm_Db ));
 
   ip_yd = 0;
   for(i = 0; i < n; i++)
@@ -66,7 +63,7 @@ double tf_line_search(double * y, double * x, double * w, int n, int k, double l
     descent += lam * (norm_Dbn - norm_Db);
     pen_term = lam * (norm_Dbn - norm_Db);
 
-    //double bound = alpha*t*grad_term+alpha*pen_term; // New idea, also doesn't work
+    //double bound = alpha*t*grad_term+alpha*pen_term; // New idea
     double bound = alpha * t * theta;
     //printf("\ndescent=%0.4f, bound=%0.4f,",descent,bound);
     
@@ -79,25 +76,3 @@ double tf_line_search(double * y, double * x, double * w, int n, int k, double l
   return t;
 }
 
-
-double l1_norm(double * x, int n)
-{
-  int i;
-  double s = 0;
-  for(i = 0; i < n; i++)
-  {
-    s += fabs( x[i] );
-  }
-  return s;
-
-}
-
-/* z = x + y */
-void sum(double * x, double * y, double * z, int n)
-{
-  int i;
-  for(i = 0; i < n; i++)
-  {
-    z[i] = x[i] + y[i];
-  }
-}
