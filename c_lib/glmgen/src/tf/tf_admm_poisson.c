@@ -1,20 +1,5 @@
 #include "tf.h"
-#include "math.h"
-
-static double b(double x)
-{
-  return exp(x);
-}
-
-static double b1(double x)
-{
-  return exp(x);
-}
-
-static double b2(double x)
-{
-  return exp(x);
-}
+#include "tf_glm_loss.h"
 
 void tf_admm_poisson (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
@@ -23,5 +8,5 @@ void tf_admm_poisson (double * y, double * x, double * w, int n, int k,
        double rho, double obj_tol, cs * DktDk)
 {
   tf_admm_glm(y, x, w, n, k, max_iter, lam, beta, alpha, u, obj, iter,
-       rho, obj_tol, DktDk, &b, &b1, &b2);
+       rho, obj_tol, DktDk, &pois_b, &pois_b1, &pois_b2);
 }

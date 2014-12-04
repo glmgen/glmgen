@@ -1,4 +1,5 @@
 #include "tf.h"
+#include "tf_glm_loss.h"
 #include "utils.h"
 
 void tf_admm (double * y, double * x, double * w, int n, int k, int family,
@@ -13,7 +14,6 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   double * beta_max;
   double * alpha;
   double * u;
-  double * resid;
 
   cs * D;
   cs * Dt;
@@ -76,7 +76,6 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     tf_dxtil(x, n, k, beta_max, alpha);
 
     /* u_max */
-    double exp_i;
     switch (family)
     {
       case FAMILY_GAUSSIAN:
@@ -84,14 +83,13 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
         break;
 
       case FAMILY_LOGISTIC:
-        for (i = 0; i < n; i++) {
-          exp_i = exp(beta_max[i]);
-          u[i] = exp_i / ((1+exp_i)*(1+exp_i)) * w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
+        for (i = 0; i < n; i++) {          
+          u[i] = logi_b2(beta_max[i]) * w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
         }
         break;
 
       case FAMILY_POISSON:
-        for (i = 0; i < n; i++) u[i] = exp(beta_max[i]) * w[i] *(beta_max[i] - y[i]) / (rho * lambda[0]);
+        for (i = 0; i < n; i++) u[i] = pois_b2(beta_max[i]) * w[i] *(beta_max[i] - y[i]) / (rho * lambda[0]);
         break;
     }
     glmgen_qrsol (Dkt_qr, u);
