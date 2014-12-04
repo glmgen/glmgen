@@ -27,7 +27,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
   int max_iter_admm;
 
   /* Set ADMM parameters appropriately */
-  admm_tol = obj_tol * 10;
+  admm_tol = obj_tol;
   max_iter_admm = ADMM_MAX_ITER;
 
   obj_admm = (double*)malloc(max_iter_admm*sizeof(double)); 
@@ -78,7 +78,6 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
     int max_iter_ls = 50;
 
     t = tf_line_search(y, x, w, n, k, lam, b, b1, beta, d, alpha_ls, gamma, max_iter_ls, iter_ls, Db, Dd); 
-    //t = 0.01;
 
     if(verb) printf("Stepsize t=%.2e,\titers=%d\n", t, *iter_ls); 
     for(i=0; i<n; i++)

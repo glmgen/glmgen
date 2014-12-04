@@ -9,8 +9,8 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
   /* Special case for k=0: skip the ADMM algorithm */
   if (k==0) 
   {
-    /* Use Nick's DP algorithm */
-    tf_dp(n,y,lam,beta);
+    /* Use Nick's DP algorithm, weighted version */
+    tf_dp_weight(n,y,w,lam,beta);
 
     int i;
     double loss, pen;
@@ -51,7 +51,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     /* Solve the least squares problem with sparse QR */
     glmgen_qrsol(kernmat_qr, beta);
 
-    if(verb) printf("\tbeta = %g\n", l1norm(beta,n));
+    if(verb) printf("it=%d\tbeta = %g", it, l1norm(beta,n));
     
     /* Update alpha: 1d fused lasso
      * Build the response vector */
@@ -62,7 +62,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     }
     /* Use Nick's DP algorithm */
     tf_dp(n-k,z,lam/rho,alpha);
-    if(verb) printf("\talpha = %g\n", l1norm(alpha,n-k));
+    if(verb) printf("\talpha = %g", l1norm(alpha,n-k));
     
     /* Update u: dual update */
     for (i=0; i<n-k; i++)

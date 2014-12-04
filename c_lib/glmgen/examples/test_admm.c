@@ -13,8 +13,8 @@ void test_admm_gauss(int n, int k);
 
 int main()
 {
-  int n=50000;
-  int k=0;
+  int n=100;
+  int k=2;
   test_admm_gauss(n, k);
   /*for(k = 1; k < 2; k++)
   {
@@ -68,8 +68,6 @@ void test_admm_gauss(int n, int k)
 
 
   lambda = (double *) malloc(nlambda * sizeof(double));
-  alpha = (double *) malloc(n * sizeof(double));
-  z = (double *) malloc(n * sizeof(double));
   beta = (double *) malloc(n * nlambda * sizeof(double));
   pred = (double *) malloc(n * sizeof(double));
   obj = (double *) malloc(max_iter * nlambda * sizeof(double));
@@ -84,42 +82,25 @@ void test_admm_gauss(int n, int k)
   /* for (i = 1; i < n; i++) x[i] = x[i-1] + ((rand() % 100)+1)/100.; */
   for (i = 1; i < n; i++) x[i] = i;
   for (i = 0; i < n; i++) y[i] = sin(x[i] * 3.*PI/n);
- /* for (i = 0; i < n; i++) y[i] = x[i] * x[i] + 0.5 * ((rand() % 100)+1)/100.;*/
   for (i = 0; i < n; i++) w[i] = 1;
-  
-  for (i = 0; i < n; i++) z[i] = exp( rand() % 80 ) + exp( rand() % 45 );
-/*  for (i = 0; i < n; i++) z[i] = sin(x[i] * 3.*PI/n);;*/
-  for(i=0; i < n; i++) z[i] = exp( rand() % 185 );
-  tf_dp(n-k,z,1e40, alpha);
 
-  printf("alpha > exp(250) at\n");
-  for(i = 0; i < n; i++) {
-    if( fabs(alpha[i]) > exp(185) )
-      printf("%d:%g  ", i, alpha[i]);
-  }
-  printf("\n");
-  printf("z=%g, alpha=%g\n", l2norm(z,n-k), l2norm(alpha, n-k));
-
-  //for (i = 0; i < n; i++) printf("%g  ", z[i]);
-  //printf("\n");
   /* Call the tf_admm function */
 
-  /* tf_admm(y, x, w, n, k, family, max_iter, lam_flag, obj_flag,
-          lambda, nlambda, lambda_min_ratio, beta, obj, iter, status, rho, vary_rho, obj_tol);
+  tf_admm(y, x, w, n, k, family, max_iter, lam_flag,
+          lambda, nlambda, lambda_min_ratio, beta, obj, iter, status, rho, obj_tol);
 
   printf("\n--------------- (x,y) ---------------------------\n");
-  for (i = 0; i < n; i++) printf("%.2f\t%.2f\n", x[i], y[i]);
+  //for (i = 0; i < n; i++) printf("%.2f\t%.2f\n", x[i], y[i]);
 
   
   printf("\n---------- lambda -------------------------------\n");
-  for (i = 0; i < nlambda; i++) printf("%f\n", lambda[i]);
+  //for (i = 0; i < nlambda; i++) printf("%f\n", lambda[i]);
 
   printf("\n---------- beta_1 -------------------------------\n");
-  for (i = 0; i < n; i++) printf("%f\n", beta[i]);
+  //for (i = 0; i < n; i++) printf("%f\n", beta[i]);
 
   printf("\n---------- beta_2 -------------------------------\n");
-  for (i = 0; i < n; i++) printf("%f\n", beta[i + n]);
-*/
+  //for (i = 0; i < n; i++) printf("%f\n", beta[i + n]);
 
   /* Prediction */
   /*

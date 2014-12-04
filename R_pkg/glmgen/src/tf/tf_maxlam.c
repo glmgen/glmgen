@@ -1,6 +1,6 @@
 #include "tf.h"
 
-double tf_maxlam (int len, double * y, gqr * Dt_qr, int family)
+double tf_maxlam (int len, double * y, gqr * Dt_qr, double * w, int family)
 {
   /* This is exact for the Gaussian case, but only approximate
      for logistic or Poisson losses, which is OK, since we are
@@ -13,6 +13,8 @@ double tf_maxlam (int len, double * y, gqr * Dt_qr, int family)
 
   y_work = (double *) malloc(len * sizeof(double));
     
+  for(i = 0; i < len; i++) y_work[i] = sqrt(w[i]) * y[i];
+  /*
   switch (family)
   {
     case FAMILY_GAUSSIAN:
@@ -27,6 +29,7 @@ double tf_maxlam (int len, double * y, gqr * Dt_qr, int family)
       for (i = 0; i < len; i++) y_work[i] = y[i];
       break;
   }
+  */
 
   glmgen_qrsol(Dt_qr, y_work);
   

@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 
 #include "cs.h"
 #include "tf.h"
@@ -12,8 +13,8 @@
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#define WEIGHT_SMALL 1e-16
-#define ADMM_MAX_ITER 100
+#define WEIGHT_SMALL DBL_EPSILON
+#define ADMM_MAX_ITER 250
 
 /* Main glmgen api functions */
 void tf_admm (double * y, double * x, double * w, int n, int k, int family, int max_iter,
@@ -27,6 +28,7 @@ void tf_primal_dual (double * y, double * x, double * w, int n, int k, int famil
 
 /* Helper functions for cases of the admm and primal dual algorithms */
 void tf_dp (int n, double *y, double lam, double *beta);
+void tf_dp_weight (int n, double *y, double *w, double lam, double *beta);
 void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
@@ -60,7 +62,7 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
 /* Low-level utility functions for trendfiltering */
 cs * tf_calc_dk (int n, int k, const double * x);
 cs * tf_calc_dktil (int n, int k, const double * x);
-double tf_maxlam (int len, double * y, gqr * Dt_qr, int family);
+double tf_maxlam (int len, double * y, gqr * Dt_qr, double * w, int family);
 void tf_dx(double *x, int n, int k,double *a, double *b);
 void tf_dtx(double *x, int n, int k, double *a, double *b);
 void tf_dxtil(double *x, int n, int k,double *a, double *b);

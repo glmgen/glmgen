@@ -1,8 +1,8 @@
 #include "tf.h"
 
-/* Dynamic programming algorithm for the 1d fused lasso problem
+/* Dynamic programming algorithm for the weighted 1d fused lasso problem 
    (Ryan's implementation of Nick Johnson's algorithm) */
-void tf_dp (int n, double *y, double lam, double *beta)
+void tf_dp_weight (int n, double *y, double *w, double lam, double *beta) 
 {
   int i;
   int k;
@@ -32,6 +32,8 @@ void tf_dp (int n, double *y, double lam, double *beta)
     return;
   }
   
+  /* Now deal with zero weights  */
+
   x = (double*) malloc(2*n*sizeof(double));
   a = (double*) malloc(2*n*sizeof(double));
   b = (double*) malloc(2*n*sizeof(double));
@@ -41,20 +43,20 @@ void tf_dp (int n, double *y, double lam, double *beta)
   tp = (double*) malloc((n-1)*sizeof(double));
 
   /* We step through the first iteration manually */
-  tm[0] = -lam+y[0];
-  tp[0] = lam+y[0];
+  tm[0] = -lam/w[0]+y[0];
+  tp[0] = lam/w[0]+y[0];
   l = n-1;
   r = n;
   x[l] = tm[0];
   x[r] = tp[0];
-  a[l] = 1;
-  b[l] = -y[0]+lam;
-  a[r] = -1;
-  b[r] = y[0]+lam;
-  afirst = 1;
-  bfirst = -y[1]-lam;
-  alast = -1;
-  blast = y[1]-lam;
+  a[l] = w[0];
+  b[l] = -w[0]*y[0]+lam;
+  a[r] = -w[0];
+  b[r] = w[0]*y[0]+lam;
+  afirst = w[1];
+  bfirst = -w[1]*y[1]-lam;
+  alast = -w[1];
+  blast = w[1]*y[1]-lam;
 
   /* Now iterations 2 through n-1 */
   for (k=1; k<n-1; k++)
@@ -96,10 +98,10 @@ void tf_dp (int n, double *y, double lam, double *beta)
     b[l] = blo+lam;
     a[r] = ahi;
     b[r] = bhi+lam;
-    afirst = 1;
-    bfirst = -y[k+1]-lam;
-    alast = -1;
-    blast = y[k+1]-lam;
+    afirst = w[k+1];
+    bfirst = -w[k+1]*y[k+1]-lam;
+    alast = -w[k+1];
+    blast = w[k+1]*y[k+1]-lam;
 
     /* double check=0; */
     /* check += afirst+alast; */
