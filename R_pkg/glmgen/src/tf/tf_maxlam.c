@@ -14,22 +14,6 @@ double tf_maxlam (int len, double * y, gqr * Dt_qr, double * w, int family)
   y_work = (double *) malloc(len * sizeof(double));
     
   for(i = 0; i < len; i++) y_work[i] = sqrt(w[i]) * y[i];
-  /*
-  switch (family)
-  {
-    case FAMILY_GAUSSIAN:
-      for (i = 0; i < len; i++) y_work[i] = y[i];
-      break;
-
-    case FAMILY_LOGISTIC:
-      for (i = 0; i < len; i++) y_work[i] = y[i];
-      break;
-
-    case FAMILY_POISSON:
-      for (i = 0; i < len; i++) y_work[i] = y[i];
-      break;
-  }
-  */
 
   glmgen_qrsol(Dt_qr, y_work);
   

@@ -1,6 +1,7 @@
 #include "btree.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 /* id of the node into which i was merged into */
 static int tree_id(int* mt, int n, int i)

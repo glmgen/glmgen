@@ -1,4 +1,4 @@
-trendfilter = function(y, x, weights, k = 3L, family = c("gaussian", "logistic", "poisson"),
+trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic", "poisson"),
                        lambda, nlambda = 50L, lambda.min.ratio = 1e-05,
                        method = c("admm", "prime_dual"),
                        maxiter = 100L, control = list()) {
@@ -14,11 +14,10 @@ trendfilter = function(y, x, weights, k = 3L, family = c("gaussian", "logistic",
   if (missing(x)) x = 1L:length(y)
   if (missing(weights)) weights = rep(1L,length(y))
   if (any(weights==0)) stop("Cannot pass zero weights.")
-  x_cond = diff(x)
-  x_cond = mean(x_cond) / min(x_cond)
+  x_cond = n * ( (max(x) - min(x)) / min(diff(x)))^k
   if(any(!is.finite(x_cond))) stop("Cannot pass duplicate x values.\nUse observation weights instead.")
-  if(x_cond > 500)
-    warning("The x values are ill-conditioned.\nSee ?trendfilter for more info.")
+  if(x_cond > 1e16)
+    warning("The x values are ill-conditioned. Consider presmoothing. \nSee ?trendfilter for more info.")
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
   if (maxiter < 1L) stop("maxiter must be a positive integer")

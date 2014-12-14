@@ -35,9 +35,9 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   double * y;
   double * x;
   double * w;
-  double * xt;
-  double * yt;
-  double * wt;
+  double * xt, * sxt;
+  double * yt, * syt;
+  double * wt, * swt;
 
   int n;
   int k;
@@ -81,20 +81,17 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   do_presmooth = get_control_value(sControl, "presmooth", 0);
   x_cond = get_control_value(sControl, "x_cond", 0);
   
+  xt = yt = wt = NULL;
   if( do_presmooth > 0 || x_cond > 0 )
   {
     presmooth(x,y,w,n,k,&xt,&yt,&wt,&nt,x_cond);
     x = xt;
     y = yt;
-    x = wt;
+    w = wt;
     n = nt;
 
     /* TODO: Have to go through the checks in trendfilter.R */
-    free(xt);
-    free(yt);
-    free(wt);
   }
-
 
   family = asInteger(sFamily);
   method = asInteger(sMethod);
@@ -117,14 +114,14 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   for(i = 0; i < nlambda; i++) status[i] = 0;
   
   PROTECT(sXt = allocVector(REALSXP, n));
-  xt = REAL(sXt);
-  for(i = 0; i < nt; i++) xt[i] = x[i];
+  sxt = REAL(sXt);
+  for(i = 0; i < n; i++) sxt[i] = x[i];
   PROTECT(sYt = allocVector(REALSXP, n));
-  yt = REAL(sYt);
-  for(i = 0; i < nt; i++) yt[i] = y[i];
+  syt = REAL(sYt);
+  for(i = 0; i < n; i++) syt[i] = y[i];
   PROTECT(sWt = allocVector(REALSXP, n));
-  wt = REAL(sWt);
-  for(i = 0; i < nt; i++) wt[i] = w[i];
+  swt = REAL(sWt);
+  for(i = 0; i < n; i++) swt[i] = w[i];
 
   // Switch on the method, and access low-level C functions
   switch(method)
@@ -171,6 +168,9 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SET_STRING_ELT(sOutputNames, 6, mkChar("w"));
   setAttrib(sOutput, R_NamesSymbol, sOutputNames);
 
+  if(xt != NULL) free(xt);
+  if(yt != NULL) free(yt);
+  if(wt != NULL) free(wt);
   // Free the allocated objects for the gc and return the output as a list
   UNPROTECT(10);
   return sOutput;

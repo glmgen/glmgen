@@ -126,7 +126,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     }
     
     /* If there any NaNs in beta: reset beta, alpha, u */
-    if(!has_no_nan(beta + i * n, n)) {
+    if(has_nan(beta + i * n, n)) {
       printf("NaN for lambda[%d], n=%d, k=%d\n",i,n,k);
       for(j = 0; j < n; j++) beta[i*n + j] = 0;
       for(j = 0; j < n-k; j++) { alpha[j] = 0; u[j] = 0; }
