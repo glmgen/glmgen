@@ -33,4 +33,9 @@ double l2norm(double * x, int n);
 int isNaN(double x);
 int has_no_nan(double * x, int n);
 int count_nans(double * x, int n);
+
+void presmooth( double* x, double* y, double* w, int n, int k, 
+  double** xt, double** yt, double** wt, int* nt_ptr, double x_cond);
+//void presmooth( double* x, double* y, double* w, int n, 
+//  double** xt, double** yt, double** wt, int* nt_ptr, double delta );
 #endif
