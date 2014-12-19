@@ -26,8 +26,8 @@ trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic",
     warning("The x values are ill-conditioned. Consider presmoothing. \nSee ?trendfilter for more info.")
   }
   if( cond > x_cond && thinning ) {
-    thinned = thin(x,y,w,k,x_cond)
-    x = thinned$x; y = thinned$y; w = thinned$w
+    thinned = thin(x,y,weights,k,x_cond)
+    x = thinned$x; y = thinned$y; weights = thinned$w
   }
 
   if(any(!is.finite(cond))) stop("Cannot pass duplicate x values.\nUse observation weights instead.")
@@ -79,7 +79,7 @@ trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic",
 
   z[["x"]] = x
   z[["y"]] = y
-  z[["w"]] = w
+  z[["w"]] = weights
   z
 }
 
