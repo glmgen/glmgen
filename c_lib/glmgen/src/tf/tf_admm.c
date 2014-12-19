@@ -49,7 +49,8 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     min_lam = max_lam * lambda_min_ratio;
     lambda[0] = max_lam;
     for (i = 1; i < nlambda; i++)
-      lambda[i] = exp((log(max_lam) * (nlambda - i) + log(min_lam) * i) / nlambda);
+      lambda[i] = exp((log(max_lam) * (nlambda - i -1) + log(min_lam) * i) / (nlambda-1));
+    
   }
 
   rho = rho * pow( (x[n-1] - x[0])/n, (double)k);

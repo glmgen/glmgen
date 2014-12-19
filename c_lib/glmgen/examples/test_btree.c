@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void test_insert()
+static void test_insert_delete()
 {
   struct btreenode *bt;
   int i;
@@ -28,29 +28,9 @@ static void test_insert()
   bt_free(bt);
 
 }
-void test_delete()
-{
-  struct btreenode *bt;
-  int i;
-
-  bt = NULL;
-  bt_insert(&bt, 0, 50 ); 
-  bt_insert(&bt, 1, 30 ); 
-
-  int ids[] = {0,1};
-  double del_values[] = {50, 30};
-  for(i=0; i < 2; i++) {
-    printf("Deleting (%d,%g)\n", ids[i], del_values[i]);
-    bt_delete(&bt, ids[i], del_values[i]);
-    bt_inorder(bt);
-    printf("\n\n");
-  }
-  bt_free(bt);
-
-}
 int main()
 {
-  test_insert();
-  test_delete();
+  test_insert_delete();
+  
   return 0;
 }

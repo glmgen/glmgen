@@ -42,16 +42,16 @@ void presmooth( double* x, double* y, double* w, int n, int k,
   double** xt, double** yt, double** wt, int* nt_ptr, double x_cond)
 {
   int i;
-  double* dx;
-  /* merge_trail: mt[i] is the id of the node into which i is merged into */
-  int* mt;
-  double* wtmp;
-  double* ytmp;
+  double * dx;
+  int * mt;/* merge_trail: mt[i] is the id into which i is merged into */
+  double * wtmp;
+  double * ytmp;
   int j, jn, jp;
   double dxj;
   int nt;
-  btnode *t; 
-  btnode *min_node;
+  btnode * t; 
+  btnode * min_val_node;
+  btnode * min_id_node;
 
   /* n+1 because we want to record the displacement of the first and last points also */ 
   dx = (double*)malloc( (n+1) * sizeof(double) );
@@ -59,7 +59,9 @@ void presmooth( double* x, double* y, double* w, int n, int k,
   wtmp = (double*)malloc( n * sizeof(double) );
   ytmp = (double*)malloc( n * sizeof(double) );
 
-  t = min_node = NULL;
+  t = min_val_node = NULL;
+
+  printf("Presmoothing initialization\n");
 
   /* Initialization */
   dx[0] = dx[n] = 0;
@@ -69,18 +71,21 @@ void presmooth( double* x, double* y, double* w, int n, int k,
   for(i=0; i<n; i++) mt[i] = i;
   for(i=0; i<n-1; i++) bt_insert(&t, i, dx[i+1]);
 
+  printf("Presmoothing initialization done\n");
   double range;
 
   nt = n;
   while(1) {
     if( t == NULL ) break;
-    bt_find_min(t, &min_node);
+    // if( nt % 1000 == 0) printf("%d ", n-nt+1);
+    bt_find_min(t, &min_val_node);
 
-    j = (min_node->ids)->value;
-    dxj = min_node->val;
+    dxj = min_val_node->key;
+    bt_find_min(min_val_node->ids, &min_id_node);
+    j = (int) min_id_node->key;
     
     range = x[n-1]-x[0]-dx[0]-dx[n];
-    if( nt * pow( range / dxj, k) < x_cond ) break;
+    if( nt * pow( range / dxj, k+1) < x_cond ) break;
     //if(dxj >= delta) break;
     
     // jn = -1 when j is the first node in the current tree. update dx[0]
@@ -109,18 +114,14 @@ void presmooth( double* x, double* y, double* w, int n, int k,
     nt--;
   }
 
-  printf("nt from #merges = %d\n", nt);
+  //printf("nt from #merges = %d\n", nt);
 
-  nt = bt_num_ids( t ) + 1;
   int* ids = (int*)malloc( nt * sizeof(int) );
   int ntt = 0;
   for(i=0; i < n; i++) {  
     if(mt[i] == i) {
       if( ntt >= nt ) { // Sanity check
-        printf("nt=%d but ntt >%d\n", nt, ntt);
-        //printf("Tree: "); bt_inorder( t ); printf("\n\n");
-        //printf("Ids: ");
-        //for(i=0; i < ntt; i++) printf("%d ", ids[i]); printf("\n\n");
+        printf("ERROR: nt=%d but ntt >%d\n", nt, ntt);
         break;
       }
       ids[ntt] = i;
@@ -136,13 +137,12 @@ void presmooth( double* x, double* y, double* w, int n, int k,
   *yt = (double*)malloc( nt * sizeof(double) );
   *wt = (double*)malloc( nt * sizeof(double) );
 
-  // Get the weights at the merged points
+  // Get the weights at the points remaining after merging
   for(i=0; i < nt; i++) (*wt)[i] = wtmp[ ids[i] ];
 
   (*xt)[0] = x[0] + dx[0];
   for(i = 1; i < nt; i++) (*xt)[i] = (*xt)[i-1] + dx[ ids[i-1] + 1 ];
   for(i = 0; i < nt; i++) (*yt)[i] = ytmp[ ids[i] ];
-
 
   free(dx);
   free(mt);

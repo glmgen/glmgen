@@ -294,7 +294,7 @@ st = function(x,s,r) {
 }
 
 ## Objective
-objective = function(x, y, k, lambda, beta) {
+objective = function(x, y, w, k, lambda, beta) {
   Db = diff(beta);
   if( k >= 1 ) {
     for( i in 1:k) {
@@ -302,14 +302,14 @@ objective = function(x, y, k, lambda, beta) {
     }
   }
 
-  0.5 * sum((y-beta)*(y-beta)) + lambda * sum(abs(Db))
+  0.5 * sum(w*(y-beta)*(y-beta)) + lambda * sum(abs(Db))
 }
 
-objectives = function(x, y, k, lam, beta ) {
+objectives = function(x, y, w, k, lam, beta ) {
   nlam = length(lam);
   obj = numeric(nlam);
   for(i in 1:nlam) {
-    obj[i] = objective(x, y, k, lam[i], beta[,i]); 
+    obj[i] = objective(x, y, w, k, lam[i], beta[,i]); 
   }
   obj
 }
@@ -317,5 +317,4 @@ objectives = function(x, y, k, lam, beta ) {
 critD = function(y, D, lam, beta) {
   return (sum((y-beta)^2)/2 + lam*sum(abs(D %*% beta)))
 }
-
 

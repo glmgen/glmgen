@@ -32,7 +32,9 @@ void test_presmoothing()
   xt = yt = wt = NULL;
 
   nt = 0;
+ 
   presmooth(x,y,w,n,k,&xt,&yt,&wt,&nt,x_cond);
+  
   printf("delta = %g\n", delta); 
   printf("nt = %d\n", nt);
   //printf("x: "); for(i=0; i < nt; i++) printf("%g ", xt[i]); printf("\n\n");
