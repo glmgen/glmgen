@@ -23,7 +23,7 @@ trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic",
   if( "x_cond" %in% names(control)) x_cond = control$x_cond
   
   if( !thinning && cond > x_cond ) {
-    warning("The x values are ill-conditioned. Consider presmoothing. \nSee ?trendfilter for more info.")
+    warning("The x values are ill-conditioned. Consider thinning. \nSee ?trendfilter for more info.")
   }
   if( cond > x_cond && thinning ) {
     thinned = thin(x,y,weights,k,x_cond)
@@ -31,7 +31,7 @@ trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic",
   }
 
   cond = (1/n) * ( (max(x) - min(x)) / min(diff(x)))^(k+1)
-  if(any(!is.finite(cond))) stop("Cannot pass duplicate x values.\nUse observation weights instead.")
+  if(k > 0 && any(!is.finite(cond))) stop("Cannot pass duplicate x values.\nUse observation weights instead.")
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
   if (maxiter < 1L) stop("maxiter must be a positive integer")
@@ -139,6 +139,3 @@ thin = function(x,y,w,k,x_cond) {
   return(list(x=xt,y=yt,w=wt))
 }
 
-x_cond_num = function(x,k) {
-  return(length(x) * ( (x[n] - x[1]) / min(diff(x)) )^(k+1))
-}
