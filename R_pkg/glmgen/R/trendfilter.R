@@ -30,6 +30,7 @@ trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic",
     x = thinned$x; y = thinned$y; weights = thinned$w
   }
 
+  cond = (1/n) * ( (max(x) - min(x)) / min(diff(x)))^(k+1)
   if(any(!is.finite(cond))) stop("Cannot pass duplicate x values.\nUse observation weights instead.")
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
