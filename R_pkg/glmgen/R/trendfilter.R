@@ -1,11 +1,10 @@
 trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic", "poisson"),
+                       method = c("admm", "prime_dual"),  
                        lambda, nlambda = 50L, lambda.min.ratio = 1e-05,
-                       method = c("admm", "prime_dual"),
-                       maxiter = 100L, xpred = NULL, control = list()) {
+                       maxiter = 200L, xpred = NULL, control = list()) {
 
   cl = match.call()
   n = length(y)
-  nlam = as.integer(nlambda)
   family = match.arg(family)
   method = match.arg(method)
   family_cd = match(family, c("gaussian", "logistic", "poisson")) - 1L
@@ -14,9 +13,10 @@ trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic",
   if (missing(x)) x = 1L:length(y)
   if (missing(weights)) weights = rep(1L,length(y))
   if (any(weights==0)) stop("Cannot pass zero weights.")
+  if (is.na(family_cd)) stop("family argument must be one of 'gaussian', 'logistic', 'poisson'.")
 
+  thinning = TRUE
   cond = (1/n) * ( (max(x) - min(x)) / min(diff(x)))^(k+1)
-  thinning = FALSE
   x_cond = 1e12
   if( "thinning" %in% names(control) ) thinning = control$thinning
   if( "x_cond" %in% names(control)) x_cond = control$x_cond
@@ -24,14 +24,14 @@ trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic",
   if( !thinning && cond > x_cond ) {
     warning("The x values are ill-conditioned. Consider thinning. \nSee ?trendfilter for more info.")
   }
-  if(k > 0 && !thinning && any(!is.finite(cond))) stop("Cannot pass duplicate x values.\nUse observation weights instead.")
+  if (any(is.infinite(cond)) && !thinning) stop("Cannot pass duplicate x values (without thinning).\nUse observation weights instead.")
+
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
-  if (maxiter < 1L) stop("maxiter must be a positive integer")
+  if (maxiter < 1L || maxiter != floor(maxiter)) stop("maxiter must be a positive integer.")
   if (missing(lambda)) {
-    if (nlam <= 0L) stop("nlambda must be a positive number.")
-    if (lambda.min.ratio < 0 | lambda.min.ratio > 1)
-      stop("lamba.min.ratio must be between 0 and 1.")
+    if (nlambda < 1L || nlambda != floor(nlambda)) stop("nlambda must be a positive integer.")
+    if (lambda.min.ratio <= 0 | lambda.min.ratio >= 1) stop("lamba.min.ratio must be between 0 and 1.")
     lambda = rep(0, nlambda)
     lambda_flag = FALSE
   } else {
@@ -41,7 +41,7 @@ trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic",
     lambda_flag = TRUE
   }
   if (!is.list(control) | (is.null(names(control)) & length(control) != 0L))
-    stop("control must be a named list")
+    stop("control must be a named list.")
   control = lapply(control, function(v) ifelse(is.numeric(v),
                    as.double(v[[1]]), stop("Elements of control must be numeric.")))
 

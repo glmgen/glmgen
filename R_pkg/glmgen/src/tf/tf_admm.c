@@ -25,8 +25,8 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
 
   beta_max = (double *) malloc(n * sizeof(double));
   temp_n = (double *) malloc(n * sizeof(double));
-  alpha = (double *) malloc(n * sizeof(double)); /* only size n-k, but we use extra buffer */
-  u = (double *) malloc(n * sizeof(double)); /* only size n-k, but we use extra buffer */
+  alpha = (double *) malloc(n * sizeof(double)); /* we use extra buffer (n vs n-k) */
+  u = (double *) malloc(n * sizeof(double)); /* we use extra buffer (n vs n-k) */
 
   /* Assume w does not have zeros */
   for(i = 0; i < n; i++) temp_n[i] = 1/sqrt(w[i]);
@@ -79,19 +79,19 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     /* u_max */
     switch (family)
     {
-      case FAMILY_GAUSSIAN:
-        for (i = 0; i < n; i++) u[i] = w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
-        break;
-
-      case FAMILY_LOGISTIC:
-        for (i = 0; i < n; i++) {          
-          u[i] = logi_b2(beta_max[i]) * w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
-        }
-        break;
-
-      case FAMILY_POISSON:
-        for (i = 0; i < n; i++) u[i] = pois_b2(beta_max[i]) * w[i] *(beta_max[i] - y[i]) / (rho * lambda[0]);
-        break;
+    case FAMILY_GAUSSIAN:
+      for (i = 0; i < n; i++) u[i] = w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
+      break;
+      
+    case FAMILY_LOGISTIC:
+      for (i = 0; i < n; i++) {          
+	u[i] = logi_b2(beta_max[i]) * w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
+      }
+      break;
+      
+    case FAMILY_POISSON:
+      for (i = 0; i < n; i++) u[i] = pois_b2(beta_max[i]) * w[i] *(beta_max[i] - y[i]) / (rho * lambda[0]);
+      break;
     }
     glmgen_qrsol (Dkt_qr, u);
   }

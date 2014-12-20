@@ -54,7 +54,6 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
 void tf_predict(double * beta, double * x, int n, int k, int family,
 	double * x0, int n0, double * pred,
   double zero_tol); 
-// TODO(V): Remove this, as we have tf_predict?
 void tf_predict_gauss(double * beta, double * x, int n, int k,
 	    double * x0, int n0, double * pred,
 	    double zero_tol);

@@ -55,10 +55,6 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
       //yt[i] = H[i]*beta[i] + y[i] - b1(beta[i]);
     }
 
-    if( verb ){
-      /* for(i=0; i<n; i++) printf("beta=%0.2e\tH=%0.2e\n", beta[i], H[i]); */
-    }
-
     /* Prox Newton step */
     int iter_admm = 0;
     tf_admm_gauss (yt, x, H, n, k,
