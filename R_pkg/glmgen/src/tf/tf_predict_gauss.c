@@ -7,6 +7,8 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
 	double * x0, int n0, double * pred,
 	double zero_tol)
 	{
+    if( n0 <= 0 )
+      return;
     int i=0, j=0;
     /* Compute phi (polynomial coefficients) */
     double *phi = (double *)malloc((k+1)*sizeof(double));

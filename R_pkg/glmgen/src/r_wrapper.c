@@ -27,7 +27,7 @@ double get_control_value(SEXP sControlList, const char * param_name, double para
 }
 
 SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod, SEXP sMaxIter,
-            SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio, SEXP sControl )
+            SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio, SEXP sXPred, SEXP sControl )
 {
 
   // Initialize all of the variables
@@ -53,7 +53,9 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   double * obj;
   int * iter;
   int * status;
-  
+ 
+  double * xp;
+  double * yp;
 
   SEXP sLambdaNew;
   SEXP sBeta;
@@ -62,7 +64,8 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SEXP sStatus;
   SEXP sXt;
   SEXP sYt;
-  SEXP sWt;
+  SEXP sWt;  
+  SEXP sYPred;
   SEXP sOutput;
   SEXP sOutputNames;
 
@@ -70,6 +73,8 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   double obj_tol;
   double do_thin;
   double x_cond;
+  int np;
+  int lam_num;
 
   // Convert input SEXP variables into C style variables
   y = REAL(sY);
@@ -146,9 +151,18 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
       error("Method code not found.");
   }
 
+  // Predict
+  xp = REAL(sXPred);
+  np = (int) get_control_value(sControl, "npred", 0);
+  lam_num = (int) get_control_value(sControl, "lam_num", 1);
+  PROTECT(sYPred = allocVector(REALSXP, np));
+  yp = REAL(sYPred);
+  // Should be generic tf_predict
+  tf_predict_gauss( beta + ((lam_num-1) * n), x, n, k, xp, np, yp, 1e-12);  
+
   // Create a list for the output
-  PROTECT(sOutput = allocVector(VECSXP, 7));
-  PROTECT(sOutputNames = allocVector(STRSXP, 7));
+  PROTECT(sOutput = allocVector(VECSXP, 8));
+  PROTECT(sOutputNames = allocVector(STRSXP, 8));
 
   // Assing beta, lambda, and obj to the list
   SET_VECTOR_ELT(sOutput, 0, sBeta);
@@ -158,7 +172,8 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SET_VECTOR_ELT(sOutput, 4, sXt);
   SET_VECTOR_ELT(sOutput, 5, sYt);
   SET_VECTOR_ELT(sOutput, 6, sWt);
-
+  SET_VECTOR_ELT(sOutput, 7, sYPred);
+  
 
   // Attach names as an attribute to the returned SEXP
   SET_STRING_ELT(sOutputNames, 0, mkChar("beta"));
@@ -168,12 +183,13 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SET_STRING_ELT(sOutputNames, 4, mkChar("x"));
   SET_STRING_ELT(sOutputNames, 5, mkChar("y"));
   SET_STRING_ELT(sOutputNames, 6, mkChar("w"));
+  SET_STRING_ELT(sOutputNames, 7, mkChar("ypred"));
   setAttrib(sOutput, R_NamesSymbol, sOutputNames);
 
   if(xt != NULL) free(xt);
   if(yt != NULL) free(yt);
   if(wt != NULL) free(wt);
   // Free the allocated objects for the gc and return the output as a list
-  UNPROTECT(10);
+  UNPROTECT(11);
   return sOutput;
 }

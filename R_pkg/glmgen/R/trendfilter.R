@@ -1,8 +1,7 @@
-#source("thinning.R")
 trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic", "poisson"),
                        lambda, nlambda = 50L, lambda.min.ratio = 1e-05,
                        method = c("admm", "prime_dual"),
-                       maxiter = 100L, control = list()) {
+                       maxiter = 100L, xpred = NULL, control = list()) {
 
   cl = match.call()
   n = length(y)
@@ -59,6 +58,7 @@ trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic",
             sLambda = as.double(lambda),
             sNlambda = as.integer(nlambda),
             sLambdaMinRatio = as.double(lambda.min.ratio),
+            sXPredict = as.double(xpred),
             sControl = control,
             package = "glmgen")
 
