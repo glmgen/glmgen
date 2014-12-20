@@ -130,7 +130,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   {
     case TF_ADMM:
       rho = get_control_value(sControl, "rho", 1);
-      obj_tol = get_control_value(sControl, "obj_tol", 1e-12);
+      obj_tol = get_control_value(sControl, "obj_tol", 1e-10);
 
       tf_admm(y, x, w, n, k, family, maxiter, lam_flag, lambda,
           nlambda, lambda_min_ratio, beta, obj, iter, status,
