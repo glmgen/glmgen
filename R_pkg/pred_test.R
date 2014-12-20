@@ -16,16 +16,19 @@ plot.trendpath = function(x, ...) {
 set.seed(1)
 
 nlambda = 3
-maxiter = 100
+maxiter = 50
 kvals = c(0, 1, 2, 3)
-nvals = c(1e3, 3e3, 1e4, 1e5)
-#kvals = c(2)
-even_spacing = F
+nvals = c(1e5)
+kvals = c(3)
+even_spacing = F 
 thinning = 1
 lam_num = 2    
 x_cond = 1e10
+family = "logistic"
+#family = "poisson"
 
-prefix = "~/Dropbox/dropbox/code/veeru/plots/pred"
+prefix = "~/Dropbox/dropbox/code/veeru/plots/pred_test"
+#prefix = sprintf("~/Dropbox/dropbox/code/veeru/plots/pred_%s",family)
 
 if( even_spacing ) {
   pdf(sprintf("%s_even.pdf", prefix), height=4, width=4*length(nvals))
@@ -40,18 +43,28 @@ for(k in kvals) {
       x = seq(0,1,length.out=n)
     } else 
       x = sort(runif(n,0,1))  
-    y = sin(x*3*pi/( max(x) - min(x))) + rnorm(n,sd=0.1)
+    f = sin(x*3*pi/( max(x) - min(x)))
+    y = f + rnorm(n,sd=0.1)
+    if( family == "logistic" ) {
+      p = 1/(1+exp(-f))
+      y = rbinom(n,1,p)
+    }
+    if( family == "poisson" ) {
+      u = exp(f)
+      y = rpois(n,u)
+    }
 
     w = rep(1,n)
 
     np = n
     xpred = sort(runif(np, min(x), max(x)))
-    
+
     time0 = proc.time()    
-    admm = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=maxiter, lambda.min.ratio = 1e-5, xpred=xpred, control=list(obj_tol=0, thinning=thinning, x_cond=x_cond, npred=np, lam_num=lam_num))
+    admm = trendfilter(y, x, k=k, nlambda=nlambda, family=family, maxiter=maxiter, lambda.min.ratio = 1e-5, xpred=xpred, control=list(obj_tol=1e-10, thinning=thinning, x_cond=x_cond, npred=np, lam_num=lam_num))
     time0 = proc.time() - time0
 
     xt = admm$x; yt = admm$y; wt = admm$w; nt = length(xt)
+    cat("nt = ", nt, "\n")
     ypred = admm$ypred
     #plot      
     pp_lam = lam_num

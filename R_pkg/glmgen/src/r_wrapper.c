@@ -158,7 +158,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   PROTECT(sYPred = allocVector(REALSXP, np));
   yp = REAL(sYPred);
   // Should be generic tf_predict
-  tf_predict_gauss( beta + ((lam_num-1) * n), x, n, k, xp, np, yp, 1e-12);  
+  tf_predict( beta + ((lam_num-1) * n), x, n, k, family, xp, np, yp, 1e-12);  
 
   // Create a list for the output
   PROTECT(sOutput = allocVector(VECSXP, 8));

@@ -1,4 +1,5 @@
 #include "tf.h"
+#include "tf_glm_loss.h"
 
 static void poly_coefs(double *x, int n, int k,
   double *beta, double *phi);
@@ -76,7 +77,36 @@ void poly_coefs(double *x, int n, int k,
   }
 }
 
-void tf_predict(double * beta, double * x, int n, int k,
+void tf_predict(double * beta, double * x, int n, int k, int family,
 	double * x0, int n0, double * pred,
-  double zero_tol) {
+  double zero_tol) 
+{
+  int i;
+  double f;
+  tf_predict_gauss(beta, x, n, k, x0, n0, pred, zero_tol);
+  
+  switch (family)
+  {
+    case FAMILY_GAUSSIAN:
+      break;
+
+    case FAMILY_LOGISTIC:
+      for (i = 0; i < n0; i++) { 
+        f = logi_b1(pred[i]);
+        pred[i] = f;
+        // pred[i] = (f >= 0) ? 1 : 0;
+      }
+      break;
+
+    case FAMILY_POISSON:
+      for (i = 0; i < n0; i++) { 
+        f = pois_b1(pred[i]);
+        pred[i] = f;
+        // pred[i] = floor(f);
+      }
+      break;
+    default:
+      printf("predict: Unknown family of linear models\n");
+      break;
+  }
 }
