@@ -79,10 +79,10 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   k = asInteger(sK);
 
   do_thin = get_control_value(sControl, "thinning", 0);
-  x_cond = get_control_value(sControl, "x_cond", 0);
+  x_cond = get_control_value(sControl, "x_cond", 1e11);
   
   xt = yt = wt = NULL;
-  if( do_thin > 0 || x_cond > 0 )
+  if( do_thin > 0 )
   {    
     thin(x,y,w,n,k,&xt,&yt,&wt,&nt,x_cond);
     int thinned = (xt != NULL);

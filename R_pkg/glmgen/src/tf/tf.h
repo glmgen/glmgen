@@ -7,12 +7,9 @@
 #include <float.h>
 
 #include "cs.h"
-#include "tf.h"
 #include "utils.h"
 #include "int_codes.h"
 
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define WEIGHT_SMALL DBL_EPSILON
 #define ADMM_MAX_ITER 250
 

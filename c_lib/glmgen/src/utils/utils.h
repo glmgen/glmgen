@@ -37,8 +37,6 @@ int is_nan(double x);
 int has_nan(double * x, int n);
 int count_nans(double * x, int n);
 
-void presmooth( double* x, double* y, double* w, int n, int k, 
-  double** xt, double** yt, double** wt, int* nt_ptr, double x_cond);
 void thin( double* x, double* y, double* w, int n, int k, 
   double** xt, double** yt, double** wt, int* nt_ptr, double x_cond);
 #endif

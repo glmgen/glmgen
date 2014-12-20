@@ -16,8 +16,6 @@ void thin( double* x, double* y, double* w, int n, int k,
   int lo, hi;
   int cur_intvl;
 
-  t = clock();
-
   r = x[n-1] - x[0];
   delta = r * pow( n*x_cond, -1./(k+1) );
  

@@ -18,7 +18,7 @@ trendfilter = function(y, x, weights, k = 2L, family = c("gaussian", "logistic",
 
   cond = (1/n) * ( (max(x) - min(x)) / min(diff(x)))^(k+1)
   thinning = FALSE
-  x_cond = 1e10
+  x_cond = 1e12
   if( "thinning" %in% names(control) ) thinning = control$thinning
   if( "x_cond" %in% names(control)) x_cond = control$x_cond
   
