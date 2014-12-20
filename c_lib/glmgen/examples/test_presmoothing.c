@@ -27,32 +27,28 @@ void test_presmoothing()
   for(i=0; i<n; i++) w[i] = 1;
 
   delta = 6 * (x[n-1] - x[0]) / n;
-  
  
   xt = yt = wt = NULL;
 
   nt = 0;
  
+  //presmooth(x,y,w,n,k,&xt,&yt,&wt,&nt,x_cond);
   presmooth(x,y,w,n,k,&xt,&yt,&wt,&nt,x_cond);
   
   printf("delta = %g\n", delta); 
   printf("nt = %d\n", nt);
-  //printf("x: "); for(i=0; i < nt; i++) printf("%g ", xt[i]); printf("\n\n");
-  //printf("y: "); for(i=0; i < nt; i++) printf("%g ", yt[i]); printf("\n\n");
-  //printf("w: "); for(i=0; i < nt; i++) printf("%g ", wt[i]); printf("\n\n");
+
+  if( xt == NULL )
+    printf("No thinning done");
  
-  //printf("dx: ");
-  double mindx = x[n-1] - x[0];
-  for(i=0; i < nt -1; i++) {
-    mindx = MIN(xt[i+1] - xt[i], mindx);
-    if(mindx <= 0) printf("mindx <= 0 at i=%d\n", i);
-    //printf("%g ", xt[i+1] - xt[i]);
-  }
-  printf("minimum dx = %g\n", mindx);
-  printf("new range= %g, old range = %g\n", xt[nt-1]-xt[0], x[n-1]-x[0]);
+  if(xt != NULL )
+    printf("new range= %g, old range = %g\n", xt[nt-1]-xt[0], x[n-1]-x[0]);
   
   free(x); free(y); free(w);
-  free(xt); free(yt); free(wt);
+  if( xt != NULL ) 
+  {
+    free(xt); free(yt); free(wt);
+  }
 
 }
 int main()

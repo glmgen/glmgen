@@ -3,6 +3,9 @@
 
 #include "cs.h"
 
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+
 /* --- custom structure to hold the out of the qr decomposition ------- */
 typedef struct gcs_qr  /* holds numeric and symbol qr together */
 {
@@ -35,5 +38,7 @@ int has_nan(double * x, int n);
 int count_nans(double * x, int n);
 
 void presmooth( double* x, double* y, double* w, int n, int k, 
+  double** xt, double** yt, double** wt, int* nt_ptr, double x_cond);
+void thin( double* x, double* y, double* w, int n, int k, 
   double** xt, double** yt, double** wt, int* nt_ptr, double x_cond);
 #endif
