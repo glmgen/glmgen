@@ -93,7 +93,6 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
       w = wt;
       n = nt;
     }
-    /* TODO: Have to go through the checks in trendfilter.R */
   }
 
   family = asInteger(sFamily);
