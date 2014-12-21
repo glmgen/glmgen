@@ -26,8 +26,8 @@ double get_control_value(SEXP sControlList, const char * param_name, double para
   return param_output;
 }
 
-SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod, SEXP sMaxIter,
-            SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio, SEXP sXPred, SEXP sControl )
+SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod,
+            SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio, SEXP sControl )
 {
 
   // Initialize all of the variables
@@ -53,9 +53,6 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   double * obj;
   int * iter;
   int * status;
- 
-  double * xp;
-  double * yp;
 
   SEXP sLambdaNew;
   SEXP sBeta;
@@ -64,17 +61,15 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SEXP sStatus;
   SEXP sXt;
   SEXP sYt;
-  SEXP sWt;  
-  SEXP sYPred;
+  SEXP sWt;
   SEXP sOutput;
   SEXP sOutputNames;
 
   double rho;
   double obj_tol;
+  int max_iter_admm;
   double do_thin;
   double x_cond;
-  int np;
-  int lam_num;
 
   // Convert input SEXP variables into C style variables
   y = REAL(sY);
@@ -85,13 +80,13 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
 
   do_thin = get_control_value(sControl, "thinning", 0);
   x_cond = get_control_value(sControl, "x_cond", 1e11);
-  
+
   xt = yt = wt = NULL;
   if( do_thin > 0 )
-  {    
+  {
     thin(x,y,w,n,k,&xt,&yt,&wt,&nt,x_cond);
     int thinned = (xt != NULL);
-    if( thinned ) 
+    if( thinned )
     {
       x = xt;
       y = yt;
@@ -102,7 +97,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
 
   family = asInteger(sFamily);
   method = asInteger(sMethod);
-  maxiter = asInteger(sMaxIter);
+  maxiter = get_control_value(sControl, "maxiter", 25);
   lam_flag = asInteger(sLamFlag);
   PROTECT(sLambdaNew = duplicate(sLambda));
   lambda = REAL(sLambda);
@@ -136,10 +131,11 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
     case TF_ADMM:
       rho = get_control_value(sControl, "rho", 1);
       obj_tol = get_control_value(sControl, "obj_tol", 1e-10);
+      max_iter_admm = get_control_value(sControl, "max_iter_admm", 250);
 
       tf_admm(y, x, w, n, k, family, maxiter, lam_flag, lambda,
-          nlambda, lambda_min_ratio, beta, obj, iter, status,
-          rho, obj_tol);
+              nlambda, lambda_min_ratio, beta, obj, iter, status,
+              rho, obj_tol, max_iter_admm);
       break;
 
     case TF_PRIMALDUAL_IP:
@@ -149,20 +145,12 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
 
     default:
       error("Method code not found.");
+      break;
   }
 
-  // Predict
-  xp = REAL(sXPred);
-  np = (int) get_control_value(sControl, "npred", 0);
-  lam_num = (int) get_control_value(sControl, "lam_num", 1);
-  PROTECT(sYPred = allocVector(REALSXP, np));
-  yp = REAL(sYPred);
-  // Should be generic tf_predict
-  tf_predict( beta + ((lam_num-1) * n), x, n, k, family, xp, np, yp, 1e-12);  
-
   // Create a list for the output
-  PROTECT(sOutput = allocVector(VECSXP, 8));
-  PROTECT(sOutputNames = allocVector(STRSXP, 8));
+  PROTECT(sOutput = allocVector(VECSXP, 7));
+  PROTECT(sOutputNames = allocVector(STRSXP, 7));
 
   // Assing beta, lambda, and obj to the list
   SET_VECTOR_ELT(sOutput, 0, sBeta);
@@ -172,8 +160,6 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SET_VECTOR_ELT(sOutput, 4, sXt);
   SET_VECTOR_ELT(sOutput, 5, sYt);
   SET_VECTOR_ELT(sOutput, 6, sWt);
-  SET_VECTOR_ELT(sOutput, 7, sYPred);
-  
 
   // Attach names as an attribute to the returned SEXP
   SET_STRING_ELT(sOutputNames, 0, mkChar("beta"));
@@ -183,13 +169,13 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SET_STRING_ELT(sOutputNames, 4, mkChar("x"));
   SET_STRING_ELT(sOutputNames, 5, mkChar("y"));
   SET_STRING_ELT(sOutputNames, 6, mkChar("w"));
-  SET_STRING_ELT(sOutputNames, 7, mkChar("ypred"));
   setAttrib(sOutput, R_NamesSymbol, sOutputNames);
 
   if(xt != NULL) free(xt);
   if(yt != NULL) free(yt);
   if(wt != NULL) free(wt);
+
   // Free the allocated objects for the gc and return the output as a list
-  UNPROTECT(11);
+  UNPROTECT(10);
   return sOutput;
 }

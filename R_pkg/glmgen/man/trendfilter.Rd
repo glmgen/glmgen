@@ -10,9 +10,10 @@ link functions of Gaussian, binomial, and Poisson penalized
 loss functions.
 }
 \usage{
-trendfilter(y, x, k = 0L, family = c("gaussian", "logistic", "poisson"), lambda,
-            nlambda = 100L, lambda.min.ratio = 1e-05, method = c("admm", "prime_dual"),
-            maxiter = 25L, objective = FALSE, control = list())
+trendfilter(y, x, k = 0L, family = c("gaussian", "logistic", "poisson"),
+            lambda, nlambda = 100L, lambda.min.ratio = 1e-05,
+            thinning = TRUE, method = c("admm"),
+            objective = FALSE, control = list())
 }
 \arguments{
   \item{y}{
@@ -46,11 +47,12 @@ if \code{lambda} is missing, this determines the ratio between the largest
 and smallest \code{lambda} values. The values are distributed on a log scale,
 so this ratio should typically be set fairly small.
 }
-  \item{method}{
-the method used to calculate the fit. Can be either "admm" or "prime_dual".
+  \item{thinning}{
+logical. If true, the data are preprocessing so that a badly conditioned or
+very large data set is reduced to a smaller, better conditioned data.
 }
-  \item{maxiter}{
-the maximum number of iterations used until convergence.
+  \item{method}{
+the method used to calculate the fit. Currently only 'admm' is supported.
 }
   \item{objective}{
 logical flag indicating whether objective values of the fit should be
@@ -80,5 +82,5 @@ Taylor B. Arnold, Ryan Tibshirani, Veerun Sadhanala
 \examples{
 x = runif(25, min=-2*pi, max=2*pi)
 y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
-out = trendfilter(y, pos, k=3)
+out = trendfilter(y, x, k=3)
 }

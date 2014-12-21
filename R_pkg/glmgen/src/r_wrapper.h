@@ -3,8 +3,7 @@
 
 double get_control_value(SEXP sControlList, const char * param_name, double param_default);
 
-SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod, SEXP sMaxIter,
-            SEXP sLamFlag, SEXP sObjFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio,
-            SEXP sControl );
+SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod,
+            SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio, SEXP sControl );
 
 #endif

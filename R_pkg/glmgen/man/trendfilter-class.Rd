@@ -18,6 +18,7 @@ to the function \code{\link{trendfilter}}.
   \describe{
     \item{\code{y}:}{the input observed numeric values}
     \item{\code{x}:}{the locations of the observed values \code{y}}
+    \item{\code{w}:}{sample weights}
     \item{\code{k}:}{integer, order of the trendfilter fit}
     \item{\code{lambda}:}{vector sequency of penalty lambdas,
     sorted in decreasing order}

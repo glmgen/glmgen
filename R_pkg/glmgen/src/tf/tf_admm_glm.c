@@ -2,42 +2,41 @@
 #include "math.h"
 
 void tf_admm_glm (double * y, double * x, double * w, int n, int k,
-       int max_iter, double lam,
-       double * beta, double * alpha, double * u,
-       double * obj, int * iter,
-       double rho, double obj_tol, cs * DktDk,
-       func_RtoR b, func_RtoR b1, func_RtoR b2)
+        int max_iter, double lam,
+        double * beta, double * alpha, double * u,
+        double * obj, int * iter,
+        double rho, double obj_tol, int max_iter_admm,
+        cs * DktDk,
+        func_RtoR b, func_RtoR b1, func_RtoR b2)
 {
-  
+
   double * d = (double*)malloc(n*sizeof(double)); /* line search direction */
   double * yt = (double*)malloc(n*sizeof(double));/* working response: ytilde */
   double * H = (double*)malloc(n*sizeof(double)); /* weighted Hessian */
   double * z = (double*)malloc(n*sizeof(double));
   double * obj_admm;
-  
+
   /* Buffers for line search */
   double * Db = (double*)malloc(n*sizeof(double));
   double * Dd = (double*)malloc(n*sizeof(double));
   int * iter_ls = (int*)malloc(sizeof(int));
-  
+
   double pobj, loss, pen;
   double t; /* stepsize */
   int it;
   double admm_tol;
-  int max_iter_admm;
 
   /* Set ADMM parameters appropriately */
   admm_tol = obj_tol;
-  max_iter_admm = ADMM_MAX_ITER;
 
-  obj_admm = (double*)malloc(max_iter_admm*sizeof(double)); 
-  
-  int verb = 0; 
+  obj_admm = (double*)malloc(max_iter_admm*sizeof(double));
+
+  int verb = 0;
   if (verb) printf("Iteration\tObjective\tLoss\t\tPenalty\n");
- 
+
   /* One Prox Newton step per iteration */
   for (it=0; it < max_iter; it++)
-  {    
+  {
     /* Define weighted Hessian, and working response */
     int i;
     for(i=0; i<n; i++)
@@ -47,7 +46,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
       {
         yt[i] = beta[i] + (y[i]-b1(beta[i]))/H[i];
       }
-      else 
+      else
       {
         yt[i] = beta[i] + (y[i]-b1(beta[i]));
       }
@@ -73,13 +72,13 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
     double gamma = 0.8;
     int max_iter_ls = 50;
 
-    t = tf_line_search(y, x, w, n, k, lam, b, b1, beta, d, alpha_ls, gamma, max_iter_ls, iter_ls, Db, Dd); 
+    t = tf_line_search(y, x, w, n, k, lam, b, b1, beta, d, alpha_ls, gamma, max_iter_ls, iter_ls, Db, Dd);
 
-    if(verb) printf("Stepsize t=%.2e,\titers=%d\n", t, *iter_ls); 
+    if(verb) printf("Stepsize t=%.2e,\titers=%d\n", t, *iter_ls);
     for(i=0; i<n; i++)
     {
       beta[i] = beta[i] + t * d[i];
-    }    
+    }
 
     /* Compute objective */
     /* Compute loss */
@@ -111,7 +110,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
 
   *iter = it;
 
-  /* free */  
+  /* free */
   free(d);
   free(yt);
   free(H);
