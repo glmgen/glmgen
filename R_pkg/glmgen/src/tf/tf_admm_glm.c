@@ -5,9 +5,9 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
         int max_iter, double lam,
         double * beta, double * alpha, double * u,
         double * obj, int * iter,
-        double rho, double obj_tol, int max_iter_admm,
+        double rho, double obj_tol, int max_inner_iter,
         cs * DktDk,
-        func_RtoR b, func_RtoR b1, func_RtoR b2)
+        func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
 {
 
   double * d = (double*)malloc(n*sizeof(double)); /* line search direction */
@@ -29,10 +29,9 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
   /* Set ADMM parameters appropriately */
   admm_tol = obj_tol;
 
-  obj_admm = (double*)malloc(max_iter_admm*sizeof(double));
+  obj_admm = (double*)malloc(max_inner_iter*sizeof(double));
 
-  int verb = 0;
-  if (verb) printf("Iteration\tObjective\tLoss\t\tPenalty\n");
+  if (verbose) printf("Iteration\tObjective\tLoss\t\tPenalty\n");
 
   /* One Prox Newton step per iteration */
   for (it=0; it < max_iter; it++)
@@ -57,10 +56,10 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
     /* Prox Newton step */
     int iter_admm = 0;
     tf_admm_gauss (yt, x, H, n, k,
-        max_iter_admm, lam,
+        max_inner_iter, lam,
         d, alpha, u,
         obj_admm, &iter_admm, rho, admm_tol,
-        DktDk);
+        DktDk, verbose);
 
     for(i=0; i<n; i++)
     {
@@ -74,7 +73,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
 
     t = tf_line_search(y, x, w, n, k, lam, b, b1, beta, d, alpha_ls, gamma, max_iter_ls, iter_ls, Db, Dd);
 
-    if(verb) printf("Stepsize t=%.2e,\titers=%d\n", t, *iter_ls);
+    if(verbose) printf("Stepsize t=%.2e,\titers=%d\n", t, *iter_ls);
     for(i=0; i<n; i++)
     {
       beta[i] = beta[i] + t * d[i];
@@ -97,7 +96,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
     pobj = loss+lam*pen;
     obj[it] = pobj;
 
-    if (verb) printf("GLM \t%i\t%0.3e\t%0.3e\t%0.3e\n",it,pobj, loss, lam*pen);
+    if (verbose) printf("GLM \t%i\t%0.3e\t%0.3e\t%0.3e\n",it,pobj, loss, lam*pen);
 
     if(it > 0)
     {

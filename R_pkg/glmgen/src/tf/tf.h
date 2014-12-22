@@ -16,11 +16,12 @@
 void tf_admm (double * y, double * x, double * w, int n, int k, int family, int max_iter,
               int lam_flag, double * lambda, int nlambda,
               double lambda_min_ratio, double * beta, double * obj, int * iter,
-              int * status, double rho, double obj_tol, int max_iter_admm);
+              int * status, double rho, double obj_tol, int max_inner_iter,
+              int verbose);
 
 void tf_primal_dual (double * y, double * x, double * w, int n, int k, int family, int max_iter,
               int lam_flag, double * lambda, int nlambda, double lambda_min_ratio,
-              double * beta, double * obj);
+              double * beta, double * obj, int verbose);
 
 /* Helper functions for cases of the admm and primal dual algorithms */
 void tf_dp (int n, double *y, double lam, double *beta);
@@ -29,17 +30,17 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj, int * iter,
-       double rho, double obj_tol, cs * DktDk);
+       double rho, double obj_tol, cs * DktDk, int verbose);
 void tf_admm_logistic (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj, int * iter,
-       double rho, double obj_tol, int max_iter_admm, cs * DktDk);
+       double rho, double obj_tol, int max_iter_admm, cs * DktDk, int verbose);
 void tf_admm_poisson (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
        double * obj, int * iter,
-       double rho, double obj_tol, int max_iter_admm, cs * DktDk);
+       double rho, double obj_tol, int max_iter_admm, cs * DktDk, int verbose);
 
 typedef double (*func_RtoR)(double);
 void tf_admm_glm (double * y, double * x, double * w, int n, int k,
@@ -48,7 +49,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
        double * obj, int * iter,
        double rho, double obj_tol, int max_iter_admm,
        cs * DktDk,
-       func_RtoR b, func_RtoR b1, func_RtoR b2);
+       func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose);
 
 /* Functions to predict */
 void tf_predict(double * beta, double * x, int n, int k, int family,

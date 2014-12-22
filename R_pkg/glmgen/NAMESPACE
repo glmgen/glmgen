@@ -13,6 +13,6 @@ exportMethods(
 )
 exportClasses(
     "glmgen",
-     "summary.glmgen",
-     "trendfilter"
+    "summary.glmgen",
+    "trendfilter"
 )

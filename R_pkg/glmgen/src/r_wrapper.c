@@ -26,18 +26,103 @@ double get_control_value(SEXP sControlList, const char * param_name, double para
   return param_output;
 }
 
-SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod,
-            SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio, SEXP sControl )
+SEXP thin_R (SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sControl)
 {
-
-  // Initialize all of the variables
+  /* Initialize all of the variables */
   int i;
   double * y;
   double * x;
   double * w;
-  double * xt, * sxt;
-  double * yt, * syt;
-  double * wt, * swt;
+  int n;
+  int k;
+  double * xt;
+  double * yt;
+  double * wt;
+  int nt;
+  double x_cond;
+
+  /* Initalize the output */
+  SEXP sOutput;
+  SEXP sOutputNames;
+  SEXP sOutputY;
+  SEXP sOutputX;
+  SEXP sOutputW;
+  SEXP sOutputN;
+  double * outputY;
+  double * outputX;
+  double * outputW;
+  int * outputN;
+
+  /* Grab condition number from the control list */
+  x_cond = get_control_value(sControl, "x_cond", 1e11);
+
+  /* Convert input SEXP variables into C style variables */
+  y = REAL(sY);
+  x = REAL(sX);
+  w = REAL(sW);
+  n = asInteger(sN);
+  k = asInteger(sK);
+
+  xt = yt = wt = NULL;
+  thin(x,y,w,n,k,&xt,&yt,&wt,&nt,x_cond);
+
+  if( xt != NULL )
+  {
+    x = xt;
+    y = yt;
+    w = wt;
+    n = nt;
+  }
+
+  /* Construct the output */
+  PROTECT(sOutputY = allocVector(REALSXP, n));
+  PROTECT(sOutputX = allocVector(REALSXP, n));
+  PROTECT(sOutputW = allocVector(REALSXP, n));
+  PROTECT(sOutputN = allocVector(INTSXP, 1));
+  outputY = REAL(sOutputY);
+  outputX = REAL(sOutputX);
+  outputW = REAL(sOutputW);
+  outputN = INTEGER(sOutputN);
+  memcpy(outputY, y, sizeof(double) * n);
+  memcpy(outputX, x, sizeof(double) * n);
+  memcpy(outputW, w, sizeof(double) * n);
+  memcpy(outputN, &n, sizeof(int));
+
+  PROTECT(sOutput = allocVector(VECSXP, 4));
+  PROTECT(sOutputNames = allocVector(STRSXP, 4));
+  SET_VECTOR_ELT(sOutput, 0, sOutputY);
+  SET_VECTOR_ELT(sOutput, 1, sOutputX);
+  SET_VECTOR_ELT(sOutput, 2, sOutputW);
+  SET_VECTOR_ELT(sOutput, 3, sOutputN);
+  SET_STRING_ELT(sOutputNames, 0, mkChar("y"));
+  SET_STRING_ELT(sOutputNames, 1, mkChar("x"));
+  SET_STRING_ELT(sOutputNames, 2, mkChar("w"));
+  SET_STRING_ELT(sOutputNames, 3, mkChar("n"));
+  setAttrib(sOutput, R_NamesSymbol, sOutputNames);
+
+  /* Free temporary thinning variables */
+  if(xt != NULL) free(xt);
+  if(yt != NULL) free(yt);
+  if(wt != NULL) free(wt);
+
+  // Free the allocated objects for the gc and return the output as a list
+  UNPROTECT(6);
+  return sOutput;
+}
+
+SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod,
+            SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio,
+            SEXP sVerbose, SEXP sControl )
+{
+
+  /* Initialize all of the variables */
+  int i;
+  double * y;
+  double * x;
+  double * w;
+  double * sxt;
+  double * syt;
+  double * swt;
 
   int n;
   int k;
@@ -53,6 +138,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   double * obj;
   int * iter;
   int * status;
+  int verbose;
 
   SEXP sLambdaNew;
   SEXP sBeta;
@@ -68,32 +154,14 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   double rho;
   double obj_tol;
   int max_iter_admm;
-  double do_thin;
-  double x_cond;
 
-  // Convert input SEXP variables into C style variables
+  /* Convert input SEXP variables into C style variables */
   y = REAL(sY);
   x = REAL(sX);
   w = REAL(sW);
   n = asInteger(sN);
   k = asInteger(sK);
-
-  do_thin = get_control_value(sControl, "thinning", 0);
-  x_cond = get_control_value(sControl, "x_cond", 1e11);
-
-  xt = yt = wt = NULL;
-  if( do_thin > 0 )
-  {
-    thin(x,y,w,n,k,&xt,&yt,&wt,&nt,x_cond);
-    int thinned = (xt != NULL);
-    if( thinned )
-    {
-      x = xt;
-      y = yt;
-      w = wt;
-      n = nt;
-    }
-  }
+  verbose = asInteger(sVerbose);
 
   family = asInteger(sFamily);
   method = asInteger(sMethod);
@@ -125,7 +193,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   swt = REAL(sWt);
   for(i = 0; i < n; i++) swt[i] = w[i];
 
-  // Switch on the method, and access low-level C functions
+  /* Switch on the method, and access low-level C functions */
   switch(method)
   {
     case TF_ADMM:
@@ -135,12 +203,12 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
 
       tf_admm(y, x, w, n, k, family, maxiter, lam_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj, iter, status,
-              rho, obj_tol, max_iter_admm);
+              rho, obj_tol, max_iter_admm, verbose);
       break;
 
     case TF_PRIMALDUAL_IP:
       tf_primal_dual(y, x, w, n, k, family, maxiter, lam_flag, lambda,
-          nlambda, lambda_min_ratio, beta, obj);
+          nlambda, lambda_min_ratio, beta, obj, verbose);
       break;
 
     default:
@@ -148,11 +216,11 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
       break;
   }
 
-  // Create a list for the output
+  /* Create a list for the output */
   PROTECT(sOutput = allocVector(VECSXP, 7));
   PROTECT(sOutputNames = allocVector(STRSXP, 7));
 
-  // Assing beta, lambda, and obj to the list
+  /* Assing beta, lambda, and obj to the list */
   SET_VECTOR_ELT(sOutput, 0, sBeta);
   SET_VECTOR_ELT(sOutput, 1, sLambda);
   SET_VECTOR_ELT(sOutput, 2, sObj);
@@ -161,7 +229,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SET_VECTOR_ELT(sOutput, 5, sYt);
   SET_VECTOR_ELT(sOutput, 6, sWt);
 
-  // Attach names as an attribute to the returned SEXP
+  /* Attach names as an attribute to the returned SEXP */
   SET_STRING_ELT(sOutputNames, 0, mkChar("beta"));
   SET_STRING_ELT(sOutputNames, 1, mkChar("lambda"));
   SET_STRING_ELT(sOutputNames, 2, mkChar("obj"));
@@ -171,11 +239,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   SET_STRING_ELT(sOutputNames, 6, mkChar("w"));
   setAttrib(sOutput, R_NamesSymbol, sOutputNames);
 
-  if(xt != NULL) free(xt);
-  if(yt != NULL) free(yt);
-  if(wt != NULL) free(wt);
-
-  // Free the allocated objects for the gc and return the output as a list
+  /* Free the allocated objects for the gc and return the output as a list */
   UNPROTECT(10);
   return sOutput;
 }

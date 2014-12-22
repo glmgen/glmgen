@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-void thin( double* x, double* y, double* w, int n, int k, 
+void thin( double* x, double* y, double* w, int n, int k,
   double** xt, double** yt, double** wt, int* nt_ptr, double x_cond)
 {
   int i,j, jj;
@@ -18,13 +18,13 @@ void thin( double* x, double* y, double* w, int n, int k,
 
   r = x[n-1] - x[0];
   delta = r * pow( n*x_cond, -1./(k+1) );
- 
+
   mindx = r;
-  for(i = 0; i < n-1; i++) 
+  for(i = 0; i < n-1; i++)
     mindx = MIN(x[i+1] - x[i], mindx);
 
   *xt = *yt = *wt = NULL;
-  
+
   if( mindx >= delta ) return;
 
   m = (int) MIN( floor(r/delta), 5*n );
@@ -60,9 +60,9 @@ void thin( double* x, double* y, double* w, int n, int k,
     {
       hi = j-1;
       (*xt)[i] = x[0] + (cur_intvl - 0.5) * delta;
-      
+
       (*wt)[i] = (*yt)[i] = 0.;
-      for( jj = lo; jj <= hi; jj++) 
+      for( jj = lo; jj <= hi; jj++)
       {
         (*wt)[i] += w[jj];
         (*yt)[i] += w[jj] * y[jj];
@@ -78,9 +78,9 @@ void thin( double* x, double* y, double* w, int n, int k,
       i = nt - 1;
       hi = n-1;
       (*xt)[i] = x[0] + (m - 0.5) * delta;
-      
+
       (*wt)[i] = (*yt)[i] = 0.;
-      for( jj = lo; jj <= hi; jj++) 
+      for( jj = lo; jj <= hi; jj++)
       {
         (*wt)[i] += w[jj];
         (*yt)[i] += w[jj] * y[jj];

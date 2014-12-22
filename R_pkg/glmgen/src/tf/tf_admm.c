@@ -6,7 +6,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               int max_iter, int lam_flag, double * lambda,
               int nlambda, double lambda_min_ratio, double * beta,
               double * obj, int * iter, int * status, double rho,
-              double obj_tol, int max_iter_admm)
+              double obj_tol, int max_inner_iter, int verbose)
 {
   int i;
   int j;
@@ -98,6 +98,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
       break;
 
     default:
+      for (i = 0; i < nlambda; i++) status[i] = 2;
       return;
     }
 
@@ -119,19 +120,19 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
       case FAMILY_GAUSSIAN:
         tf_admm_gauss(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
                       u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-                      DktDk);
+                      DktDk, verbose);
         break;
 
       case FAMILY_LOGISTIC:
         tf_admm_logistic(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
 			                    u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-                          max_iter_admm, DktDk);
+                          max_inner_iter, DktDk, verbose);
         break;
 
       case FAMILY_POISSON:
         tf_admm_poisson(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
 		                      u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-                          max_iter_admm, DktDk);
+                          max_inner_iter, DktDk, verbose);
         break;
     }
 

@@ -12,17 +12,16 @@ loss functions.
 \usage{
 trendfilter(y, x, k = 0L, family = c("gaussian", "logistic", "poisson"),
             lambda, nlambda = 100L, lambda.min.ratio = 1e-05,
-            thinning = TRUE, method = c("admm"),
-            objective = FALSE, control = list())
+            thinning = !missing(x), method = "admm",
+            objective = TRUE, verbose = FALSE, control = list())
 }
 \arguments{
   \item{y}{
 vector of observed data
 }
   \item{x}{
-optional vector of observed data locations, which should be sorted in
-ascending order. If missing, will be assumed to be the integers 1 through
-the length of \code{y}.
+optional vector of observed data locations. If missing, will be assumed to
+be the integers 1 through the length of \code{y}.
 }
   \item{k}{
 the order to the trendfilter fit; an integer larger than 0 (orders larger
@@ -49,7 +48,8 @@ so this ratio should typically be set fairly small.
 }
   \item{thinning}{
 logical. If true, the data are preprocessing so that a badly conditioned or
-very large data set is reduced to a smaller, better conditioned data.
+very large data set is reduced to a smaller, better conditioned data. Defaults
+to true if and only if a set of observations are passed.
 }
   \item{method}{
 the method used to calculate the fit. Currently only 'admm' is supported.
@@ -58,6 +58,9 @@ the method used to calculate the fit. Currently only 'admm' is supported.
 logical flag indicating whether objective values of the fit should be
 returned.
 }
+  \item{verbose}{
+logical. Should the function print out intermediate results as it is running.
+}
   \item{control}{
 an optional named list of control parameters to pass to the underlying algorithm;
 see Details for more information. Names not matching any valid parameters
@@ -65,13 +68,27 @@ will be silently ignored.
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+Further parameters can be passed through the \code{control} input. The \code{rho}
+in the admm procedure is defaulted to 1, \code{obj_tol} to 1e-10 for the tolerance
+used in the stopping criterion, \code{max_iter} to 25 is the number of admm iterations
+used, and \code{max_iter_admm} to 250 as the number of iterations used for each admm
+update for glm losses.
+
+The paramter \code{x_cond} effects the degree of thinning, when applied. The default
+is 1e11; smaller values indicate more thinning.
 }
 \value{
 an object of class \code{\linkS4class{trendfilter}}
 }
 \references{
-%% ~put references to the literature/web site here ~
+  Tibshirani, R. J. and Taylor, J. (2011), "The solution path of the
+  generalized lasso", Annals of Statistics 39 (3) 1335--1371.
+
+  Tibshirani, R. J. (2014), "Adaptive piecewise polynomial estimation
+  via trend filtering", Annals of Statistics 42 (1): 285--323.
+
+  Arnold, T. B. and Tibshirani, R. J. (2014), "Efficient implementations
+  of the generalized lasso dual path algorithm", arXiv: 1405.3222.
 }
 \author{
 Taylor B. Arnold, Ryan Tibshirani, Veerun Sadhanala
@@ -80,7 +97,7 @@ Taylor B. Arnold, Ryan Tibshirani, Veerun Sadhanala
 \code{\linkS4class{trendfilter}}
 }
 \examples{
-x = runif(25, min=-2*pi, max=2*pi)
-y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
-out = trendfilter(y, x, k=3)
+  x = runif(25, min=-2*pi, max=2*pi)
+  y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
+  out = trendfilter(y, x, k=3)
 }
