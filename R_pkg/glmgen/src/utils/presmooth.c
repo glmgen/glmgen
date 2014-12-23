@@ -38,7 +38,7 @@ static int tree_id_bwd(int* mt, int n, int i)
   }
   return -1;
 }
-void presmooth( double* x, double* y, double* w, int n, int k, 
+void presmooth( double* x, double* y, double* w, int n, int k,
   double** xt, double** yt, double** wt, int* nt_ptr, double x_cond)
 {
   int i;
@@ -49,11 +49,11 @@ void presmooth( double* x, double* y, double* w, int n, int k,
   int j, jn, jp;
   double dxj;
   int nt;
-  btnode * t; 
+  btnode * t;
   btnode * min_val_node;
   btnode * min_id_node;
 
-  /* n+1 because we want to record the displacement of the first and last points also */ 
+  /* n+1 because we want to record the displacement of the first and last points also */
   dx = (double*)malloc( (n+1) * sizeof(double) );
   mt = (int*)malloc( n * sizeof(int) );
   wtmp = (double*)malloc( n * sizeof(double) );
@@ -83,11 +83,11 @@ void presmooth( double* x, double* y, double* w, int n, int k,
     dxj = min_val_node->key;
     bt_find_min(min_val_node->ids, &min_id_node);
     j = (int) min_id_node->key;
-    
+
     range = x[n-1]-x[0]-dx[0]-dx[n];
     if( nt * pow( range / dxj, k+1) < x_cond ) break;
     //if(dxj >= delta) break;
-    
+
     // jn = -1 when j is the first node in the current tree. update dx[0]
     // jp = n-1 when j is the last node. update dx[n]
     // Note: mt[n-1] = n-1 always
@@ -101,13 +101,13 @@ void presmooth( double* x, double* y, double* w, int n, int k,
 
     dx[jn+1] += dx[j+1]/2.;
     dx[jp+1] += dx[j+1]/2.;
-    
+
     if(jn != -1)  bt_insert(&t, jn, dx[jn+1]);
     if(jp != n-1) bt_insert(&t, jp, dx[jp+1]);
 
     /* Average y */
     ytmp[jp] = (wtmp[j]*ytmp[j] + wtmp[jp]*ytmp[jp])/(wtmp[j] + wtmp[jp]);
-    
+
     wtmp[jp] += wtmp[j];
     mt[j] = jp;
     wtmp[j] = 0;
@@ -118,7 +118,7 @@ void presmooth( double* x, double* y, double* w, int n, int k,
 
   int* ids = (int*)malloc( nt * sizeof(int) );
   int ntt = 0;
-  for(i=0; i < n; i++) {  
+  for(i=0; i < n; i++) {
     if(mt[i] == i) {
       if( ntt >= nt ) { // Sanity check
         printf("ERROR: nt=%d but ntt >%d\n", nt, ntt);

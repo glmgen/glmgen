@@ -5,7 +5,8 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
         int max_iter, double lam,
         double * beta, double * alpha, double * u,
         double * obj, int * iter,
-        double rho, double obj_tol, int max_inner_iter,
+        double rho, double obj_tol, double alpha_ls, double gamma_ls,
+        int max_iter_ls, int max_inner_iter,
         cs * DktDk,
         func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
 {
@@ -62,12 +63,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
       d[i] = d[i] - beta[i];
     }
 
-    /* TODO: take the bt line search parameters as inputs */
-    double alpha_ls = 0.5;
-    double gamma = 0.8;
-    int max_iter_ls = 50;
-
-    t = tf_line_search(y, x, w, n, k, lam, b, b1, beta, d, alpha_ls, gamma, max_iter_ls, iter_ls, Db, Dd);
+    t = tf_line_search(y, x, w, n, k, lam, b, b1, beta, d, alpha_ls, gamma_ls, max_iter_ls, iter_ls, Db, Dd);
 
     if(verbose) printf("Stepsize t=%.2e,\titers=%d\n", t, *iter_ls);
     for(i=0; i<n; i++)

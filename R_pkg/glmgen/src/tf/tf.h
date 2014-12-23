@@ -13,11 +13,12 @@
 #define WEIGHT_SMALL DBL_EPSILON
 
 /* Main glmgen api functions */
-void tf_admm (double * y, double * x, double * w, int n, int k, int family, int max_iter,
-              int lam_flag, double * lambda, int nlambda,
-              double lambda_min_ratio, double * beta, double * obj, int * iter,
-              int * status, double rho, double obj_tol, int max_inner_iter,
-              int verbose);
+void tf_admm (double * y, double * x, double * w, int n, int k, int family,
+              int max_iter, int lam_flag, double * lambda,
+              int nlambda, double lambda_min_ratio, double * beta,
+              double * obj, int * iter, int * status, double rho,
+              double obj_tol, double alpha_ls, double gamma_ls,
+              int max_iter_ls, int max_inner_iter, int verbose);
 
 typedef double (*func_RtoR)(double);
 
@@ -33,7 +34,8 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
     int max_iter, double lam,
     double * beta, double * alpha, double * u,
     double * obj, int * iter,
-    double rho, double obj_tol, int max_iter_admm,
+    double rho, double obj_tol, double alpha_ls, double gamma_ls,
+    int max_iter_ls, int max_iter_admm,
     cs * DktDk,
     func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose);
 

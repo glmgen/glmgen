@@ -21,7 +21,7 @@ void bt_insert (btnode **bt, int id, double val)
     (*bt)->node_lvl = FIRST;
     (*bt)->rightchild = NULL;
   }
-  else/* search the node to which new node will be attached */
+  else /* search the node to which new node will be attached */
   {
     /* if new val is less, traverse to left */
     if ( val < (*bt)->key )
@@ -48,7 +48,7 @@ void bt_insert_inner (btnode **bt, int id)
   {
     if ( id < (*bt)->key )
       bt_insert_inner ( &( ( *bt ) -> leftchild ), id );
-    else if( id > (*bt)->key ) 
+    else if( id > (*bt)->key )
       bt_insert_inner ( &( (*bt)->rightchild ), id );
     /* do nothing if id already exists */
   }
@@ -91,7 +91,7 @@ void bt_delete ( btnode **bt, int id, double val )
     }
 
     x -> key = xsucc -> key;
-    x -> ids = xsucc -> ids; 
+    x -> ids = xsucc -> ids;
     x = xsucc ; /* delete xsucc now */
   }
 
@@ -130,12 +130,12 @@ void bt_delete_inner(btnode **bt, int id)
     x -> key = xsucc -> key;
     x = xsucc ; /* delete xsucc now */
   }
-  
+
   bt_delete_found_node(bt, &parent, x);
 }
 
 void bt_delete_found_node(btnode **bt, btnode **parent, btnode *x)
-{  
+{
   /* if the node to be deleted has no child */
   if ( x -> leftchild == NULL && x -> rightchild == NULL )
   {
@@ -154,7 +154,7 @@ void bt_delete_found_node(btnode **bt, btnode **parent, btnode *x)
   if ( x -> leftchild == NULL && x -> rightchild != NULL )
   {
     if( (*parent) == NULL )
-      (*bt ) = x -> rightchild;    
+      (*bt ) = x -> rightchild;
     else if ( (*parent) -> leftchild == x )
       (*parent) -> leftchild = x -> rightchild ;
     else
@@ -168,7 +168,7 @@ void bt_delete_found_node(btnode **bt, btnode **parent, btnode *x)
   if ( x -> leftchild != NULL && x -> rightchild == NULL )
   {
     if( (*parent) == NULL )
-      (*bt ) = x -> leftchild;    
+      (*bt ) = x -> leftchild;
     else if ( (*parent) -> leftchild == x )
       (*parent) -> leftchild = x -> leftchild ;
     else
@@ -188,7 +188,7 @@ void bt_search( btnode **bt, double val,
   q = *bt;
   *found = FALSE;
   *par = NULL;
-  
+
   while ( q != NULL )
   {
     if ( q -> key > val ) {
@@ -228,7 +228,7 @@ void bt_inorder ( btnode *bt )
 void bt_find_min(btnode* bt, btnode** x)
 {
   *x = bt;
-  if( bt == NULL ) 
+  if( bt == NULL )
     return;
 
   while( (*x) -> leftchild != NULL )

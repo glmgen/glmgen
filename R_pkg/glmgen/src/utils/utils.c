@@ -47,7 +47,7 @@ int is_nan(double x) {
 int count_nans(double * x, int n) {
   int i;
   int num_nans = 0;
-  
+
   for(i=0; i < n; i++) {
     num_nans += is_nan(x[i]);
   }

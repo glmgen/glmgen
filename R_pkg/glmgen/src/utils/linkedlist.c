@@ -40,11 +40,11 @@ void delete_node(linkedlist** ll, int key)
 {
   llnode* ptr;
   llnode* prev;
-  
+
   int found = 0;
 
   if (*ll == NULL)
-  {    
+  {
     printf("Cannot delete from empty list\n");
     return;
   }
@@ -54,11 +54,11 @@ void delete_node(linkedlist** ll, int key)
     {
       found = 1;
       if(ptr == *ll)
-        *ll = ptr->next;    
+        *ll = ptr->next;
       else
-        prev->next = ptr->next;      
+        prev->next = ptr->next;
 
-      free(ptr);      
+      free(ptr);
       break;
     }
     else
@@ -97,7 +97,7 @@ void display(linkedlist* ll)
   {
     printf("[");
     for (ptr = ll;ptr != NULL;ptr = ptr->next)
-    {    
+    {
       printf("%d ", ptr->value);
     }
     printf("]");

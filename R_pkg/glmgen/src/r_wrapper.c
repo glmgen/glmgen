@@ -153,7 +153,10 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
 
   double rho;
   double obj_tol;
-  int max_iter_admm;
+  double alpha_ls;
+  double gamma_ls;
+  int max_iter_ls;
+  int max_inner_iter;
 
   /* Convert input SEXP variables into C style variables */
   y = REAL(sY);
@@ -199,11 +202,15 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
     case TF_ADMM:
       rho = get_control_value(sControl, "rho", 1);
       obj_tol = get_control_value(sControl, "obj_tol", 1e-10);
-      max_iter_admm = get_control_value(sControl, "max_iter_admm", 250);
+      alpha_ls = get_control_value(sControl, "alpha_ls", 0.5);
+      gamma_ls = get_control_value(sControl, "gamma_ls", 0.8);
+      max_iter_ls = get_control_value(sControl, "max_iter_ls", 50);
+      max_inner_iter = get_control_value(sControl, "max_inner_iter", 250);
 
       tf_admm(y, x, w, n, k, family, maxiter, lam_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj, iter, status,
-              rho, obj_tol, max_iter_admm, verbose);
+              rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
+              max_inner_iter, verbose);
       break;
 
     default:
@@ -272,7 +279,7 @@ SEXP tf_predict_R (SEXP sBeta, SEXP sX, SEXP sN, SEXP sK, SEXP sX0, SEXP sN0,
 
   for (i = 0; i < nlambda; i++)
   {
-    tf_predict(beta, x, n, k, family, x0, n0, pred + i*n, zero_tol);
+    tf_predict(beta, x, n, k, family, x0, n0, pred + n0*i, zero_tol);
   }
 
   /* Free the allocated objects for the gc and return the output as a list */

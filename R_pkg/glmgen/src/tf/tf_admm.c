@@ -5,7 +5,8 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               int max_iter, int lam_flag, double * lambda,
               int nlambda, double lambda_min_ratio, double * beta,
               double * obj, int * iter, int * status, double rho,
-              double obj_tol, int max_inner_iter, int verbose)
+              double obj_tol, double alpha_ls, double gamma_ls,
+              int max_iter_ls, int max_inner_iter, int verbose)
 {
   int i;
   int j;
@@ -124,14 +125,14 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
 
       case FAMILY_LOGISTIC:
         tf_admm_glm(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha, u, obj+i*max_iter, iter+i,
-                    rho * lambda[i], obj_tol, max_inner_iter, DktDk, &logi_b, &logi_b1, &logi_b2,
-                    verbose);
+                    rho * lambda[i], obj_tol, alpha_ls, gamma_ls, max_iter_ls, max_inner_iter,
+                    DktDk, &logi_b, &logi_b1, &logi_b2, verbose);
         break;
 
       case FAMILY_POISSON:
         tf_admm_glm(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha, u, obj+i*max_iter, iter+i,
-                    rho * lambda[i], obj_tol, max_inner_iter, DktDk, &pois_b, &pois_b1, &pois_b2,
-                    verbose);
+                    rho * lambda[i], obj_tol, alpha_ls, gamma_ls, max_iter_ls, max_inner_iter,
+                    DktDk, &pois_b, &pois_b1, &pois_b2, verbose);
         break;
     }
 

@@ -81,6 +81,11 @@ update for glm losses.
 
 The paramter \code{x_cond} effects the degree of thinning, when applied. The default
 is 1e11; smaller values indicate more thinning.
+
+When using glm losses (e.g., binomial and poisson), a line search is used in the inner
+loop of the algorithm; parameters for this can be set from the control list as well.
+The \code{alpha_ls} defaults to 0.5, \code{gamma_ls} to 0.8, and \code{max_iter_ls}
+to 50.
 }
 \value{
 an object of class \code{\linkS4class{trendfilter}}
