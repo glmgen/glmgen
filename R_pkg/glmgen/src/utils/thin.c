@@ -1,3 +1,31 @@
+/****************************************************************************
+ * Copyright (C) 2014 by Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala   *
+ *                                                                          *
+ * This file is part of the glmgen library / package.                       *
+ *                                                                          *
+ *   glmgen is free software: you can redistribute it and/or modify it      *
+ *   under the terms of the GNU Lesser General Public License as published  *
+ *   by the Free Software Foundation, either version 2 of the License, or   *
+ *   (at your option) any later version.                                    *
+ *                                                                          *
+ *   glmgen is distributed in the hope that it will be useful,              *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *   GNU Lesser General Public License for more details.                    *
+ *                                                                          *
+ *   You should have received a copy of the GNU Lesser General Public       *
+ *   License along with glmgen. If not, see <http://www.gnu.org/licenses/>. *
+ ****************************************************************************/
+
+/**
+ * @file thin.c
+ * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
+ * @date 2014-12-23
+ * @brief Main calling function for fitting trendfiltering model.
+ *
+ * Here.
+ */
+
 #include "utils.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,13 +35,15 @@ void thin( double* x, double* y, double* w, int n, int k,
   double** xt, double** yt, double** wt, int* nt_ptr, double x_cond)
 {
   int i,j, jj;
-  int m;  // number of intervals
-  int nt; // number of intervals with at least one point
-  double r, delta;
+  int m;  /* number of intervals */
+  int nt; /* number of intervals with at least one point */
+  double r;
+  double delta;
   double mindx;
   int * intvl;
   int intvl_xj;
-  int lo, hi;
+  int lo;
+  int hi;
   int cur_intvl;
 
   r = x[n-1] - x[0];
@@ -30,7 +60,7 @@ void thin( double* x, double* y, double* w, int n, int k,
   m = (int) MIN( floor(r/delta), 5*n );
   delta = r/m;
 
-  if( m <= 1 ) return; // Not thinning as it merges all points into one
+  if( m <= 1 ) return; /* Not thinning as it merges all points into one */
 
   intvl = (int*)malloc( n * sizeof(int) );
 
@@ -51,12 +81,12 @@ void thin( double* x, double* y, double* w, int n, int k,
 
   lo = 0;
   hi = 0;
-  i = 0; // range 0:nt-1
-  cur_intvl = 1; // range 1:m
+  i = 0; /* range 0:nt-1 */
+  cur_intvl = 1; /* range 1:m */
 
   for(j = 0; j < n; j++)
   {
-    if( intvl[j] > cur_intvl ) //crossed the current interval
+    if( intvl[j] > cur_intvl ) /* crossed the current interval */
     {
       hi = j-1;
       (*xt)[i] = x[0] + (cur_intvl - 0.5) * delta;
@@ -73,7 +103,7 @@ void thin( double* x, double* y, double* w, int n, int k,
       cur_intvl = intvl[j];
       lo = j;
     }
-    if( i >= nt - 1 ) // last interval
+    if( i >= nt - 1 ) /* last interval */
     {
       i = nt - 1;
       hi = n-1;

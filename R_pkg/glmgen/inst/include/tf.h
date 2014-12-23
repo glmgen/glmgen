@@ -1,3 +1,31 @@
+/****************************************************************************
+ * Copyright (C) 2014 by Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala   *
+ *                                                                          *
+ * This file is part of the glmgen library / package.                       *
+ *                                                                          *
+ *   glmgen is free software: you can redistribute it and/or modify it      *
+ *   under the terms of the GNU Lesser General Public License as published  *
+ *   by the Free Software Foundation, either version 2 of the License, or   *
+ *   (at your option) any later version.                                    *
+ *                                                                          *
+ *   glmgen is distributed in the hope that it will be useful,              *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *   GNU Lesser General Public License for more details.                    *
+ *                                                                          *
+ *   You should have received a copy of the GNU Lesser General Public       *
+ *   License along with glmgen. If not, see <http://www.gnu.org/licenses/>. *
+ ****************************************************************************/
+
+/**
+ * @file tf.h
+ * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
+ * @date 2014-12-23
+ * @brief Main calling function for fitting trendfiltering model.
+ *
+ * Here.
+ */
+
 #ifndef TF_H
 #define TF_H
 
@@ -8,7 +36,6 @@
 
 #include "cs.h"
 #include "utils.h"
-#include "int_codes.h"
 
 #define WEIGHT_SMALL DBL_EPSILON
 
@@ -19,8 +46,6 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               double * obj, int * iter, int * status, double rho,
               double obj_tol, double alpha_ls, double gamma_ls,
               int max_iter_ls, int max_inner_iter, int verbose);
-
-typedef double (*func_RtoR)(double);
 
 /* Helper functions for cases of the admm and primal dual algorithms */
 void tf_dp (int n, double *y, double lam, double *beta);
@@ -48,25 +73,12 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
 /* Low-level utility functions for trendfiltering */
 cs * tf_calc_dk (int n, int k, const double * x);
 cs * tf_calc_dktil (int n, int k, const double * x);
-double tf_maxlam (int len, double * y, gqr * Dt_qr, double * w, int family);
+double tf_maxlam (int len, double * y, gqr * Dt_qr, double * w);
 void tf_dx(double *x, int n, int k,double *a, double *b);
 void tf_dtx(double *x, int n, int k, double *a, double *b);
 void tf_dxtil(double *x, int n, int k,double *a, double *b);
 void tf_dtxtil(double *x, int n, int k, double *a, double *b);
-void poly_coefs(double *x, int n, int k, double *beta, double *phi);
+void poly_coefs(double *x, int k, double *beta, double *phi);
 
-/* glm loss functions */
-double logi_b(double x);
-double logi_b1(double x);
-double logi_b2(double x);
-double pois_b(double x);
-double pois_b1(double x);
-double pois_b2(double x);
-
-double tf_line_search(double * y, double * x, double * w, int n, int k, double lam,
-    func_RtoR b, func_RtoR b1,
-    double * beta, double * d,
-    double alpha, double gamma, int max_iter,
-    int * iter, double * Db, double * Dd);
 
 #endif

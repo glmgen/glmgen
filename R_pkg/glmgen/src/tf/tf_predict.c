@@ -1,18 +1,54 @@
-#include "tf.h"
+/****************************************************************************
+ * Copyright (C) 2014 by Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala   *
+ *                                                                          *
+ * This file is part of the glmgen library / package.                       *
+ *                                                                          *
+ *   glmgen is free software: you can redistribute it and/or modify it      *
+ *   under the terms of the GNU Lesser General Public License as published  *
+ *   by the Free Software Foundation, either version 2 of the License, or   *
+ *   (at your option) any later version.                                    *
+ *                                                                          *
+ *   glmgen is distributed in the hope that it will be useful,              *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *   GNU Lesser General Public License for more details.                    *
+ *                                                                          *
+ *   You should have received a copy of the GNU Lesser General Public       *
+ *   License along with glmgen. If not, see <http://www.gnu.org/licenses/>. *
+ ****************************************************************************/
+
+/**
+ * @file tf_predict.c
+ * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
+ * @date 2014-12-23
+ * @brief Main calling function for fitting trendfiltering model.
+ *
+ * Here.
+ */
+
+ #include "tf.h"
 
 void tf_predict_gauss(double * beta, double * x, int n, int k,
 		      double * x0, int n0, double * pred, double zero_tol)
 {
+  int i;
+  int j;
+  int l;
+  double * phi;
+  double * theta;
+  double k_fac;
+  double h;
+
   if(n0 <= 0) return;
-  int i=0, j=0;
+
   /* Compute phi (polynomial coefficients) */
-  double *phi = (double *)malloc((k+1)*sizeof(double));
-  poly_coefs(x,n,k,beta,phi);
+  phi = (double *)malloc((k+1)*sizeof(double));
+  poly_coefs(x,k,beta,phi);
 
   /* Compute theta (falling fact coefficients) */
-  double *theta = (double *)malloc((n)*sizeof(double));
+  theta = (double *)malloc((n)*sizeof(double));
   tf_dx(x,n,k+1,beta,theta);
-  double k_fac = glmgen_factorial(k);
+  k_fac = glmgen_factorial(k);
   for(i=0; i<n-k-1;i++)
     theta[i] /= k_fac;
 
@@ -20,16 +56,15 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
   for (i=0; i<n-k-1; i++) if (fabs(theta[i])<zero_tol) theta[i]=0;
 
   /* Compute the predictions at each new point x0 */
-  double h;
   for (j=0; j<n0; j++) {
     pred[j] = 0;
 
     /* Loop over x points, polynomial basis */
     for (i=0; i<k+1; i++) {
       h = 1;
-      int l=0;
+      l=0;
       for (l=0; l<i; l++) {
-	h *= (x0[j]-x[l]);
+        h *= (x0[j]-x[l]);
       }
       pred[j] += phi[i]*h;
     }
@@ -42,12 +77,11 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
       /* Otherwise check the ith coef, and if it is nonzero,
        * compute the contribution of the ith basis function */
       if (theta[i]!=0) {
-	h = 1;
-	int l=0;
-	for (l=0; l<k; l++) {
-	  h *= (x0[j]-x[i+l+1]);
-	}
-	pred[j] += theta[i]*h;
+	      h = 1;
+	      for (l=0; l<k; l++) {
+	        h *= (x0[j]-x[i+l+1]);
+	      }
+	      pred[j] += theta[i]*h;
       }
     }
   }
@@ -56,10 +90,12 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
   free(theta);
 }
 
-void poly_coefs(double *x, int n, int k, double *beta, double *phi)
+void poly_coefs(double *x, int k, double *beta, double *phi)
 {
+  int j;
+  int ell;
+
   memcpy(phi,beta,(k+1)*sizeof(double));
-  int j, ell;
 
   for(j=1; j <= k; j++)
   {
@@ -75,6 +111,7 @@ void tf_predict(double * beta, double * x, int n, int k, int family,
 {
   int i;
   double f;
+
   tf_predict_gauss(beta, x, n, k, x0, n0, pred, zero_tol);
 
   switch (family)

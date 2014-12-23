@@ -1,6 +1,6 @@
 .PHONY: all mylibs
 
-PKG_CPPFLAGS = -I./csparse -I./tf -I./utils 
+PKG_CPPFLAGS =  -I../inst/include
 PKG_LIBS = $(SUBLIBS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 SUBLIBS = ./csparse/*.o ./tf/*.o ./utils/*.o
