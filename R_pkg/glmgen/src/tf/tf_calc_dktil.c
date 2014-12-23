@@ -4,15 +4,15 @@
 /* Creates \tilde{D}k = k. (delta_k)^-1 Dk */
 cs * tf_calc_dktil (int n, int k, const double * x)
 {
-  cs * delta_k;  
+  cs * delta_k;
   cs * delta_k_cp;
   cs * Dk;
   cs * Dktil;
-  
+
   int i;
 
   Dk = tf_calc_dk(n, k, x);
-  
+
   /* Deal with k=0 separately */
   if(k == 0)
     return Dk;

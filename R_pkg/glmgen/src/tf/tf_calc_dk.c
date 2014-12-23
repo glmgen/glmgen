@@ -4,7 +4,7 @@
 cs * tf_calc_dk (int n, int k, const double * x)
 {
   long int i;
-  
+
   int tk = 1; /* "this k" - will iterate until ts = k */
 
   cs * D1;
@@ -20,7 +20,7 @@ cs * tf_calc_dk (int n, int k, const double * x)
 
   /* Deal with k=0 separately */
   if(k == 0)
-  {    
+  {
     T = cs_spalloc (n, n, n, 1, 1) ;
     for (i = 0 ; i < n; i++) cs_entry (T, i, i, 1);
     eye = cs_compress (T);

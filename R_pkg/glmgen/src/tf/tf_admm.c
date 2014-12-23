@@ -1,5 +1,4 @@
 #include "tf.h"
-#include "tf_glm_loss.h"
 #include "utils.h"
 
 void tf_admm (double * y, double * x, double * w, int n, int k, int family,
@@ -43,8 +42,8 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   DktDk = cs_multiply(Dkt,Dk);
 
   /* Determine the maximum lambda in the path, and initiate the path if needed
-     using the input lambda_min_ratio and equally spaced log points. */
-
+   * using the input lambda_min_ratio and equally spaced log points.
+   */
   max_lam = tf_maxlam(n, y, Dt_qr, w, family);
   if (!lam_flag)
   {
@@ -106,9 +105,9 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   }
 
   /* Iterate lower level functions over all lambda values;
-     the alpha and u vectors get used each time of subsequent
-     warm starts */
-
+   * the alpha and u vectors get used each time of subsequent
+   * warm starts
+   */
   for (i = 0; i < nlambda; i++)
   {
     /* warm start */
@@ -124,15 +123,15 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
         break;
 
       case FAMILY_LOGISTIC:
-        tf_admm_logistic(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
-			                    u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-                          max_inner_iter, DktDk, verbose);
+        tf_admm_glm(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha, u, obj+i*max_iter, iter+i,
+                    rho * lambda[i], obj_tol, max_inner_iter, DktDk, &logi_b, &logi_b1, &logi_b2,
+                    verbose);
         break;
 
       case FAMILY_POISSON:
-        tf_admm_poisson(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha,
-		                      u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-                          max_inner_iter, DktDk, verbose);
+        tf_admm_glm(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha, u, obj+i*max_iter, iter+i,
+                    rho * lambda[i], obj_tol, max_inner_iter, DktDk, &pois_b, &pois_b1, &pois_b2,
+                    verbose);
         break;
     }
 

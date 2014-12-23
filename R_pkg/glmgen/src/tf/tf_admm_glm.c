@@ -24,10 +24,6 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
   double pobj, loss, pen;
   double t; /* stepsize */
   int it;
-  double admm_tol;
-
-  /* Set ADMM parameters appropriately */
-  admm_tol = obj_tol;
 
   obj_admm = (double*)malloc(max_inner_iter*sizeof(double));
 
@@ -58,7 +54,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
     tf_admm_gauss (yt, x, H, n, k,
         max_inner_iter, lam,
         d, alpha, u,
-        obj_admm, &iter_admm, rho, admm_tol,
+        obj_admm, &iter_admm, rho, obj_tol,
         DktDk, verbose);
 
     for(i=0; i<n; i++)

@@ -45,44 +45,42 @@ setMethod("coef", signature(object = "glmgen"),
           })
 
 setMethod("predict", signature(object = "trendfilter"),
-          function(object, type = c("link", "response"), lambda = NULL, x.new = NULL) {
-            type = match.arg(type)
-            co = coef(object, lambda)
-            if (is.null(lambda)) lambda = object@lambda
-            if (!is.null(x.new)) {
-              if (min(x.new) < min(object@x) | max(x.new) > max(object@x))
-                stop("Cannot predict outside of the original x range.")
+          function(object, type = c("link", "response"), lambda = NULL,
+            x.new = NULL, zero_tol=1e-6) {
 
-              o = order(x.new, decreasing = TRUE)
-              o2 = order(object@x, decreasing=TRUE)
-              x.new = x.new[o]
-              knots = object@x[o2]
-              k = length(x.new)
-              mat = matrix(rep(knots, each = k), nrow = k)
-              b = x.new >= mat
-              blo = max.col(b, ties.method = "first")
-              bhi = pmax(blo - 1, 1)
-              i = bhi == blo
-              p = numeric(k)
-              p[i] = 0
-              p[!i] = ((x.new - knots[blo])/(knots[bhi] - knots[blo]))[!i]
+              type = match.arg(type)
+              if (is.null(x.new)) {
+                x.new = object@x
+              } else {
+                if (min(x.new) < min(object@x) | max(x.new) > max(object@x))
+                  stop("Cannot predict outside of the original x range.")
+              }
 
-              xs = co[o2,,drop=FALSE]
-              x = t((1 - p) * t(xs[blo,, drop = FALSE]) +
-                  p * t(xs[bhi,, drop = FALSE]))
-              colnames(x) = as.character(round(lambda, 3))
-              rownames(x) = as.character(round(x.new, 3))
+              if (type == "link") {
+                family_cd = 0L
+              } else {
+                family_cd = match(out@family, c("gaussian", "logistic", "poisson")) - 1L
+              }
 
-              x = x[order(o),,drop=FALSE]
-            } else x = co
+              if (is.null(lambda)) lambda = out@lambda
 
-            if (object@family == "gaussian" | type == "link")
-              return(x)
-            else if (object@family == "logistic")
-              return(1 / (1 + exp(-x)))
-            else
-              return(exp(x))
-          })
+              co = coef(object, lambda)
+
+              z = .Call("tf_predict_R",
+                    sBeta = as.double(co),
+                    sX = as.double(out@x),
+                    sN = length(out@y),
+                    sK = as.integer(out@k),
+                    sX0 = as.double(x.new),
+                    sN0 = length(x.new),
+                    sNLambda = length(lambda),
+                    sFamily = family_cd,
+                    sZeroTol = as.double(zero_tol),
+                    package = "glmgen")
+
+              z = matrix(z, ncol=ncol(co), dimnames=list(NULL, colnames(co)))
+              return(z)
+            })
 
 setMethod("print", signature(x = "glmgen"),
           function(x) {

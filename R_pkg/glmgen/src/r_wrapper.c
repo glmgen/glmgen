@@ -206,11 +206,6 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
               rho, obj_tol, max_iter_admm, verbose);
       break;
 
-    case TF_PRIMALDUAL_IP:
-      tf_primal_dual(y, x, w, n, k, family, maxiter, lam_flag, lambda,
-          nlambda, lambda_min_ratio, beta, obj, verbose);
-      break;
-
     default:
       error("Method code not found.");
       break;
@@ -243,3 +238,49 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   UNPROTECT(10);
   return sOutput;
 }
+
+SEXP tf_predict_R (SEXP sBeta, SEXP sX, SEXP sN, SEXP sK, SEXP sX0, SEXP sN0,
+    SEXP sNLambda, SEXP sFamily, SEXP sZeroTol)
+{
+  /* Initialize all of the variables */
+  int i;
+  double * beta;
+  double * x;
+  double * x0;
+  int n;
+  int n0;
+  int k;
+  int family;
+  int nlambda;
+  double zero_tol;
+  double * pred;
+
+  beta = REAL(sBeta);
+  x = REAL(sX);
+  x0 = REAL(sX0);
+  n = asInteger(sN);
+  n0 = asInteger(sN0);
+  k = asInteger(sK);
+  nlambda = asInteger(sNLambda);
+  family = asInteger(sFamily);
+  zero_tol = asReal(sZeroTol);
+
+  /* Output */
+  SEXP sPred;
+  PROTECT(sPred = allocVector(REALSXP, n0 * nlambda));
+  pred = REAL(sPred);
+
+  for (i = 0; i < nlambda; i++)
+  {
+    tf_predict(beta, x, n, k, family, x0, n0, pred + i*n, zero_tol);
+  }
+
+  /* Free the allocated objects for the gc and return the output as a list */
+  UNPROTECT(1);
+  return sPred;
+}
+
+
+
+
+

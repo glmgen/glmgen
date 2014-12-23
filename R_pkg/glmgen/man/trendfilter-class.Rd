@@ -2,7 +2,6 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{trendfilter-class}
-\alias{predict,trendfilter-method}
 \alias{summary,trendfilter-method}
 
 \title{Class \code{"trendfilter"}}
@@ -56,7 +55,14 @@ Class \code{"\linkS4class{glmgen}"}, directly.
   }
 }
 \references{
-%%  ~~put references to the literature/web site here~~
+  Tibshirani, R. J. and Taylor, J. (2011), "The solution path of the
+  generalized lasso", Annals of Statistics 39 (3) 1335--1371.
+
+  Tibshirani, R. J. (2014), "Adaptive piecewise polynomial estimation
+  via trend filtering", Annals of Statistics 42 (1): 285--323.
+
+  Arnold, T. B. and Tibshirani, R. J. (2014), "Efficient implementations
+  of the generalized lasso dual path algorithm", arXiv: 1405.3222.
 }
 \author{
 Taylor B. Arnold, Ryan Tibshirani, Veerun Sadhanala
@@ -65,8 +71,8 @@ Taylor B. Arnold, Ryan Tibshirani, Veerun Sadhanala
 \code{\linkS4class{glmgen}},
 }
 \examples{
-x = runif(25, min=-2*pi, max=2*pi)
-y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
-out = trendfilter(y, pos, k=3)
+  x = runif(25, min=-2*pi, max=2*pi)
+  y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
+  out = trendfilter(y, x, k=3)
 }
 \keyword{classes}

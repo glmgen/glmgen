@@ -2,7 +2,6 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{glmgen-class}
-\alias{coef,glmgen-method}
 \alias{print,glmgen-method}
 \alias{show,glmgen-method}
 \alias{summary.glmgen-class}
@@ -80,9 +79,6 @@ to estimation algorithms such as \code{\link{trendfilter}}.
     \code{glmgen} object.
     }
 	}
-}
-\references{
-%%  ~~put references to the literature/web site here~~
 }
 \author{
 Taylor B. Arnold, Ryan Tibshirani, Veerun Sadhanala

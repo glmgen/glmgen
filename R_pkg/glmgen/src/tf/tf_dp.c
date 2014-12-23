@@ -31,7 +31,7 @@ void tf_dp (int n, double *y, double lam, double *beta)
     for (i=0; i<n; i++) beta[i] = y[i];
     return;
   }
-  
+
   x = (double*) malloc(2*n*sizeof(double));
   a = (double*) malloc(2*n*sizeof(double));
   b = (double*) malloc(2*n*sizeof(double));
@@ -69,7 +69,7 @@ void tf_dp (int n, double *y, double lam, double *beta)
       alo += a[lo];
       blo += b[lo];
     }
-   
+
    /* Compute hi: step down from r until the
        derivative is less than lam */
     ahi = alast;
@@ -85,7 +85,7 @@ void tf_dp (int n, double *y, double lam, double *beta)
     tm[k] = (-lam-blo)/alo;
     l = lo-1;
     x[l] = tm[k];
- 
+
     /* Compute the positive knot */
     tp[k] = (lam+bhi)/(-ahi);
     r = hi+1;

@@ -19,43 +19,29 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family, int 
               int * status, double rho, double obj_tol, int max_inner_iter,
               int verbose);
 
-void tf_primal_dual (double * y, double * x, double * w, int n, int k, int family, int max_iter,
-              int lam_flag, double * lambda, int nlambda, double lambda_min_ratio,
-              double * beta, double * obj, int verbose);
+typedef double (*func_RtoR)(double);
 
 /* Helper functions for cases of the admm and primal dual algorithms */
 void tf_dp (int n, double *y, double lam, double *beta);
 void tf_dp_weight (int n, double *y, double *w, double lam, double *beta);
 void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
-       int max_iter, double lam,
-       double * beta, double * alpha, double * u,
-       double * obj, int * iter,
-       double rho, double obj_tol, cs * DktDk, int verbose);
-void tf_admm_logistic (double * y, double * x, double * w, int n, int k,
-       int max_iter, double lam,
-       double * beta, double * alpha, double * u,
-       double * obj, int * iter,
-       double rho, double obj_tol, int max_iter_admm, cs * DktDk, int verbose);
-void tf_admm_poisson (double * y, double * x, double * w, int n, int k,
-       int max_iter, double lam,
-       double * beta, double * alpha, double * u,
-       double * obj, int * iter,
-       double rho, double obj_tol, int max_iter_admm, cs * DktDk, int verbose);
-
-typedef double (*func_RtoR)(double);
+    int max_iter, double lam,
+    double * beta, double * alpha, double * u,
+    double * obj, int * iter,
+    double rho, double obj_tol, cs * DktDk, int verbose);
 void tf_admm_glm (double * y, double * x, double * w, int n, int k,
-       int max_iter, double lam,
-       double * beta, double * alpha, double * u,
-       double * obj, int * iter,
-       double rho, double obj_tol, int max_iter_admm,
-       cs * DktDk,
-       func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose);
+    int max_iter, double lam,
+    double * beta, double * alpha, double * u,
+    double * obj, int * iter,
+    double rho, double obj_tol, int max_iter_admm,
+    cs * DktDk,
+    func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose);
 
 /* Functions to predict */
 void tf_predict(double * beta, double * x, int n, int k, int family,
-	double * x0, int n0, double * pred, double zero_tol);
+    double * x0, int n0, double * pred, double zero_tol);
 void tf_predict_gauss(double * beta, double * x, int n, int k,
-	double * x0, int n0, double * pred, double zero_tol);
+    double * x0, int n0, double * pred, double zero_tol);
 
 /* Low-level utility functions for trendfiltering */
 cs * tf_calc_dk (int n, int k, const double * x);
@@ -65,6 +51,15 @@ void tf_dx(double *x, int n, int k,double *a, double *b);
 void tf_dtx(double *x, int n, int k, double *a, double *b);
 void tf_dxtil(double *x, int n, int k,double *a, double *b);
 void tf_dtxtil(double *x, int n, int k, double *a, double *b);
+void poly_coefs(double *x, int n, int k, double *beta, double *phi);
+
+/* glm loss functions */
+double logi_b(double x);
+double logi_b1(double x);
+double logi_b2(double x);
+double pois_b(double x);
+double pois_b1(double x);
+double pois_b2(double x);
 
 double tf_line_search(double * y, double * x, double * w, int n, int k, double lam,
     func_RtoR b, func_RtoR b1,

@@ -1,8 +1,8 @@
 #include "tf.h"
 
-/* Dynamic programming algorithm for the weighted 1d fused lasso problem 
+/* Dynamic programming algorithm for the weighted 1d fused lasso problem
    (Ryan's implementation of Nick Johnson's algorithm) */
-void tf_dp_weight (int n, double *y, double *w, double lam, double *beta) 
+void tf_dp_weight (int n, double *y, double *w, double lam, double *beta)
 {
   int i;
   int k;
@@ -31,7 +31,7 @@ void tf_dp_weight (int n, double *y, double *w, double lam, double *beta)
     for (i=0; i<n; i++) beta[i] = y[i];
     return;
   }
-  
+
   /* Now deal with zero weights  */
 
   x = (double*) malloc(2*n*sizeof(double));
@@ -71,7 +71,7 @@ void tf_dp_weight (int n, double *y, double *w, double lam, double *beta)
       alo += a[lo];
       blo += b[lo];
     }
-   
+
    /* Compute hi: step down from r until the
        derivative is less than lam */
     ahi = alast;
@@ -87,7 +87,7 @@ void tf_dp_weight (int n, double *y, double *w, double lam, double *beta)
     tm[k] = (-lam-blo)/alo;
     l = lo-1;
     x[l] = tm[k];
- 
+
     /* Compute the positive knot */
     tp[k] = (lam+bhi)/(-ahi);
     r = hi+1;

@@ -27,10 +27,9 @@ Taylor B. Arnold, Ryan Tibshirani
 
 Maintainer: Taylor Arnold <taylor.arnold@aya.yale.edu>
 }
-\references{
-
-}
 \keyword{ package }
 \examples{
-
+  x = runif(25, min=-2*pi, max=2*pi)
+  y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
+  out = trendfilter(y, x, k=3)
 }

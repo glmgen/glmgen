@@ -10,10 +10,11 @@ link functions of Gaussian, binomial, and Poisson penalized
 loss functions.
 }
 \usage{
-trendfilter(y, x, k = 0L, family = c("gaussian", "logistic", "poisson"),
-            lambda, nlambda = 100L, lambda.min.ratio = 1e-05,
-            thinning = !missing(x), method = "admm",
-            objective = TRUE, verbose = FALSE, control = list())
+trendfilter(y, x, weights, k = 2L, family = c("gaussian",
+            "logistic", "poisson"), method = c("admm"), lambda,
+            nlambda = 50L, lambda.min.ratio = 1e-05,
+            thinning = !missing(x), objective = TRUE,
+            verbose = FALSE, control = list())
 }
 \arguments{
   \item{y}{
@@ -22,6 +23,10 @@ vector of observed data
   \item{x}{
 optional vector of observed data locations. If missing, will be assumed to
 be the integers 1 through the length of \code{y}.
+}
+  \item{weights}{
+optional vector of sample weights. If missing, the weights will be assumed
+as constant across all samples.
 }
   \item{k}{
 the order to the trendfilter fit; an integer larger than 0 (orders larger
