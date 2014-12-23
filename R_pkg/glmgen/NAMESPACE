@@ -2,7 +2,7 @@ useDynLib(glmgen)
 
 importFrom("methods", show)
 
-export(trendfilter)
+export(trendfilter, trendfilter.control.list)
 
 exportMethods(
     "coef",

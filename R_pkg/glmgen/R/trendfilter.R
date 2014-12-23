@@ -3,7 +3,7 @@ trendfilter = function(y, x, weights, k = 2L,
                         method = c("admm"),
                         lambda, nlambda = 50L, lambda.min.ratio = 1e-05,
                         thinning = !missing(x), objective = TRUE,
-                        verbose = FALSE, control = list()) {
+                        verbose = FALSE, control = trendfilter.control.list()) {
 
   cl = match.call()
   n = length(y)
@@ -90,5 +90,16 @@ trendfilter = function(y, x, weights, k = 2L,
             p = length(y), m = length(y) - as.integer(k) - 1L, obj = z$obj,
             call = cl)
   out
+}
+
+trendfilter.control.list = function(rho=1, obj_tol=1e-10, maxiter=25L,
+                          max_inner_iter=250L, x_cond=1e11,
+                          alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=50L) {
+
+  z <- list(rho=rho, obj_tol=obj_tol, maxiter=maxiter,
+            max_inner_iter=max_inner_iter, x_cond=x_cond,
+            alpha_ls=alpha_ls, gamma_ls=gamma_ls,
+            max_iter_ls=max_iter_ls)
+  z
 }
 

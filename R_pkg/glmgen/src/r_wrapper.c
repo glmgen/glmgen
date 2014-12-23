@@ -5,21 +5,32 @@
 #include "tf.h"
 #include "utils.h"
 
-double get_control_value(SEXP sControlList, const char * param_name, double param_default)
+double get_control_value(SEXP sControlList, const char * param_name)
 {
   int i;
+  int okay_flag;
   double param_output;
+  char * outputString;
   SEXP sControlListNames;
 
   sControlListNames = getAttrib(sControlList, R_NamesSymbol);
-  param_output = param_default;
+  okay_flag = 0;
+  param_output = 0;
   for (i = 0; i < length(sControlList); i++)
   {
     if (strcmp(CHAR(STRING_ELT(sControlListNames, i)), param_name) == 0)
     {
      param_output = REAL(VECTOR_ELT(sControlList, i))[0];
+     okay_flag = 1;
      break;
     }
+  }
+
+  if (okay_flag == 0)
+  {
+    outputString = (char *) malloc(sizeof(char) * 100);
+    snprintf(outputString, sizeof(char) * 100, "Missing required tuning parameter %s", param_name);
+    Rf_error(outputString);
   }
 
   return param_output;
@@ -53,7 +64,7 @@ SEXP thin_R (SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sControl)
   int * outputN;
 
   /* Grab condition number from the control list */
-  x_cond = get_control_value(sControl, "x_cond", 1e11);
+  x_cond = get_control_value(sControl, "x_cond");
 
   /* Convert input SEXP variables into C style variables */
   y = REAL(sY);
@@ -167,7 +178,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
 
   family = asInteger(sFamily);
   method = asInteger(sMethod);
-  maxiter = get_control_value(sControl, "maxiter", 25);
+  maxiter = get_control_value(sControl, "maxiter");
   lam_flag = asInteger(sLamFlag);
   PROTECT(sLambdaNew = duplicate(sLambda));
   lambda = REAL(sLambda);
@@ -199,12 +210,12 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   switch(method)
   {
     case TF_ADMM:
-      rho = get_control_value(sControl, "rho", 1);
-      obj_tol = get_control_value(sControl, "obj_tol", 1e-10);
-      alpha_ls = get_control_value(sControl, "alpha_ls", 0.5);
-      gamma_ls = get_control_value(sControl, "gamma_ls", 0.8);
-      max_iter_ls = get_control_value(sControl, "max_iter_ls", 50);
-      max_inner_iter = get_control_value(sControl, "max_inner_iter", 250);
+      rho = get_control_value(sControl, "rho");
+      obj_tol = get_control_value(sControl, "obj_tol");
+      alpha_ls = get_control_value(sControl, "alpha_ls");
+      gamma_ls = get_control_value(sControl, "gamma_ls");
+      max_iter_ls = get_control_value(sControl, "max_iter_ls");
+      max_inner_iter = get_control_value(sControl, "max_inner_iter");
 
       tf_admm(y, x, w, n, k, family, maxiter, lam_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj, iter, status,

@@ -16,7 +16,7 @@
 \arguments{
   \item{object}{an \R object inheriting from class \code{\linkS4class{trendfilter}}.}
   \item{type}{the type of prediction required. The default is on the scale
-          of the linear predictors; the alternative ‘"response"’ is on
+          of the linear predictors; the alternative \code{response} is on
           the scale of the response variable.}
   \item{lambda}{option vector of lambda values at which to predict. If \code{NULL},
           the set of lambda used in fitting are used for prediction.}

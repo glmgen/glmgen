@@ -1,7 +1,7 @@
 #ifndef RWRAPPER_H
 #define RWRAPPER_H
 
-double get_control_value(SEXP sControlList, const char * param_name, double param_default);
+double get_control_value(SEXP sControlList, const char * param_name);
 
 SEXP thin_R (SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sControl);
 SEXP tf_R (SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily,

@@ -14,7 +14,7 @@ trendfilter(y, x, weights, k = 2L, family = c("gaussian",
             "logistic", "poisson"), method = c("admm"), lambda,
             nlambda = 50L, lambda.min.ratio = 1e-05,
             thinning = !missing(x), objective = TRUE,
-            verbose = FALSE, control = list())
+            verbose = FALSE, control = trendfilter.control.list())
 }
 \arguments{
   \item{y}{
@@ -73,19 +73,7 @@ will be silently ignored.
 }
 }
 \details{
-Further parameters can be passed through the \code{control} input. The \code{rho}
-in the admm procedure is defaulted to 1, \code{obj_tol} to 1e-10 for the tolerance
-used in the stopping criterion, \code{max_iter} to 25 is the number of admm iterations
-used, and \code{max_iter_admm} to 250 as the number of iterations used for each admm
-update for glm losses.
-
-The paramter \code{x_cond} effects the degree of thinning, when applied. The default
-is 1e11; smaller values indicate more thinning.
-
-When using glm losses (e.g., binomial and poisson), a line search is used in the inner
-loop of the algorithm; parameters for this can be set from the control list as well.
-The \code{alpha_ls} defaults to 0.5, \code{gamma_ls} to 0.8, and \code{max_iter_ls}
-to 50.
+Further parameters can be passed by using \code{\link{trendfilter.control.list}}.
 }
 \value{
 an object of class \code{\linkS4class{trendfilter}}
