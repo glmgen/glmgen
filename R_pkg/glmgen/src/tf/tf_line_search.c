@@ -1,5 +1,5 @@
 #include "tf.h"
-#include <math.h>
+#include "math.h"
 
 /* backtracking linesearch. See Jason Lee et. al (2012)
  * f = g + h, g differentiable, h not necessarily so

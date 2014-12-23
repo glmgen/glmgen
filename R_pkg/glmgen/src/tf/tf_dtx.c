@@ -6,7 +6,7 @@ void tf_dtx(double *x, int n, int k, double *a, double *b)
   int j;
 
   for(i=0; i < n; i++) b[i] = a[i];
-  
+
   if( k < 1 || k >= n )
     return;
 
