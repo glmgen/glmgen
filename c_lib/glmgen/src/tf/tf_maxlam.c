@@ -18,7 +18,7 @@
  ****************************************************************************/
 
 /**
- * @file glmgen_api.c
+ * @file tf_maxlam.c
  * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
  * @date 2014-12-23
  * @brief Main calling function for fitting trendfiltering model.
@@ -26,27 +26,29 @@
  * Here.
  */
 
-#ifndef GLMGEN_API_H
-#define GLMGEN_API_H
-
- #include "cs.h"
  #include "tf.h"
- #include "utils.h"
 
-/* user-level c functions here */
-double * tf_admm_default (double * y, int n);
+double tf_maxlam (int len, double * y, gqr * Dt_qr, double * w)
+{
+  /* This is exact for the Gaussian case, but only approximate
+     for logistic or Poisson losses, which is OK, since we are
+     only tasked with finding an interesting range for lambdas. */
 
-void tf_admm (double * y, double * x, double * w, int n, int k, int family,
-              int max_iter, int lam_flag, double * lambda,
-              int nlambda, double lambda_min_ratio, double * beta,
-              double * obj, int * iter, int * status, double rho,
-              double obj_tol, double alpha_ls, double gamma_ls,
-              int max_iter_ls, int max_inner_iter, int verbose);
+  int i;
+  int tmp; /*n-k-1*/
+  double maxlam;
+  double * y_work;
 
-void tf_predict(double * beta, double * x, int n, int k, int family,
-    double * x0, int n0, double * pred, double zero_tol);
+  y_work = (double *) malloc(len * sizeof(double));
 
-void thin( double* x, double* y, double* w, int n, int k,
-  double** xt, double** yt, double** wt, int* nt_ptr, double x_cond);
+  for(i = 0; i < len; i++) y_work[i] = sqrt(w[i]) * y[i];
 
-#endif
+  glmgen_qrsol(Dt_qr, y_work);
+
+  tmp = Dt_qr->n;
+  maxlam = 0;
+  for(i = 0; i < tmp; i++) maxlam = MAX(maxlam, fabs(y_work[i]));
+
+  free(y_work);
+  return maxlam;
+}
