@@ -6,5 +6,5 @@ R library directly from github, run the following from R:
 
 ```{r}
  library(devtools)
- install_github("statsmaths/glmgen", subdir="R_pkg/glmgen”)
+ install_github("statsmaths/glmgen", subdir="R_pkg/glmgen")
 ```
