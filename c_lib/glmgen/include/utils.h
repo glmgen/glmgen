@@ -131,7 +131,7 @@ llnode* create_node(int val);
 void insert_node(linkedlist** ll, int val);
 void delete_node(linkedlist** ll, int key);
 int isempty(linkedlist* ll);
-int length(linkedlist* ll);
+int ll_length(linkedlist* ll);
 void display(linkedlist* ll);
 void ll_free(linkedlist* ll);
 

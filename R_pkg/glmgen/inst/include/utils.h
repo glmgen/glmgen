@@ -29,21 +29,25 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "cs.h"
+#include "cs.h" /* for cs structures */
 
+/* Method codes (only TF_ADMM currently implemented) */
 #define TF_ADMM 0
 #define TF_PRIMALDUAL_IP 1
 #define TF_PROJECTED_NEWTON 2
 
+/* Family codes */
 #define FAMILY_GAUSSIAN 0
 #define FAMILY_LOGISTIC 1
 #define FAMILY_POISSON 2
 
+/* Define MAX and MIN functions */
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 
-/* --- custom structure to hold the out of the qr decomposition ------- */
-typedef struct gcs_qr  /* holds numeric and symbol qr together */
+/* Custom structures */
+
+typedef struct gcs_qr /* holds numeric and symbolic qr together */
 {
   csi m ;         /* number of rows */
   csi n ;         /* number of columns */
@@ -52,39 +56,83 @@ typedef struct gcs_qr  /* holds numeric and symbol qr together */
   double * W ;    /* pre-allocated working space for the solver */
 } gqr ;
 
-typedef double (*func_RtoR)(double);
+typedef double (*func_RtoR)(double); /* double to double function typedef */
 
-/* Utility functions for solving a linear system with a
-   pre-computed sparse qr object (struct gcs_qr / gqr) */
-gqr * glmgen_qr (const cs * A);
-csi glmgen_qrsol (gqr * B, double * b);
-csi glmgen_gqr_free (gqr * A);
+typedef enum { FIRST, SECOND } bt_node_lvl;
 
-cs * scalar_plus_diag (const cs * A, double b, double *D);
-void diag_times_sparse (const cs * A, double * w);
-double glmgen_factorial(int n);
+struct btreenode
+{
+  struct btreenode *leftchild;
+  double key;
+  struct btreenode *ids;
+  bt_node_lvl node_lvl;
+  struct btreenode *rightchild;
+};
 
+struct llnode
+{
+  int value;
+  struct llnode *next;
+};
+
+typedef struct btreenode btnode;
+
+typedef struct llnode llnode;
+typedef llnode linkedlist;
+
+/* Small utility functions found in utils.c */
 double glmgen_factorial(int n);
 double l1norm(double * x, int n);
 int is_nan(double x);
 int has_nan(double * x, int n);
 int count_nans(double * x, int n);
 
-void thin( double* x, double* y, double* w, int n, int k,
-  double** xt, double** yt, double** wt, int* nt_ptr, double x_cond);
+cs * scalar_plus_diag(const cs * A, double b, double *D);
+void diag_times_sparse(const cs * A, double * w);
 
-double line_search(double * y, double * x, double * w, int n, int k, double lam,
-    func_RtoR b, func_RtoR b1,
-    double * beta, double * d,
-    double alpha, double gamma, int max_iter,
-    int * iter, double * Db, double * Dd);
-
-/* glm loss functions */
 double logi_b(double x);
 double logi_b1(double x);
 double logi_b2(double x);
 double pois_b(double x);
 double pois_b1(double x);
 double pois_b2(double x);
+
+void thin(double* x, double* y, double* w,
+          int n, int k, double** xt, double** yt,
+          double** wt, int* nt_ptr, double x_cond);
+
+/* Utility functions for solving a linear system with a gqr object */
+gqr * glmgen_qr(const cs * A);
+csi glmgen_qrsol(gqr * B, double * b);
+csi glmgen_gqr_free(gqr * A);
+
+/* Generic line search */
+double line_search(double * y, double * x, double * w, int n, int k, double lam,
+    func_RtoR b, func_RtoR b1,
+    double * beta, double * d,
+    double alpha, double gamma, int max_iter,
+    int * iter, double * Db, double * Dd);
+
+/* Custom implementation of balanced trees */
+void bt_insert (btnode** bt, int id, double val);
+void bt_insert_inner (btnode **bt, int id);
+void bt_delete (btnode** bt, int id, double val);
+void bt_delete_inner (btnode **bt, int id);
+void bt_delete_found_node(btnode **bt, btnode **parent, btnode *x);
+void bt_search (btnode **bt, double val,
+    btnode **par, btnode **x, int *found);
+void bt_find_min (btnode* bt, btnode** x);
+void bt_find_min_twice (btnode* bt, btnode** x);
+void bt_inorder (btnode* bt);
+void bt_free (btnode *bt);
+
+/* Custom implementation of linked lists */
+llnode* create_node(int val);
+void insert_node(linkedlist** ll, int val);
+void delete_node(linkedlist** ll, int key);
+int isempty(linkedlist* ll);
+int ll_length(linkedlist* ll);
+void display(linkedlist* ll);
+void ll_free(linkedlist* ll);
 
 #endif

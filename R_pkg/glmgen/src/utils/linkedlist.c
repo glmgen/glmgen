@@ -103,7 +103,7 @@ int isempty(linkedlist* ll)
 {
   return (ll == NULL);
 }
-int length(linkedlist* ll)
+int ll_length(linkedlist* ll)
 {
   int len = 0;
   while(ll != NULL)
