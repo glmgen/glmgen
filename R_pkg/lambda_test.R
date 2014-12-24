@@ -13,23 +13,24 @@ plot.trendpath = function(x, ...) {
   class(x) = c("trendfilter", class(x)[-1])
   genlasso::plot.trendfilter(x, ...)
 }
-n = 1000
+n = 6
 eps = rnorm(n,sd=0.1)
-x = seq(0,n-1,length.out=n)
-y = sin(x*3*pi/n)
+x = seq(0,1,length.out=n)
+y = sin(x*3*pi/( max(x) - min(x) )) 
 k = 3
 maxiter = 100
 
 # Path
-out_path = trendpath(y, x, ord=k, maxsteps=10)
-out_admm = glmgen::trendfilter(y, x, k=k, maxiter=maxiter, control=list(obj_tol=0))
-out_admm_old = trendfilterSim::trendfilter(y=y, k=k, eabs=0, erel=0, maxiter=maxiter)
+out_path = trendpath(y, x, ord=k, maxsteps=2)
+out_admm = glmgen::trendfilter(y, x, k=k, nlambda=2, maxiter=maxiter, control=list(obj_tol=0))
+out_admm_old = trendfilterSim::trendfilter(y=y, k=k, nlambda=2, eabs=0, erel=0, maxiter=maxiter)
 
 cat(sprintf("path lambda_max = %g\n",out_path$lambda[1]))
 cat(sprintf("NEW lambda_max = %g\n",out_admm$lambda[1]))
-cat(sprintf("OLD lambda_max = %g\n",out_admm_old$lambda[1]))
+#cat(sprintf("OLD lambda_max = %g\n",out_admm_old$lambda[1]))
 
-D = getDtfSparse(n,k)
+D = getDtfPosSparse(n,k,x)
+print(D)
 #beta_max = y - t(D) %*% qr.solve(DDt, D %*% y)
 lambda_max = max( abs(qr.solve(t(D), y)))
 cat(sprintf("lambda_max = %g\n",lambda_max))

@@ -1,0 +1,740 @@
+\hypertarget{tf_8h}{\section{include/tf.h File Reference}
+\label{tf_8h}\index{include/tf.\+h@{include/tf.\+h}}
+}
+
+
+Main calling function for fitting trendfiltering model.  
+
+
+{\ttfamily \#include $<$math.\+h$>$}\\*
+{\ttfamily \#include $<$stdlib.\+h$>$}\\*
+{\ttfamily \#include $<$string.\+h$>$}\\*
+{\ttfamily \#include $<$float.\+h$>$}\\*
+{\ttfamily \#include \char`\"{}cs.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}utils.\+h\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{tf_8h_a8d79b0957c1ee50d159f451973d5b0f2}{\#define {\bfseries W\+E\+I\+G\+H\+T\+\_\+\+S\+M\+A\+L\+L}~D\+B\+L\+\_\+\+E\+P\+S\+I\+L\+O\+N}\label{tf_8h_a8d79b0957c1ee50d159f451973d5b0f2}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double $\ast$ \hyperlink{tf_8h_a25ffda5658b9ded4415d2175b83edd46}{tf\+\_\+admm\+\_\+default} (double $\ast$y, int n)
+\begin{DoxyCompactList}\small\item\em Default call to tf\+\_\+admm Example of how to call tf\+\_\+admm, taking only the response vector {\ttfamily and} observation size ~\newline
+ as inputs. Users will likely need to adjust tf\+\_\+admm\+\_\+default for their own needs, using it as a starting template. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_a4d2a9a88c443d9e0e1cedf67a202968f}{tf\+\_\+admm} (double $\ast$y, double $\ast$x, double $\ast$w, int n, int k, int family, int max\+\_\+iter, int lam\+\_\+flag, double $\ast$lambda, int nlambda, double lambda\+\_\+min\+\_\+ratio, double $\ast$beta, double $\ast$obj, int $\ast$iter, int $\ast$status, double rho, double obj\+\_\+tol, double alpha\+\_\+ls, double gamma\+\_\+ls, int max\+\_\+iter\+\_\+ls, int max\+\_\+inner\+\_\+iter, int verbose)
+\begin{DoxyCompactList}\small\item\em Main wrapper for fitting a trendfilter model. Takes as input either a sequence of lambda tuning parameters, or the number of desired lambda values. In the latter case the function will also calculate a lambda sequence. The user must supply allocated memory to store the output, with the function itself returning only {\ttfamily void}. For default values, and an example of how to call the function, see the function tf\+\_\+admm\+\_\+default. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_a45371289f36d4cccdeeeef6525afa897}{tf\+\_\+admm\+\_\+gauss} (double $\ast$y, double $\ast$x, double $\ast$w, int n, int k, int max\+\_\+iter, double lam, double $\ast$beta, double $\ast$alpha, double $\ast$u, double $\ast$obj, int $\ast$iter, double rho, double obj\+\_\+tol, \hyperlink{structcs__sparse}{cs} $\ast$Dkt\+Dk, int verbose)
+\begin{DoxyCompactList}\small\item\em Low level fitting routine for a Gaussian trendfiltering problem. Function used by tf\+\_\+admm to fit a Gaussian A\+D\+M\+M trendfilter, or as a subproblem by tf\+\_\+admm\+\_\+glm when using logistic or poisson losses. Fits the solution for a single value of lambda. Most users will want to call tf\+\_\+admm, rather than tf\+\_\+admm\+\_\+gauss directly. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_a11d35a96af9347a6ccb5b4021d05945d}{tf\+\_\+admm\+\_\+glm} (double $\ast$y, double $\ast$x, double $\ast$w, int n, int k, int max\+\_\+iter, double lam, double $\ast$beta, double $\ast$alpha, double $\ast$u, double $\ast$obj, int $\ast$iter, double rho, double obj\+\_\+tol, double alpha\+\_\+ls, double gamma\+\_\+ls, int max\+\_\+iter\+\_\+ls, int max\+\_\+iter\+\_\+admm, \hyperlink{structcs__sparse}{cs} $\ast$Dkt\+Dk, func\+\_\+\+Rto\+R b, func\+\_\+\+Rto\+R b1, func\+\_\+\+Rto\+R b2, int verbose)
+\begin{DoxyCompactList}\small\item\em Low level fitting routine for non-\/\+Gaussian trendfiltering problems. Can be configured to handle arbirary losses, as it takes the link function and it first two derivaties as inputs. Fits the solution for a single value of lambda. Most users will want to call tf\+\_\+admm, rather than tf\+\_\+admm\+\_\+glm directly. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_af224c785025187a7719752e6322fa800}{tf\+\_\+dp} (int n, double $\ast$y, double lam, double $\ast$beta)
+\begin{DoxyCompactList}\small\item\em Dynamic programming algorithm for the 1d fused lasso problem Implementation of Nick Johnson's algorithm for O(n) calculation of the entire solution path for the 1-\/d fused lasso. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_ad138a0f7e5712eee7988fe1f982ca1b0}{tf\+\_\+dp\+\_\+weight} (int n, double $\ast$y, double $\ast$w, double lam, double $\ast$beta)
+\begin{DoxyCompactList}\small\item\em Weighted variant of the dynamic programming algorithm for the 1d fused lasso problem Implementation of Nick Johnson's algorithm for O(n) calculation of the entire solution path for the 1-\/d fused lasso, using weights. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_ab88fd9d82ee2652cf59f2094cf7d6a80}{tf\+\_\+predict} (double $\ast$beta, double $\ast$x, int n, int k, int family, double $\ast$x0, int n0, double $\ast$pred, double zero\+\_\+tol)
+\begin{DoxyCompactList}\small\item\em Calculate maximum lambda value. Will return the largest lambda value for which the penalty term is zero for Gaussian losses. Will only be approximate for other loss functions. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_a47ab5be455b8c651247c1440fd34046e}{tf\+\_\+predict\+\_\+gauss} (double $\ast$beta, double $\ast$x, int n, int k, double $\ast$x0, int n0, double $\ast$pred, double zero\+\_\+tol)
+\begin{DoxyCompactList}\small\item\em Calculate maximum lambda value. Lower level function for predicting from a Gaussian loss function. \end{DoxyCompactList}\item 
+double \hyperlink{tf_8h_ae0990ba84059073576bb231cf611e46b}{tf\+\_\+maxlam} (int len, double $\ast$y, \hyperlink{structgcs__qr}{gqr} $\ast$Dt\+\_\+qr, double $\ast$w)
+\begin{DoxyCompactList}\small\item\em Calculate maximum lambda value. Will return the largest lambda value for which the penalty term is zero for Gaussian losses. Will only be approximate for other loss functions. \end{DoxyCompactList}\item 
+\hyperlink{structcs__sparse}{cs} $\ast$ \hyperlink{tf_8h_a92777ec75cd6ca2bab7a69a446f6874c}{tf\+\_\+calc\+\_\+dk} (int n, int k, const double $\ast$x)
+\begin{DoxyCompactList}\small\item\em Creates the penalty matrix of order k. Returns the matrix Dk as a suite sparse style matrix. \end{DoxyCompactList}\item 
+\hyperlink{structcs__sparse}{cs} $\ast$ \hyperlink{tf_8h_aab9a7c384dc62938aa03f821e2b0b34a}{tf\+\_\+calc\+\_\+dktil} (int n, int k, const double $\ast$x)
+\begin{DoxyCompactList}\small\item\em Creates the penalty matrix D tilda of order k. Returns the matrix Dk premultipied by a diagonal matrix of weights. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_abe1096ff44812fc725fd03fd40e56a0e}{tf\+\_\+dx} (double $\ast$x, int n, int k, double $\ast$a, double $\ast$b)
+\begin{DoxyCompactList}\small\item\em Multiply by D Multiplies a vector by D, without having to explictly construct or use the matrix D. In symbols, Da = b. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_a60558a641a6130619ff3ae25a3f7a595}{tf\+\_\+dtx} (double $\ast$x, int n, int k, double $\ast$a, double $\ast$b)
+\begin{DoxyCompactList}\small\item\em Multiply by D transponse Multiplies a vector by D transpose, without having to explictly construct or use the matrix D. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_a232013939a70192c2ef319f0a5d25bbd}{tf\+\_\+dxtil} (double $\ast$x, int n, int k, double $\ast$a, double $\ast$b)
+\begin{DoxyCompactList}\small\item\em Multiply by D tilda Multiplies a vector by D tilda, without having to explictly construct or use the matrix D. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_ace98772e71eb3c22e25234c34aa43a82}{tf\+\_\+dtxtil} (double $\ast$x, int n, int k, double $\ast$a, double $\ast$b)
+\begin{DoxyCompactList}\small\item\em Multiply by D tilda transponse Multiplies a vector by D tilda transpose, without having to explictly construct or use the matrix D. \end{DoxyCompactList}\item 
+void \hyperlink{tf_8h_ada592c610d15c914d1c12068b0ceea0b}{poly\+\_\+coefs} (double $\ast$x, int k, double $\ast$beta, double $\ast$phi)
+\begin{DoxyCompactList}\small\item\em Calculate polynomial coefficents of the fit. Helper function to convert the beta vector into a polynomial. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Main calling function for fitting trendfiltering model. 
+
+\begin{DoxyAuthor}{Author}
+Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2014-\/12-\/23 Here. 
+\end{DoxyDate}
+
+
+\subsection{Function Documentation}
+\hypertarget{tf_8h_ada592c610d15c914d1c12068b0ceea0b}{\index{tf.\+h@{tf.\+h}!poly\+\_\+coefs@{poly\+\_\+coefs}}
+\index{poly\+\_\+coefs@{poly\+\_\+coefs}!tf.\+h@{tf.\+h}}
+\subsubsection[{poly\+\_\+coefs}]{\setlength{\rightskip}{0pt plus 5cm}void poly\+\_\+coefs (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{x, }
+\item[{int}]{k, }
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{phi}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_ada592c610d15c914d1c12068b0ceea0b}
+
+
+Calculate polynomial coefficents of the fit. Helper function to convert the beta vector into a polynomial. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & the original positions used in the fit \\
+\hline
+{\em k} & order of the fit \\
+\hline
+{\em beta} & the beta vector for the prediction; length n-\/k \\
+\hline
+{\em phi} & allocated memory of length k+1 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{tf_8h_a4d2a9a88c443d9e0e1cedf67a202968f}{\index{tf.\+h@{tf.\+h}!tf\+\_\+admm@{tf\+\_\+admm}}
+\index{tf\+\_\+admm@{tf\+\_\+admm}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+admm}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+admm (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{y, }
+\item[{double $\ast$}]{x, }
+\item[{double $\ast$}]{w, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{int}]{family, }
+\item[{int}]{max\+\_\+iter, }
+\item[{int}]{lam\+\_\+flag, }
+\item[{double $\ast$}]{lambda, }
+\item[{int}]{nlambda, }
+\item[{double}]{lambda\+\_\+min\+\_\+ratio, }
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{obj, }
+\item[{int $\ast$}]{iter, }
+\item[{int $\ast$}]{status, }
+\item[{double}]{rho, }
+\item[{double}]{obj\+\_\+tol, }
+\item[{double}]{alpha\+\_\+ls, }
+\item[{double}]{gamma\+\_\+ls, }
+\item[{int}]{max\+\_\+iter\+\_\+ls, }
+\item[{int}]{max\+\_\+inner\+\_\+iter, }
+\item[{int}]{verbose}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_a4d2a9a88c443d9e0e1cedf67a202968f}
+
+
+Main wrapper for fitting a trendfilter model. Takes as input either a sequence of lambda tuning parameters, or the number of desired lambda values. In the latter case the function will also calculate a lambda sequence. The user must supply allocated memory to store the output, with the function itself returning only {\ttfamily void}. For default values, and an example of how to call the function, see the function tf\+\_\+admm\+\_\+default. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em y} & a vector of responses \\
+\hline
+{\em x} & a vector of response locations; must be ordered \\
+\hline
+{\em w} & a vector of sample weights \\
+\hline
+{\em n} & the length of y, x, and w \\
+\hline
+{\em k} & degree of the trendfilter; i.\+e., k=1 linear \\
+\hline
+{\em family} & family code for the type of fit; family=0 for O\+L\+S \\
+\hline
+{\em max\+\_\+iter} & maximum number of A\+D\+M\+M interations; ignored for k=0 \\
+\hline
+{\em lam\+\_\+flag} & 0/1 flag for whether lambda sequence needs to be estimated \\
+\hline
+{\em lambda} & either a sequence of lambda when lam\+\_\+flag=0, or empty allocated space if lam\+\_\+flag=1 \\
+\hline
+{\em nlambda} & number of lambda values; need for both lam\+\_\+flag=0 and 1 \\
+\hline
+{\em lambda\+\_\+min\+\_\+ratio} & minimum ratio between min and max lambda; ignored for lam\+\_\+flag=0 \\
+\hline
+{\em beta} & allocated space of size n$\ast$nlambda to store the output coefficents \\
+\hline
+{\em obj} & allocated space of size max\+\_\+iter$\ast$nlambda to store the objective \\
+\hline
+{\em iter} & allocated space of size nlambda to store the number of iterations \\
+\hline
+{\em status} & allocated space of size nlambda to store the status of each run \\
+\hline
+{\em rho} & tuning parameter for the A\+D\+M\+M algorithm \\
+\hline
+{\em obj\+\_\+tol} & stopping criteria tolerance \\
+\hline
+{\em alpha\+\_\+ls} & for family != 0, line search tuning parameter \\
+\hline
+{\em gamma\+\_\+ls} & for family != 0, line search tuning parameter \\
+\hline
+{\em max\+\_\+iter\+\_\+ls} & for family != 0, max number of iterations in line search \\
+\hline
+{\em max\+\_\+inner\+\_\+iter} & for family != 0, max number of iterations in inner A\+D\+M\+M \\
+\hline
+{\em verbose} & 0/1 flag for printing progress \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__admm_8c_a25ffda5658b9ded4415d2175b83edd46}{tf\+\_\+admm\+\_\+default} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_a25ffda5658b9ded4415d2175b83edd46}{\index{tf.\+h@{tf.\+h}!tf\+\_\+admm\+\_\+default@{tf\+\_\+admm\+\_\+default}}
+\index{tf\+\_\+admm\+\_\+default@{tf\+\_\+admm\+\_\+default}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+admm\+\_\+default}]{\setlength{\rightskip}{0pt plus 5cm}double$\ast$ tf\+\_\+admm\+\_\+default (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{y, }
+\item[{int}]{n}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_a25ffda5658b9ded4415d2175b83edd46}
+
+
+Default call to tf\+\_\+admm Example of how to call tf\+\_\+admm, taking only the response vector {\ttfamily and} observation size ~\newline
+ as inputs. Users will likely need to adjust tf\+\_\+admm\+\_\+default for their own needs, using it as a starting template. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em y} & a vector of responses \\
+\hline
+{\em n} & the length of y, i.\+e., the number of observations \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns a pointer to beta values, a column oriented (nlambda x n) array. 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+The user is responsible for freeing the array pointed to by the response. 
+\end{DoxyNote}
+\hypertarget{tf_8h_a45371289f36d4cccdeeeef6525afa897}{\index{tf.\+h@{tf.\+h}!tf\+\_\+admm\+\_\+gauss@{tf\+\_\+admm\+\_\+gauss}}
+\index{tf\+\_\+admm\+\_\+gauss@{tf\+\_\+admm\+\_\+gauss}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+admm\+\_\+gauss}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+admm\+\_\+gauss (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{y, }
+\item[{double $\ast$}]{x, }
+\item[{double $\ast$}]{w, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{int}]{max\+\_\+iter, }
+\item[{double}]{lam, }
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{alpha, }
+\item[{double $\ast$}]{u, }
+\item[{double $\ast$}]{obj, }
+\item[{int $\ast$}]{iter, }
+\item[{double}]{rho, }
+\item[{double}]{obj\+\_\+tol, }
+\item[{{\bf cs} $\ast$}]{Dkt\+Dk, }
+\item[{int}]{verbose}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_a45371289f36d4cccdeeeef6525afa897}
+
+
+Low level fitting routine for a Gaussian trendfiltering problem. Function used by tf\+\_\+admm to fit a Gaussian A\+D\+M\+M trendfilter, or as a subproblem by tf\+\_\+admm\+\_\+glm when using logistic or poisson losses. Fits the solution for a single value of lambda. Most users will want to call tf\+\_\+admm, rather than tf\+\_\+admm\+\_\+gauss directly. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em y} & a vector of responses \\
+\hline
+{\em x} & a vector of response locations; must be ordered \\
+\hline
+{\em w} & a vector of sample weights \\
+\hline
+{\em n} & the length of y, x, and w \\
+\hline
+{\em k} & degree of the trendfilter; i.\+e., k=1 linear \\
+\hline
+{\em max\+\_\+iter} & maximum number of A\+D\+M\+M interations; ignored for k=0 \\
+\hline
+{\em lam} & the value of lambda \\
+\hline
+{\em beta} & allocated space for output coefficents; must pre-\/fill as it is used in warm start \\
+\hline
+{\em alpha} & allocated space for A\+D\+M\+M alpha covariates; must pre-\/fill as it is used in warm start \\
+\hline
+{\em u} & allocated space for A\+D\+M\+M u covariates; must pre-\/fill as it is used in warm start \\
+\hline
+{\em obj} & allocated space to store the objective; will fill at most max\+\_\+iter elements \\
+\hline
+{\em iter} & allocated space to store the number of iterations; will fill just one element \\
+\hline
+{\em rho} & tuning parameter for the A\+D\+M\+M algorithm; set to 1 for default \\
+\hline
+{\em obj\+\_\+tol} & stopping criteria tolerance; set to 1e-\/10 for default \\
+\hline
+{\em Dkt\+Dk} & pointer to the inner product of Dkt\+Dk \\
+\hline
+{\em verbose} & 0/1 flag for printing progress \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__admm_8c_a4d2a9a88c443d9e0e1cedf67a202968f}{tf\+\_\+admm} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_a11d35a96af9347a6ccb5b4021d05945d}{\index{tf.\+h@{tf.\+h}!tf\+\_\+admm\+\_\+glm@{tf\+\_\+admm\+\_\+glm}}
+\index{tf\+\_\+admm\+\_\+glm@{tf\+\_\+admm\+\_\+glm}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+admm\+\_\+glm}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+admm\+\_\+glm (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{y, }
+\item[{double $\ast$}]{x, }
+\item[{double $\ast$}]{w, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{int}]{max\+\_\+iter, }
+\item[{double}]{lam, }
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{alpha, }
+\item[{double $\ast$}]{u, }
+\item[{double $\ast$}]{obj, }
+\item[{int $\ast$}]{iter, }
+\item[{double}]{rho, }
+\item[{double}]{obj\+\_\+tol, }
+\item[{double}]{alpha\+\_\+ls, }
+\item[{double}]{gamma\+\_\+ls, }
+\item[{int}]{max\+\_\+iter\+\_\+ls, }
+\item[{int}]{max\+\_\+inner\+\_\+iter, }
+\item[{{\bf cs} $\ast$}]{Dkt\+Dk, }
+\item[{func\+\_\+\+Rto\+R}]{b, }
+\item[{func\+\_\+\+Rto\+R}]{b1, }
+\item[{func\+\_\+\+Rto\+R}]{b2, }
+\item[{int}]{verbose}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_a11d35a96af9347a6ccb5b4021d05945d}
+
+
+Low level fitting routine for non-\/\+Gaussian trendfiltering problems. Can be configured to handle arbirary losses, as it takes the link function and it first two derivaties as inputs. Fits the solution for a single value of lambda. Most users will want to call tf\+\_\+admm, rather than tf\+\_\+admm\+\_\+glm directly. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em y} & a vector of responses \\
+\hline
+{\em x} & a vector of response locations; must be ordered \\
+\hline
+{\em w} & a vector of sample weights \\
+\hline
+{\em n} & the length of y, x, and w \\
+\hline
+{\em k} & degree of the trendfilter; i.\+e., k=1 linear \\
+\hline
+{\em max\+\_\+iter} & maximum number of A\+D\+M\+M interations; ignored for k=0 \\
+\hline
+{\em lam} & the value of lambda \\
+\hline
+{\em beta} & allocated space for output coefficents; must pre-\/fill as it is used in warm start \\
+\hline
+{\em alpha} & allocated space for A\+D\+M\+M alpha covariates; must pre-\/fill as it is used in warm start \\
+\hline
+{\em u} & allocated space for A\+D\+M\+M u covariates; must pre-\/fill as it is used in warm start \\
+\hline
+{\em obj} & allocated space to store the objective; will fill at most max\+\_\+iter elements \\
+\hline
+{\em iter} & allocated space to store the number of iterations; will fill just one element \\
+\hline
+{\em status} & allocated space of size nlambda to store the status of each run \\
+\hline
+{\em rho} & tuning parameter for the A\+D\+M\+M algorithm; set to 1 for default \\
+\hline
+{\em obj\+\_\+tol} & stopping criteria tolerance; set to 1e-\/10 for default \\
+\hline
+{\em alpha\+\_\+ls} & for family != 0, line search tuning parameter \\
+\hline
+{\em gamma\+\_\+ls} & for family != 0, line search tuning parameter \\
+\hline
+{\em max\+\_\+iter\+\_\+ls} & for family != 0, max number of iterations in line search \\
+\hline
+{\em max\+\_\+inner\+\_\+iter} & for family != 0, max number of iterations in inner A\+D\+M\+M \\
+\hline
+{\em Dkt\+Dk} & pointer to the inner product of Dkt\+Dk \\
+\hline
+{\em b} & the link function for a given loss \\
+\hline
+{\em b1} & first derivative of the link function for a given loss \\
+\hline
+{\em b2} & second derivative of the link function for a given loss \\
+\hline
+{\em verbose} & 0/1 flag for printing progress \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__admm_8c_a4d2a9a88c443d9e0e1cedf67a202968f}{tf\+\_\+admm} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_a92777ec75cd6ca2bab7a69a446f6874c}{\index{tf.\+h@{tf.\+h}!tf\+\_\+calc\+\_\+dk@{tf\+\_\+calc\+\_\+dk}}
+\index{tf\+\_\+calc\+\_\+dk@{tf\+\_\+calc\+\_\+dk}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+calc\+\_\+dk}]{\setlength{\rightskip}{0pt plus 5cm}{\bf cs}$\ast$ tf\+\_\+calc\+\_\+dk (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{const double $\ast$}]{x}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_a92777ec75cd6ca2bab7a69a446f6874c}
+
+
+Creates the penalty matrix of order k. Returns the matrix Dk as a suite sparse style matrix. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em n} & number of observations \\
+\hline
+{\em k} & order of the trendfilter \\
+\hline
+{\em x} & locations of the responses \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to a csparse matrix 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__d_8c_aab9a7c384dc62938aa03f821e2b0b34a}{tf\+\_\+calc\+\_\+dktil} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_aab9a7c384dc62938aa03f821e2b0b34a}{\index{tf.\+h@{tf.\+h}!tf\+\_\+calc\+\_\+dktil@{tf\+\_\+calc\+\_\+dktil}}
+\index{tf\+\_\+calc\+\_\+dktil@{tf\+\_\+calc\+\_\+dktil}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+calc\+\_\+dktil}]{\setlength{\rightskip}{0pt plus 5cm}{\bf cs}$\ast$ tf\+\_\+calc\+\_\+dktil (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{const double $\ast$}]{x}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_aab9a7c384dc62938aa03f821e2b0b34a}
+
+
+Creates the penalty matrix D tilda of order k. Returns the matrix Dk premultipied by a diagonal matrix of weights. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em n} & number of observations \\
+\hline
+{\em k} & order of the trendfilter \\
+\hline
+{\em x} & locations of the responses \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to a csparse matrix 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__d_8c_aab9a7c384dc62938aa03f821e2b0b34a}{tf\+\_\+calc\+\_\+dktil} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_af224c785025187a7719752e6322fa800}{\index{tf.\+h@{tf.\+h}!tf\+\_\+dp@{tf\+\_\+dp}}
+\index{tf\+\_\+dp@{tf\+\_\+dp}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+dp}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+dp (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double $\ast$}]{y, }
+\item[{double}]{lam, }
+\item[{double $\ast$}]{beta}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_af224c785025187a7719752e6322fa800}
+
+
+Dynamic programming algorithm for the 1d fused lasso problem Implementation of Nick Johnson's algorithm for O(n) calculation of the entire solution path for the 1-\/d fused lasso. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em n} & number of observations \\
+\hline
+{\em y} & response vector \\
+\hline
+{\em lam} & the maximum lambda of the path \\
+\hline
+{\em beta} & allocated space for the output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__dp_8c_ad138a0f7e5712eee7988fe1f982ca1b0}{tf\+\_\+dp\+\_\+weight} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_ad138a0f7e5712eee7988fe1f982ca1b0}{\index{tf.\+h@{tf.\+h}!tf\+\_\+dp\+\_\+weight@{tf\+\_\+dp\+\_\+weight}}
+\index{tf\+\_\+dp\+\_\+weight@{tf\+\_\+dp\+\_\+weight}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+dp\+\_\+weight}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+dp\+\_\+weight (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double $\ast$}]{y, }
+\item[{double $\ast$}]{w, }
+\item[{double}]{lam, }
+\item[{double $\ast$}]{beta}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_ad138a0f7e5712eee7988fe1f982ca1b0}
+
+
+Weighted variant of the dynamic programming algorithm for the 1d fused lasso problem Implementation of Nick Johnson's algorithm for O(n) calculation of the entire solution path for the 1-\/d fused lasso, using weights. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em n} & number of observations \\
+\hline
+{\em y} & response vector \\
+\hline
+{\em w} & vector of weights \\
+\hline
+{\em lam} & the maximum lambda of the path \\
+\hline
+{\em beta} & allocated space for the output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__dp_8c_af224c785025187a7719752e6322fa800}{tf\+\_\+dp} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_a60558a641a6130619ff3ae25a3f7a595}{\index{tf.\+h@{tf.\+h}!tf\+\_\+dtx@{tf\+\_\+dtx}}
+\index{tf\+\_\+dtx@{tf\+\_\+dtx}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+dtx}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+dtx (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{x, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{double $\ast$}]{a, }
+\item[{double $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_a60558a641a6130619ff3ae25a3f7a595}
+
+
+Multiply by D transponse Multiplies a vector by D transpose, without having to explictly construct or use the matrix D. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & locations of the responses \\
+\hline
+{\em n} & number of observations \\
+\hline
+{\em k} & order of the trendfilter \\
+\hline
+{\em a} & the input vector to multiply \\
+\hline
+{\em b} & allocated space for the output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__d_8c_ace98772e71eb3c22e25234c34aa43a82}{tf\+\_\+dtxtil} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_ace98772e71eb3c22e25234c34aa43a82}{\index{tf.\+h@{tf.\+h}!tf\+\_\+dtxtil@{tf\+\_\+dtxtil}}
+\index{tf\+\_\+dtxtil@{tf\+\_\+dtxtil}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+dtxtil}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+dtxtil (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{x, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{double $\ast$}]{a, }
+\item[{double $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_ace98772e71eb3c22e25234c34aa43a82}
+
+
+Multiply by D tilda transponse Multiplies a vector by D tilda transpose, without having to explictly construct or use the matrix D. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & locations of the responses \\
+\hline
+{\em n} & number of observations \\
+\hline
+{\em k} & order of the trendfilter \\
+\hline
+{\em a} & the input vector to multiply \\
+\hline
+{\em b} & allocated space for the output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__d_8c_a60558a641a6130619ff3ae25a3f7a595}{tf\+\_\+dtx} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_abe1096ff44812fc725fd03fd40e56a0e}{\index{tf.\+h@{tf.\+h}!tf\+\_\+dx@{tf\+\_\+dx}}
+\index{tf\+\_\+dx@{tf\+\_\+dx}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+dx}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+dx (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{x, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{double $\ast$}]{a, }
+\item[{double $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_abe1096ff44812fc725fd03fd40e56a0e}
+
+
+Multiply by D Multiplies a vector by D, without having to explictly construct or use the matrix D. In symbols, Da = b. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & locations of the responses \\
+\hline
+{\em n} & number of observations \\
+\hline
+{\em k} & order of the trendfilter \\
+\hline
+{\em a} & the input vector to multiply \\
+\hline
+{\em b} & allocated space for the output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__d_8c_a232013939a70192c2ef319f0a5d25bbd}{tf\+\_\+dxtil} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_a232013939a70192c2ef319f0a5d25bbd}{\index{tf.\+h@{tf.\+h}!tf\+\_\+dxtil@{tf\+\_\+dxtil}}
+\index{tf\+\_\+dxtil@{tf\+\_\+dxtil}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+dxtil}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+dxtil (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{x, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{double $\ast$}]{a, }
+\item[{double $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_a232013939a70192c2ef319f0a5d25bbd}
+
+
+Multiply by D tilda Multiplies a vector by D tilda, without having to explictly construct or use the matrix D. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & locations of the responses \\
+\hline
+{\em n} & number of observations \\
+\hline
+{\em k} & order of the trendfilter \\
+\hline
+{\em a} & the input vector to multiply \\
+\hline
+{\em b} & allocated space for the output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__d_8c_abe1096ff44812fc725fd03fd40e56a0e}{tf\+\_\+dx} 
+\end{DoxySeeAlso}
+\hypertarget{tf_8h_ae0990ba84059073576bb231cf611e46b}{\index{tf.\+h@{tf.\+h}!tf\+\_\+maxlam@{tf\+\_\+maxlam}}
+\index{tf\+\_\+maxlam@{tf\+\_\+maxlam}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+maxlam}]{\setlength{\rightskip}{0pt plus 5cm}double tf\+\_\+maxlam (
+\begin{DoxyParamCaption}
+\item[{int}]{len, }
+\item[{double $\ast$}]{y, }
+\item[{{\bf gqr} $\ast$}]{Dt\+\_\+qr, }
+\item[{double $\ast$}]{w}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_ae0990ba84059073576bb231cf611e46b}
+
+
+Calculate maximum lambda value. Will return the largest lambda value for which the penalty term is zero for Gaussian losses. Will only be approximate for other loss functions. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em len} & number of observations \\
+\hline
+{\em y} & a vector of responses \\
+\hline
+{\em Dt\+\_\+qr} & Q\+R decomposition of the Dt matrix \\
+\hline
+{\em w} & vector of sample weights; must be filled \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the maximum value of lambda. 
+\end{DoxyReturn}
+\hypertarget{tf_8h_ab88fd9d82ee2652cf59f2094cf7d6a80}{\index{tf.\+h@{tf.\+h}!tf\+\_\+predict@{tf\+\_\+predict}}
+\index{tf\+\_\+predict@{tf\+\_\+predict}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+predict}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+predict (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{x, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{int}]{family, }
+\item[{double $\ast$}]{x0, }
+\item[{int}]{n0, }
+\item[{double $\ast$}]{pred, }
+\item[{double}]{zero\+\_\+tol}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_ab88fd9d82ee2652cf59f2094cf7d6a80}
+
+
+Calculate maximum lambda value. Will return the largest lambda value for which the penalty term is zero for Gaussian losses. Will only be approximate for other loss functions. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em beta} & the beta vector for the prediction; length n-\/k \\
+\hline
+{\em x} & the original positions used in the fit \\
+\hline
+{\em n} & number of observations \\
+\hline
+{\em k} & order of the fit \\
+\hline
+{\em family} & family of the fit \\
+\hline
+{\em x0} & the new positions to predict at \\
+\hline
+{\em n0} & the number of observations in x0 \\
+\hline
+{\em pred} & allocated space for the predicted values \\
+\hline
+{\em zero\+\_\+tol} & tolerance for the fitting algorithm; default is 1e-\/11 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+The results will not be valid unless the values in x0 are within the range of the original x inputs. 
+\end{DoxyNote}
+\hypertarget{tf_8h_a47ab5be455b8c651247c1440fd34046e}{\index{tf.\+h@{tf.\+h}!tf\+\_\+predict\+\_\+gauss@{tf\+\_\+predict\+\_\+gauss}}
+\index{tf\+\_\+predict\+\_\+gauss@{tf\+\_\+predict\+\_\+gauss}!tf.\+h@{tf.\+h}}
+\subsubsection[{tf\+\_\+predict\+\_\+gauss}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+predict\+\_\+gauss (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{x, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{double $\ast$}]{x0, }
+\item[{int}]{n0, }
+\item[{double $\ast$}]{pred, }
+\item[{double}]{zero\+\_\+tol}
+\end{DoxyParamCaption}
+)}}\label{tf_8h_a47ab5be455b8c651247c1440fd34046e}
+
+
+Calculate maximum lambda value. Lower level function for predicting from a Gaussian loss function. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em beta} & the beta vector for the prediction; length n-\/k \\
+\hline
+{\em x} & the original positions used in the fit \\
+\hline
+{\em n} & number of observations \\
+\hline
+{\em k} & order of the fit \\
+\hline
+{\em x0} & the new positions to predict at \\
+\hline
+{\em n0} & the number of observations in x0 \\
+\hline
+{\em pred} & allocated space for the predicted values \\
+\hline
+{\em zero\+\_\+tol} & tolerance for the fitting algorithm; default is 1e-\/11 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__predict_8c_ab88fd9d82ee2652cf59f2094cf7d6a80}{tf\+\_\+predict} 
+\end{DoxySeeAlso}

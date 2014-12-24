@@ -1,0 +1,6 @@
+name	user	system	elapsed
+glmgen-package	0.009	0.000	0.009	
+predict-methods	0.007	0.000	0.007	
+trendfilter-class	0.006	0.001	0.006	
+trendfilter	0.006	0.000	0.006	
+trendfilter.control.list	0.006	0.000	0.007	

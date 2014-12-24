@@ -13,7 +13,7 @@ void test_admm_gauss(int n, int k);
 
 int main()
 {
-  int n=500;
+  int n=100;
   int k=2;
   test_admm_gauss(n, k);
   /*for(k = 1; k < 2; k++)
@@ -38,9 +38,14 @@ void test_admm_gauss(int n, int k)
   double lambda_min_ratio;
   double * beta;
   double * pred;
+  double * alpha;
+  double * z;
   double * obj;
+
   int * iter;
+  int * status;
   double rho;
+  int vary_rho;
   double obj_tol;
   double predict_zero_tol;
   int verb;
@@ -54,45 +59,48 @@ void test_admm_gauss(int n, int k)
   nlambda = 5;
   lambda_min_ratio = 1e-4;
   rho = 1;
+  vary_rho = 1;
   obj_tol = 1e-12;
 
   y = (double *) malloc(n * sizeof(double));
   x = (double *) malloc(n * sizeof(double));
   w = (double *) malloc(n * sizeof(double));
 
+
   lambda = (double *) malloc(nlambda * sizeof(double));
   beta = (double *) malloc(n * nlambda * sizeof(double));
   pred = (double *) malloc(n * sizeof(double));
   obj = (double *) malloc(max_iter * nlambda * sizeof(double));
   iter = (int *) malloc( nlambda * sizeof(int));
+  status = (int *) malloc( nlambda * sizeof(int));
 
-  srand(5490);
-  srand(time(NULL));
+
+  srand(15);
+  //srand(time(NULL));
 
   x[0] = 0;
   /* for (i = 1; i < n; i++) x[i] = x[i-1] + ((rand() % 100)+1)/100.; */
   for (i = 1; i < n; i++) x[i] = i;
   for (i = 0; i < n; i++) y[i] = sin(x[i] * 3.*PI/n);
- /* for (i = 0; i < n; i++) y[i] = x[i] * x[i] + 0.5 * ((rand() % 100)+1)/100.;*/
-/*  for (i = 0; i < n; i++) y[i] = i;*/
   for (i = 0; i < n; i++) w[i] = 1;
 
   /* Call the tf_admm function */
-  tf_admm(y, x, w, n, k, family, max_iter, lam_flag, obj_flag,
-          lambda, nlambda, lambda_min_ratio, beta, obj, iter, rho, obj_tol);
+
+  tf_admm(y, x, w, n, k, family, max_iter, lam_flag,
+          lambda, nlambda, lambda_min_ratio, beta, obj, iter, status, rho, obj_tol);
 
   printf("\n--------------- (x,y) ---------------------------\n");
-  for (i = 0; i < n; i++) printf("%.2f\t%.2f\n", x[i], y[i]);
+  //for (i = 0; i < n; i++) printf("%.2f\t%.2f\n", x[i], y[i]);
 
+  
   printf("\n---------- lambda -------------------------------\n");
-  for (i = 0; i < nlambda; i++) printf("%f\n", lambda[i]);
+  //for (i = 0; i < nlambda; i++) printf("%f\n", lambda[i]);
 
   printf("\n---------- beta_1 -------------------------------\n");
-  for (i = 0; i < n; i++) printf("%f\n", beta[i]);
+  //for (i = 0; i < n; i++) printf("%f\n", beta[i]);
 
   printf("\n---------- beta_2 -------------------------------\n");
-  for (i = 0; i < n; i++) printf("%f\n", beta[i + n]);
-
+  //for (i = 0; i < n; i++) printf("%f\n", beta[i + n]);
 
   /* Prediction */
   /*
@@ -136,7 +144,7 @@ void test_admm_gauss(int n, int k)
   
   lambda[0] = 1; 
   tf_admm(y, x, w, n, k, family, max_iter, lam_flag, obj_flag,
-          lambda, nlambda, lambda_min_ratio, beta, obj, iter, rho, obj_tol);
+          lambda, nlambda, lambda_min_ratio, beta, obj, iter, status, rho, obj_tol);
 
   printf("\n---------- lambda -------------------------------\n");
   for (i = 0; i < nlambda; i++) printf("%f\n", lambda[i]);
@@ -152,6 +160,7 @@ void test_admm_gauss(int n, int k)
   free(beta);
   free(obj);
   free(iter);
+  free(status);
   free(pred);
 
 }
