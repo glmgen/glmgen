@@ -1,4 +1,0 @@
-glmgen
-======
-
-Generalized lasso implementations
