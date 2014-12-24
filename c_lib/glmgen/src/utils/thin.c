@@ -21,9 +21,7 @@
  * @file thin.c
  * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
  * @date 2014-12-23
- * @brief Main calling function for fitting trendfiltering model.
- *
- * Here.
+ * @brief Code for thinning large or ill-conditioned input values.
  */
 
 #include "utils.h"

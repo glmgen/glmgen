@@ -1,0 +1,95 @@
+\hypertarget{tf__dp_8c}{\section{src/tf/tf\+\_\+dp.c File Reference}
+\label{tf__dp_8c}\index{src/tf/tf\+\_\+dp.\+c@{src/tf/tf\+\_\+dp.\+c}}
+}
+
+
+Main calling function for fitting trendfiltering model.  
+
+
+{\ttfamily \#include \char`\"{}tf.\+h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{tf__dp_8c_af224c785025187a7719752e6322fa800}{tf\+\_\+dp} (int n, double $\ast$y, double lam, double $\ast$beta)
+\begin{DoxyCompactList}\small\item\em Dynamic programming algorithm for the 1d fused lasso problem Implementation of Nick Johnson's algorithm for O(n) calculation of the entire solution path for the 1-\/d fused lasso. \end{DoxyCompactList}\item 
+void \hyperlink{tf__dp_8c_ad138a0f7e5712eee7988fe1f982ca1b0}{tf\+\_\+dp\+\_\+weight} (int n, double $\ast$y, double $\ast$w, double lam, double $\ast$beta)
+\begin{DoxyCompactList}\small\item\em Weighted variant of the dynamic programming algorithm for the 1d fused lasso problem Implementation of Nick Johnson's algorithm for O(n) calculation of the entire solution path for the 1-\/d fused lasso, using weights. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Main calling function for fitting trendfiltering model. 
+
+\begin{DoxyAuthor}{Author}
+Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2014-\/12-\/23 Here. 
+\end{DoxyDate}
+
+
+\subsection{Function Documentation}
+\hypertarget{tf__dp_8c_af224c785025187a7719752e6322fa800}{\index{tf\+\_\+dp.\+c@{tf\+\_\+dp.\+c}!tf\+\_\+dp@{tf\+\_\+dp}}
+\index{tf\+\_\+dp@{tf\+\_\+dp}!tf\+\_\+dp.\+c@{tf\+\_\+dp.\+c}}
+\subsubsection[{tf\+\_\+dp}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+dp (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double $\ast$}]{y, }
+\item[{double}]{lam, }
+\item[{double $\ast$}]{beta}
+\end{DoxyParamCaption}
+)}}\label{tf__dp_8c_af224c785025187a7719752e6322fa800}
+
+
+Dynamic programming algorithm for the 1d fused lasso problem Implementation of Nick Johnson's algorithm for O(n) calculation of the entire solution path for the 1-\/d fused lasso. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em n} & number of observations \\
+\hline
+{\em y} & response vector \\
+\hline
+{\em lam} & the maximum lambda of the path \\
+\hline
+{\em beta} & allocated space for the output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__dp_8c_ad138a0f7e5712eee7988fe1f982ca1b0}{tf\+\_\+dp\+\_\+weight} 
+\end{DoxySeeAlso}
+\hypertarget{tf__dp_8c_ad138a0f7e5712eee7988fe1f982ca1b0}{\index{tf\+\_\+dp.\+c@{tf\+\_\+dp.\+c}!tf\+\_\+dp\+\_\+weight@{tf\+\_\+dp\+\_\+weight}}
+\index{tf\+\_\+dp\+\_\+weight@{tf\+\_\+dp\+\_\+weight}!tf\+\_\+dp.\+c@{tf\+\_\+dp.\+c}}
+\subsubsection[{tf\+\_\+dp\+\_\+weight}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+dp\+\_\+weight (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double $\ast$}]{y, }
+\item[{double $\ast$}]{w, }
+\item[{double}]{lam, }
+\item[{double $\ast$}]{beta}
+\end{DoxyParamCaption}
+)}}\label{tf__dp_8c_ad138a0f7e5712eee7988fe1f982ca1b0}
+
+
+Weighted variant of the dynamic programming algorithm for the 1d fused lasso problem Implementation of Nick Johnson's algorithm for O(n) calculation of the entire solution path for the 1-\/d fused lasso, using weights. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em n} & number of observations \\
+\hline
+{\em y} & response vector \\
+\hline
+{\em w} & vector of weights \\
+\hline
+{\em lam} & the maximum lambda of the path \\
+\hline
+{\em beta} & allocated space for the output \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__dp_8c_af224c785025187a7719752e6322fa800}{tf\+\_\+dp} 
+\end{DoxySeeAlso}

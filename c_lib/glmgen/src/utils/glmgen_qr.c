@@ -21,9 +21,7 @@
  * @file glmgen_qr.c
  * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
  * @date 2014-12-23
- * @brief Main calling function for fitting trendfiltering model.
- *
- * Here.
+ * @brief Construct a single qr decomposition object.
  */
 
 #include "utils.h"

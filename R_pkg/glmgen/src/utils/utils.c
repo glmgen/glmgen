@@ -21,9 +21,7 @@
  * @file utils.c
  * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
  * @date 2014-12-23
- * @brief Main calling function for fitting trendfiltering model.
- *
- * Here.
+ * @brief Small generic utility functions for the glmgen library.
  */
 
 #include "utils.h"

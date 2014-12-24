@@ -20,15 +20,27 @@
 /**
  * @file tf_d.c
  * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
- * @date 2014-12-23
- * @brief Main calling function for fitting trendfiltering model.
+ * @date 2014-12-24
+ * @brief Utility functions for working with the trendfiltering penalty matrix.
  *
- * Here.
+ * The penalty matrix D in the trendfiltering problem has many nice properties
+ * which distinquish it from arbitrary sparse of banded matricies. Much of the
+ * speed and stability of the trendfiltering algorithms come from taking advantage
+ * of these properties. Helper functions for doing so are collected here.
  */
 
  #include "tf.h"
 
-/* Creates the Dk matrix for a given n,k, and x */
+/**
+ * @brief Creates the penalty matrix of order k.
+ * Returns the matrix Dk as a suite sparse style matrix.
+ *
+ * @param n                    number of observations
+ * @param k                    order of the trendfilter
+ * @param x                    locations of the responses
+ * @return pointer to a csparse matrix
+ * @see tf_calc_dktil
+ */
 cs * tf_calc_dk (int n, int k, const double * x)
 {
   long int i;
@@ -114,7 +126,17 @@ cs * tf_calc_dk (int n, int k, const double * x)
   return Dk_cp;
 }
 
-/* Creates \tilde{D}k = k. (delta_k)^-1 Dk */
+/**
+ * @brief Creates the penalty matrix D tilda of order k.
+ * Returns the matrix Dk premultipied by a diagonal
+ * matrix of weights.
+ *
+ * @param n                    number of observations
+ * @param k                    order of the trendfilter
+ * @param x                    locations of the responses
+ * @return pointer to a csparse matrix
+ * @see tf_calc_dktil
+ */
 cs * tf_calc_dktil (int n, int k, const double * x)
 {
   cs * delta_k;
@@ -149,65 +171,18 @@ cs * tf_calc_dktil (int n, int k, const double * x)
   return Dktil;
 }
 
-void tf_dtx(double *x, int n, int k, double *a, double *b)
-{
-  int i;
-  int j;
-  double fact;
-
-  for(i=0; i < n; i++) b[i] = a[i];
-
-  if( k < 1 || k >= n )
-    return;
-
-  for(i=k; i > 0; --i)
-  {
-
-    /* b[0:n-i] = D' * b[0:n-i-1] for 1 <= i < n */
-    b[n-i] = b[n-i-1];
-    for(j=n-i-1; j > 0; --j)
-    {
-      b[j] = b[j-1] - b[j];
-    }
-    b[0] = -b[0];
-
-    if( i != 1 )
-    {
-      for(j=0; j <= n-i; ++j)
-      {
-        b[j] = b[j] / ( x[j+i-1] - x[j] );
-      }
-    }
-  }
-
-  fact = glmgen_factorial(k-1);
-  for(i=0; i < n; ++i)
-  {
-    b[i] *= fact;
-  }
-}
-
-/* b = (\tilde{D}^{(x,k)})^T a = k ( D^{(x,k)}^T \Delta_k)^{-1} a
-*/
-void tf_dtxtil(double *x, int n, int k,double *a, double *b)
-{
-  int i;
-
-  if( k > 0 )
-    for(i=0; i < n-k; i++)
-    {
-      a[i] = a[i] * k/( x[k+i] - x[i] );
-    }
-  tf_dtx(x, n, k, a, b);
-
-}
-
-/* This function computes b = D*a,
- * for D the difference operator of order k, defined
- * over the inputs x
- * See "The Falling Factorial Basis" paper for pseudocode
- * of how these can be implemented directly in O(nk) time
- * Note: b should have size n, not n-k. The result is in the first n-k elements.
+/**
+ * @brief Multiply by D
+ * Multiplies a vector by D, without having to explictly
+ * construct or use the matrix D. In symbols, Da = b.
+ *
+ * @param x                    locations of the responses
+ * @param n                    number of observations
+ * @param k                    order of the trendfilter
+ * @param a                    the input vector to multiply
+ * @param b                    allocated space for the output
+ * @return void
+ * @see tf_dxtil
  */
 void tf_dx(double *x, int n, int k,double *a, double *b)
 {
@@ -248,8 +223,18 @@ void tf_dx(double *x, int n, int k,double *a, double *b)
   memmove(b, b+k, (n-k)*sizeof(double));
 }
 
-/*
- * b = \tilde{D}^{(x,k)} a = k (\Delta_k)^{-1} D^{(x,k)} a
+/**
+ * @brief Multiply by D tilda
+ * Multiplies a vector by D tilda, without having to explictly
+ * construct or use the matrix D.
+ *
+ * @param x                    locations of the responses
+ * @param n                    number of observations
+ * @param k                    order of the trendfilter
+ * @param a                    the input vector to multiply
+ * @param b                    allocated space for the output
+ * @return void
+ * @see tf_dx
  */
 void tf_dxtil(double *x, int n, int k,double *a, double *b)
 {
@@ -262,4 +247,81 @@ void tf_dxtil(double *x, int n, int k,double *a, double *b)
     {
       b[i] = b[i] * k/( x[k+i] - x[i] );
     }
+}
+
+/**
+ * @brief Multiply by D transponse
+ * Multiplies a vector by D transpose, without having
+ * to explictly construct or use the matrix D.
+ *
+ * @param x                    locations of the responses
+ * @param n                    number of observations
+ * @param k                    order of the trendfilter
+ * @param a                    the input vector to multiply
+ * @param b                    allocated space for the output
+ * @return void
+ * @see tf_dtxtil
+ */
+void tf_dtx(double *x, int n, int k, double *a, double *b)
+{
+  int i;
+  int j;
+  double fact;
+
+  for(i=0; i < n; i++) b[i] = a[i];
+
+  if( k < 1 || k >= n )
+    return;
+
+  for(i=k; i > 0; --i)
+  {
+
+    /* b[0:n-i] = D' * b[0:n-i-1] for 1 <= i < n */
+    b[n-i] = b[n-i-1];
+    for(j=n-i-1; j > 0; --j)
+    {
+      b[j] = b[j-1] - b[j];
+    }
+    b[0] = -b[0];
+
+    if( i != 1 )
+    {
+      for(j=0; j <= n-i; ++j)
+      {
+        b[j] = b[j] / ( x[j+i-1] - x[j] );
+      }
+    }
+  }
+
+  fact = glmgen_factorial(k-1);
+  for(i=0; i < n; ++i)
+  {
+    b[i] *= fact;
+  }
+}
+
+/**
+ * @brief Multiply by D tilda transponse
+ * Multiplies a vector by D tilda transpose, without having
+ * to explictly construct or use the matrix D.
+ *
+ * @param x                    locations of the responses
+ * @param n                    number of observations
+ * @param k                    order of the trendfilter
+ * @param a                    the input vector to multiply
+ * @param b                    allocated space for the output
+ * @return void
+ * @see tf_dtx
+ */
+void tf_dtxtil(double *x, int n, int k,double *a, double *b)
+{
+  int i;
+
+  if( k > 0 )
+    for(i=0; i < n-k; i++)
+    {
+      a[i] = a[i] * k/( x[k+i] - x[i] );
+    }
+  tf_dtx(x, n, k, a, b);
+
 }

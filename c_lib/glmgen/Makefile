@@ -12,6 +12,9 @@ all:
 	cd obj; ${CC} ${CFLAGS}  -c -fPIC ../src/tf/*.c -I${IDIR}
 	${CC} -shared -o lib/libglmgen.so ${OBJ}
 
+docs:
+	doxygen Doxyfile
+
 ex:
 	${CC} ${CFLAGS} -c -fPIC ./examples/test_utils.c -I./examples -I./src/utils -I./src/tf -I./include/ -o examples/test_utils.o
 

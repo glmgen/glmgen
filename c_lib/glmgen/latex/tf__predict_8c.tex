@@ -1,0 +1,149 @@
+\hypertarget{tf__predict_8c}{\section{src/tf/tf\+\_\+predict.c File Reference}
+\label{tf__predict_8c}\index{src/tf/tf\+\_\+predict.\+c@{src/tf/tf\+\_\+predict.\+c}}
+}
+
+
+Prediction algorithms for trendfiltering.  
+
+
+{\ttfamily \#include \char`\"{}tf.\+h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{tf__predict_8c_ab88fd9d82ee2652cf59f2094cf7d6a80}{tf\+\_\+predict} (double $\ast$beta, double $\ast$x, int n, int k, int family, double $\ast$x0, int n0, double $\ast$pred, double zero\+\_\+tol)
+\begin{DoxyCompactList}\small\item\em Calculate maximum lambda value. Will return the largest lambda value for which the penalty term is zero for Gaussian losses. Will only be approximate for other loss functions. \end{DoxyCompactList}\item 
+void \hyperlink{tf__predict_8c_a47ab5be455b8c651247c1440fd34046e}{tf\+\_\+predict\+\_\+gauss} (double $\ast$beta, double $\ast$x, int n, int k, double $\ast$x0, int n0, double $\ast$pred, double zero\+\_\+tol)
+\begin{DoxyCompactList}\small\item\em Calculate maximum lambda value. Lower level function for predicting from a Gaussian loss function. \end{DoxyCompactList}\item 
+void \hyperlink{tf__predict_8c_ada592c610d15c914d1c12068b0ceea0b}{poly\+\_\+coefs} (double $\ast$x, int k, double $\ast$beta, double $\ast$phi)
+\begin{DoxyCompactList}\small\item\em Calculate polynomial coefficents of the fit. Helper function to convert the beta vector into a polynomial. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Prediction algorithms for trendfiltering. 
+
+\begin{DoxyAuthor}{Author}
+Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2014-\/12-\/23 Routines take a beta vector, and therefore are agnostic to the algorithm used for calculating the fit. 
+\end{DoxyDate}
+
+
+\subsection{Function Documentation}
+\hypertarget{tf__predict_8c_ada592c610d15c914d1c12068b0ceea0b}{\index{tf\+\_\+predict.\+c@{tf\+\_\+predict.\+c}!poly\+\_\+coefs@{poly\+\_\+coefs}}
+\index{poly\+\_\+coefs@{poly\+\_\+coefs}!tf\+\_\+predict.\+c@{tf\+\_\+predict.\+c}}
+\subsubsection[{poly\+\_\+coefs}]{\setlength{\rightskip}{0pt plus 5cm}void poly\+\_\+coefs (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{x, }
+\item[{int}]{k, }
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{phi}
+\end{DoxyParamCaption}
+)}}\label{tf__predict_8c_ada592c610d15c914d1c12068b0ceea0b}
+
+
+Calculate polynomial coefficents of the fit. Helper function to convert the beta vector into a polynomial. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & the original positions used in the fit \\
+\hline
+{\em k} & order of the fit \\
+\hline
+{\em beta} & the beta vector for the prediction; length n-\/k \\
+\hline
+{\em phi} & allocated memory of length k+1 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{tf__predict_8c_ab88fd9d82ee2652cf59f2094cf7d6a80}{\index{tf\+\_\+predict.\+c@{tf\+\_\+predict.\+c}!tf\+\_\+predict@{tf\+\_\+predict}}
+\index{tf\+\_\+predict@{tf\+\_\+predict}!tf\+\_\+predict.\+c@{tf\+\_\+predict.\+c}}
+\subsubsection[{tf\+\_\+predict}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+predict (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{x, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{int}]{family, }
+\item[{double $\ast$}]{x0, }
+\item[{int}]{n0, }
+\item[{double $\ast$}]{pred, }
+\item[{double}]{zero\+\_\+tol}
+\end{DoxyParamCaption}
+)}}\label{tf__predict_8c_ab88fd9d82ee2652cf59f2094cf7d6a80}
+
+
+Calculate maximum lambda value. Will return the largest lambda value for which the penalty term is zero for Gaussian losses. Will only be approximate for other loss functions. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em beta} & the beta vector for the prediction; length n-\/k \\
+\hline
+{\em x} & the original positions used in the fit \\
+\hline
+{\em n} & number of observations \\
+\hline
+{\em k} & order of the fit \\
+\hline
+{\em family} & family of the fit \\
+\hline
+{\em x0} & the new positions to predict at \\
+\hline
+{\em n0} & the number of observations in x0 \\
+\hline
+{\em pred} & allocated space for the predicted values \\
+\hline
+{\em zero\+\_\+tol} & tolerance for the fitting algorithm; default is 1e-\/11 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+The results will not be valid unless the values in x0 are within the range of the original x inputs. 
+\end{DoxyNote}
+\hypertarget{tf__predict_8c_a47ab5be455b8c651247c1440fd34046e}{\index{tf\+\_\+predict.\+c@{tf\+\_\+predict.\+c}!tf\+\_\+predict\+\_\+gauss@{tf\+\_\+predict\+\_\+gauss}}
+\index{tf\+\_\+predict\+\_\+gauss@{tf\+\_\+predict\+\_\+gauss}!tf\+\_\+predict.\+c@{tf\+\_\+predict.\+c}}
+\subsubsection[{tf\+\_\+predict\+\_\+gauss}]{\setlength{\rightskip}{0pt plus 5cm}void tf\+\_\+predict\+\_\+gauss (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{x, }
+\item[{int}]{n, }
+\item[{int}]{k, }
+\item[{double $\ast$}]{x0, }
+\item[{int}]{n0, }
+\item[{double $\ast$}]{pred, }
+\item[{double}]{zero\+\_\+tol}
+\end{DoxyParamCaption}
+)}}\label{tf__predict_8c_a47ab5be455b8c651247c1440fd34046e}
+
+
+Calculate maximum lambda value. Lower level function for predicting from a Gaussian loss function. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em beta} & the beta vector for the prediction; length n-\/k \\
+\hline
+{\em x} & the original positions used in the fit \\
+\hline
+{\em n} & number of observations \\
+\hline
+{\em k} & order of the fit \\
+\hline
+{\em x0} & the new positions to predict at \\
+\hline
+{\em n0} & the number of observations in x0 \\
+\hline
+{\em pred} & allocated space for the predicted values \\
+\hline
+{\em zero\+\_\+tol} & tolerance for the fitting algorithm; default is 1e-\/11 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{tf__predict_8c_ab88fd9d82ee2652cf59f2094cf7d6a80}{tf\+\_\+predict} 
+\end{DoxySeeAlso}

@@ -28,8 +28,17 @@
 
  #include "tf.h"
 
-/* Dynamic programming algorithm for the 1d fused lasso problem
-   (Ryan's implementation of Nick Johnson's algorithm) */
+/**
+ * @brief Dynamic programming algorithm for the 1d fused lasso problem
+ * Implementation of Nick Johnson's algorithm for O(n) calculation of the
+ * entire solution path for the 1-d fused lasso.
+ * @param n                    number of observations
+ * @param y                    response vector
+ * @param lam                  the maximum lambda of the path
+ * @param beta                 allocated space for the output
+ * @return  void
+ * @see tf_dp_weight
+ */
 void tf_dp (int n, double *y, double lam, double *beta)
 {
   int i;
@@ -166,9 +175,18 @@ void tf_dp (int n, double *y, double lam, double *beta)
   free(tp);
 }
 
-/* Dynamic programming algorithm for the weighted 1d fused lasso problem
-   (Ryan's implementation of Nick Johnson's algorithm) */
-void tf_dp_weight (int n, double *y, double *w, double lam, double *beta)
+/**
+ * @brief Weighted variant of the dynamic programming algorithm for the 1d fused lasso problem
+ * Implementation of Nick Johnson's algorithm for O(n) calculation of the
+ * entire solution path for the 1-d fused lasso, using weights.
+ * @param n                    number of observations
+ * @param y                    response vector
+ * @param w                    vector of weights
+ * @param lam                  the maximum lambda of the path
+ * @param beta                 allocated space for the output
+ * @return  void
+ * @see tf_dp
+ */void tf_dp_weight (int n, double *y, double *w, double lam, double *beta)
 {
   int i;
   int k;

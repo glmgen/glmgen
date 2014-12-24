@@ -21,44 +21,148 @@
  * @file tf_admm.c
  * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
  * @date 2014-12-23
- * @brief Main calling function for fitting trendfiltering model.
+ * @brief Fitting trendfiltering using the ADMM algorithm.
  *
- * Here.
+ * Contains all of the functions specific to the ADMM algorithm
+ * implementation; allows for Gaussian, binomial, and poisson
+ * losses, as well as arbitrary sample weights.
  */
 
 #include "tf.h"
 #include "utils.h"
 
 /**
- * @brief Fit a trendfilter model.
+ * @brief Default call to tf_admm
+ * Example of how to call tf_admm, taking only the response vector @p and
+ * observation size @n as inputs. Users will likely need to adjust tf_admm_default
+ * for their own needs, using it as a starting template.
+ * @param y                    a vector of responses
+ * @param n                    the length of y, i.e., the number of observations
+ * @return  Returns a pointer to beta values, a column oriented (nlambda x n) array.
+ * @note The user is responsible for freeing the array pointed to by the response.
+ */
+double * tf_admm_default(double * y, int n)
+{
+  int i;
+  int j;
+
+  double * x;
+  double * w;
+  int k;
+  int family;
+  int max_iter;
+  int lam_flag;
+  double * lambda;
+  int nlambda;
+  double lambda_min_ratio;
+  double * beta;
+  double * obj;
+  int * iter;
+  int * status;
+  double rho;
+  double obj_tol;
+  double alpha_ls;
+  double gamma_ls;
+  int max_iter_ls;
+  int max_inner_iter;
+  int verbose;
+
+  /* Set default constants */
+  k = 2;
+  family = FAMILY_GAUSSIAN;
+  max_iter = 25;
+  lam_flag = 0;
+  nlambda = 50;
+  lambda_min_ratio = 1e-11;
+  rho = 1;
+  obj_tol = 1e-10;
+  alpha_ls = 0.5;
+  gamma_ls = 0.8;
+  max_iter_ls = 50;
+  max_inner_iter = 250;
+  verbose = 0;
+
+  /* Allocate space for input arrays */
+  x      = (double *) malloc(n * sizeof(double));
+  w      = (double *) malloc(n * sizeof(double));
+  lambda = (double *) malloc(nlambda * sizeof(double));
+  beta   = (double *) malloc(nlambda * n * sizeof(double));
+  obj    = (double *) malloc(nlambda * max_iter * sizeof(double));
+  iter   = (int *)    malloc(nlambda * sizeof(int));
+  status = (int *)    malloc(nlambda * sizeof(int));
+
+  /* Fill x and w with default values */
+  for (i = 0; i < n; i++)
+  {
+    x[i] = i;
+    w[i] = 1;
+  }
+
+  /* Initalize output arrays with 0's */
+  for (i = 0; i < nlambda; i++)
+  {
+    lambda[i] = 0;
+    for (j = 0; j < n; j++)
+    {
+      beta[i + j*nlambda] = 0;
+    }
+    for (j = 0; j < max_iter; j++)
+    {
+      obj[i + j*nlambda] = 0;
+    }
+    iter[i] = 0;
+    status[i] = 0;
+  }
+
+  tf_admm(y, x, w, n, k, family, max_iter, lam_flag, lambda,
+          nlambda, lambda_min_ratio, beta, obj, iter,
+          status, rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
+          max_inner_iter, verbose);
+
+  /* Free allocated arrays (except beta; which is returned) */
+  free(x);
+  free(w);
+  free(lambda);
+  free(obj);
+  free(iter);
+  free(status);
+
+  return(beta);
+}
+
+/**
+ * @brief Main wrapper for fitting a trendfilter model.
+ * Takes as input either a sequence of lambda tuning parameters, or the number
+ * of desired lambda values. In the latter case the function will also calculate
+ * a lambda sequence. The user must supply allocated memory to store the output,
+ * with the function itself returning only @c void. For default values, and an
+ * example of how to call the function, see the function tf_admm_default.
  *
- * Fits a trendfilter model for a sequence of lambda tuning parameters. The
- * user must supply allocated memory to store the output, with the function
- * itself returning only @c void.
  * @param y                    a vector of responses
  * @param x                    a vector of response locations; must be ordered
  * @param w                    a vector of sample weights
  * @param n                    the length of y, x, and w
  * @param k                    degree of the trendfilter; i.e., k=1 linear
  * @param family               family code for the type of fit; family=0 for OLS
- * @param maxiter              maximum number of ADMM interations; ignored for k=0
+ * @param max_iter             maximum number of ADMM interations; ignored for k=0
  * @param lam_flag             0/1 flag for whether lambda sequence needs to be estimated
  * @param lambda               either a sequence of lambda when lam_flag=0, or empty
  *                             allocated space if lam_flag=1
  * @param nlambda              number of lambda values; need for both lam_flag=0 and 1
  * @param lambda_min_ratio     minimum ratio between min and max lambda; ignored for lam_flag=0
  * @param beta                 allocated space of size n*nlambda to store the output coefficents
- * @param obj                  allocated space of size maxiter*nlambda to store the objective
+ * @param obj                  allocated space of size max_iter*nlambda to store the objective
  * @param iter                 allocated space of size nlambda to store the number of iterations
  * @param status               allocated space of size nlambda to store the status of each run
- * @param rho                  tuning parameter for the ADMM algorithm; set to 1 for default
- * @param obj_tol              stopping criteria tolerance; set to 1e-10 for default
- * @param alpha_ls             for family != 0, line search tuning parameter; set to 0.5 for default
- * @param gamma_ls             for family != 0, line search tuning parameter; set to 0.8 for default
- * @param max_iter_ls          for family != 0, max number of iterations in line search; set to 50 for default
- * @param max_inner_iter       for family != 0, max number of iterations in inner ADMM; set to 250 for default
+ * @param rho                  tuning parameter for the ADMM algorithm
+ * @param obj_tol              stopping criteria tolerance
+ * @param alpha_ls             for family != 0, line search tuning parameter
+ * @param gamma_ls             for family != 0, line search tuning parameter
+ * @param max_iter_ls          for family != 0, max number of iterations in line search
+ * @param max_inner_iter       for family != 0, max number of iterations in inner ADMM
  * @param verbose              0/1 flag for printing progress
  * @return void
+ * @see tf_admm_default
  */
 void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               int max_iter, int lam_flag, double * lambda,
@@ -85,9 +189,9 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   gqr * Dkt_qr;
 
   beta_max = (double *) malloc(n * sizeof(double));
-  temp_n = (double *) malloc(n * sizeof(double));
-  alpha = (double *) malloc(n * sizeof(double)); /* we use extra buffer (n vs n-k) */
-  u = (double *) malloc(n * sizeof(double)); /* we use extra buffer (n vs n-k) */
+  temp_n   = (double *) malloc(n * sizeof(double));
+  alpha    = (double *) malloc(n * sizeof(double)); /* we use extra buffer (n vs n-k) */
+  u        = (double *) malloc(n * sizeof(double)); /* we use extra buffer (n vs n-k) */
 
   /* Assume w does not have zeros */
   for(i = 0; i < n; i++) temp_n[i] = 1/sqrt(w[i]);
@@ -219,6 +323,32 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   free(u);
 }
 
+/**
+ * @brief Low level fitting routine for a Gaussian trendfiltering problem.
+ * Function used by tf_admm to fit a Gaussian ADMM trendfilter, or as a
+ * subproblem by tf_admm_glm when using logistic or poisson losses. Fits
+ * the solution for a single value of lambda. Most users will want to call
+ * tf_admm, rather than tf_admm_gauss directly.
+ *
+ * @param y                    a vector of responses
+ * @param x                    a vector of response locations; must be ordered
+ * @param w                    a vector of sample weights
+ * @param n                    the length of y, x, and w
+ * @param k                    degree of the trendfilter; i.e., k=1 linear
+ * @param max_iter             maximum number of ADMM interations; ignored for k=0
+ * @param lam                  the value of lambda
+ * @param beta                 allocated space for output coefficents; must pre-fill as it is used in warm start
+ * @param alpha                allocated space for ADMM alpha covariates; must pre-fill as it is used in warm start
+ * @param u                    allocated space for ADMM u covariates; must pre-fill as it is used in warm start
+ * @param obj                  allocated space to store the objective; will fill at most max_iter elements
+ * @param iter                 allocated space to store the number of iterations; will fill just one element
+ * @param rho                  tuning parameter for the ADMM algorithm; set to 1 for default
+ * @param obj_tol              stopping criteria tolerance; set to 1e-10 for default
+ * @param DktDk                pointer to the inner product of DktDk
+ * @param verbose              0/1 flag for printing progress
+ * @return void
+ * @see tf_admm
+ */
 void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
        int max_iter, double lam,
        double * beta, double * alpha, double * u,
@@ -242,7 +372,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     /* Use Nick's DP algorithm, weighted version */
     tf_dp_weight(n,y,w,lam,beta);
 
-    db = (double*)malloc(n*sizeof(double));
+    db = (double *) malloc(n*sizeof(double));
 
     /* Compute objective */
     loss = 0; pen = 0;
@@ -262,8 +392,8 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
   kernmat_qr = glmgen_qr(kernmat);
 
   /* Other variables that will be useful during our iterations */
-  v = (double*)malloc(n*sizeof(double));
-  z = (double*)malloc(n*sizeof(double));
+  v = (double*) malloc(n*sizeof(double));
+  z = (double*) malloc(n*sizeof(double));
 
   if (verbose) printf("Iteration\tObjective\tPenalty\n");
 
@@ -326,6 +456,39 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
   free(z);
 }
 
+/**
+ * @brief Low level fitting routine for non-Gaussian trendfiltering problems.
+ * Can be configured to handle arbirary losses, as it takes the link function
+ * and it first two derivaties as inputs. Fits the solution for a single value
+ * of lambda. Most users will want to call tf_admm, rather than tf_admm_glm directly.
+ *
+ * @param y                    a vector of responses
+ * @param x                    a vector of response locations; must be ordered
+ * @param w                    a vector of sample weights
+ * @param n                    the length of y, x, and w
+ * @param k                    degree of the trendfilter; i.e., k=1 linear
+ * @param max_iter             maximum number of ADMM interations; ignored for k=0
+ * @param lam                  the value of lambda
+ * @param beta                 allocated space for output coefficents; must pre-fill as it is used in warm start
+ * @param alpha                allocated space for ADMM alpha covariates; must pre-fill as it is used in warm start
+ * @param u                    allocated space for ADMM u covariates; must pre-fill as it is used in warm start
+ * @param obj                  allocated space to store the objective; will fill at most max_iter elements
+ * @param iter                 allocated space to store the number of iterations; will fill just one element
+ * @param status               allocated space of size nlambda to store the status of each run
+ * @param rho                  tuning parameter for the ADMM algorithm; set to 1 for default
+ * @param obj_tol              stopping criteria tolerance; set to 1e-10 for default
+ * @param alpha_ls             for family != 0, line search tuning parameter
+ * @param gamma_ls             for family != 0, line search tuning parameter
+ * @param max_iter_ls          for family != 0, max number of iterations in line search
+ * @param max_inner_iter       for family != 0, max number of iterations in inner ADMM
+ * @param DktDk                pointer to the inner product of DktDk
+ * @param b                    the link function for a given loss
+ * @param b1                   first derivative of the link function for a given loss
+ * @param b2                   second derivative of the link function for a given loss
+ * @param verbose              0/1 flag for printing progress
+ * @return void
+ * @see tf_admm
+ */
 void tf_admm_glm (double * y, double * x, double * w, int n, int k,
         int max_iter, double lam,
         double * beta, double * alpha, double * u,
@@ -352,15 +515,15 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
   double pen;
   double t; /* stepsize */
 
-  d = (double*)malloc(n*sizeof(double)); /* line search direction */
-  yt = (double*)malloc(n*sizeof(double));/* working response: ytilde */
-  H = (double*)malloc(n*sizeof(double)); /* weighted Hessian */
-  z = (double*)malloc(n*sizeof(double));
+  d  = (double*) malloc(n*sizeof(double)); /* line search direction */
+  yt = (double*) malloc(n*sizeof(double));/* working response: ytilde */
+  H  = (double*) malloc(n*sizeof(double)); /* weighted Hessian */
+  z  = (double*) malloc(n*sizeof(double));
 
   /* Buffers for line search */
-  Db = (double*)malloc(n*sizeof(double));
-  Dd = (double*)malloc(n*sizeof(double));
-  iter_ls = (int*)malloc(sizeof(int));
+  Db      = (double *) malloc(n*sizeof(double));
+  Dd      = (double *) malloc(n*sizeof(double));
+  iter_ls = (int *)    malloc(sizeof(int));
 
   obj_admm = (double*)malloc(max_inner_iter*sizeof(double));
 

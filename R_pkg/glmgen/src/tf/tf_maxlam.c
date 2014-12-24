@@ -21,18 +21,26 @@
  * @file tf_maxlam.c
  * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
  * @date 2014-12-23
- * @brief Main calling function for fitting trendfiltering model.
+ * @brief Calculate the maximum lambda value for a trendfiltering problem.
  *
- * Here.
+ * Will return the largest lambda value for which the penalty term is zero
+ * for Gaussian losses. Will only be approximate for other loss functions.
  */
 
  #include "tf.h"
 
+/**
+ * @brief Calculate maximum lambda value.
+ * Will return the largest lambda value for which the penalty term is zero
+ * for Gaussian losses. Will only be approximate for other loss functions.
+ * @param len                  number of observations
+ * @param y                    a vector of responses
+ * @param Dt_qr                QR decomposition of the Dt matrix
+ * @param w                    vector of sample weights; must be filled
+ * @return  Returns the maximum value of lambda.
+ */
 double tf_maxlam (int len, double * y, gqr * Dt_qr, double * w)
 {
-  /* This is exact for the Gaussian case, but only approximate
-     for logistic or Poisson losses, which is OK, since we are
-     only tasked with finding an interesting range for lambdas. */
 
   int i;
   int tmp; /*n-k-1*/
