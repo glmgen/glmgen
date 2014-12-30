@@ -3,13 +3,12 @@
 \alias{glmgen}
 \docType{package}
 \title{
-Fast generalized lasso solver
+  Fast generalized lasso algorithms
 }
 \description{
-  An efficent implementation of several numerical algorithms
-  for solving the generalized lasso. Specialized implementations are provided
-  to deal with special cases, such as trendfiltering and the (graph)
-  fused lasso.
+  Efficient implementations of generalized lasso problems. Specialized
+  implementations are provided to deal with special problem classes, such
+  as trend filtering.
 }
 \details{
 \tabular{ll}{
@@ -23,13 +22,21 @@ Depends: \tab methods\cr
 
 }
 \author{
-Taylor B. Arnold, Ryan Tibshirani
+Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
 
 Maintainer: Taylor Arnold <taylor.arnold@aya.yale.edu>
 }
 \keyword{ package }
 \examples{
-  x = runif(25, min=-2*pi, max=2*pi)
-  y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
-  out = trendfilter(y, x, k=3)
+  set.seed(0)
+  n = 100
+  x = runif(n, min=-2*pi, max=2*pi)
+  y = 1.5*sin(x) + sin(2*x) + rnorm(n, sd=0.2)
+  out = trendfilter(y, x, k=2)
+
+  xx = seq(min(x),max(x),length=500)
+  lambda = out@lambda[25]
+  yy = predict(out,x.new=xx,lambda=lambda)
+  plot(x,y)
+  lines(xx,yy,col=2)
 }

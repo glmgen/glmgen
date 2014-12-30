@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani   *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
@@ -19,13 +19,13 @@
 
 /**
  * @file tf_d.c
- * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
+ * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-24
- * @brief Utility functions for working with the trendfiltering penalty matrix.
+ * @brief Utility functions for working with the trend filtering penalty matrix.
  *
- * The penalty matrix D in the trendfiltering problem has many nice properties
+ * The penalty matrix D in the trend filtering problem has many nice properties
  * which distinquish it from arbitrary sparse of banded matricies. Much of the
- * speed and stability of the trendfiltering algorithms come from taking advantage
+ * speed and stability of the trend filtering algorithms come from taking advantage 
  * of these properties. Helper functions for doing so are collected here.
  */
 

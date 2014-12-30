@@ -1,10 +1,10 @@
 \name{trendfilter.control.list}
 \alias{trendfilter.control.list}
 \title{
-Control list for tuning trendfiltering algorithm
+Control list for tuning trend filtering algorithm
 }
 \description{
-Constructs the control parameters for the trendfiltering
+Constructs the control parameters for the trend filtering
 algorithm. Allows the user to customize as many or as
 little as desired.
 }
@@ -25,23 +25,24 @@ the tolerance used in the stopping criterion.
 number of admm iterations used; ignored for k=0.
 }
   \item{max_inner_iter}{
-for glm losses, the number of inner iterations used to approximate a non-linear loss.
+for non-Gaussian GLM losses, the number of inner iterations used to in quadratic
+approximation.
 }
   \item{x_cond}{
 condition number to control the degree of thinning, when applicable. Lower numbers
 give more thinning.
 }
   \item{alpha_ls}{
-tuning parameter for the line search used inside of the ADMM procedure for glm
-losses.
+tuning parameter for the line search used inside of the ADMM procedure for non-Gaussian
+GLM losses.
 }
   \item{gamma_ls}{
-tuning parameter for the line search used inside of the ADMM procedure for glm
-losses.
+tuning parameter for the line search used inside of the ADMM procedure for non-Gaussian
+GLM losses.
 }
   \item{max_iter_ls}{
-tuning parameter for the number of iterations to use in the line search used
-inside of the ADMM procedure for glm losses.
+tuning parameter for the number of iterations to use in the line search used inside of 
+the ADMM procedure for non-Gaussian GLM losses.
 }
 }
 \value{

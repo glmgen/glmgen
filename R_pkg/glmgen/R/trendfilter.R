@@ -2,36 +2,38 @@ trendfilter = function(y, x, weights, k = 2L,
                         family = c("gaussian", "logistic", "poisson"),
                         method = c("admm"),
                         lambda, nlambda = 50L, lambda.min.ratio = 1e-05,
-                        thinning = !missing(x), objective = TRUE,
-                        verbose = FALSE, control = trendfilter.control.list()) {
+                        thinning = TRUE, verbose = FALSE,
+                        control = trendfilter.control.list()) {
 
   cl = match.call()
-  n = length(y)
   family = match.arg(family)
   method = match.arg(method)
   family_cd = match(family, c("gaussian", "logistic", "poisson")) - 1L
   method_cd = match(method, c("admm")) - 1L
 
+  n = length(y)
+  if (!missing(x) && length(x)!=n) stop("x and y must have the same length.")
   if (!missing(x)) {
     ord = order(x)
     y = y[ord]
     x = x[ord]
   }
-  if (missing(x)) x = 1L:length(y)
-  if (missing(weights)) weights = rep(1L,length(y))
+  if (missing(x)) x = 1L:n
+  if (missing(weights)) weights = rep(1L,n)
   if (any(weights==0)) stop("Cannot pass zero weights.")
   if (is.na(family_cd)) stop("family argument must be one of 'gaussian', 'logistic', or 'poisson'.")
-
-  cond = (1/n) * ( (max(x) - min(x)) / min(diff(x)))^(k+1)
-  if( !thinning && cond > 1e12 ) {
-    warning("The x values are ill-conditioned. Consider thinning. \nSee ?trendfilter for more info.")
+  if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
+  if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
+  if (k > 3) warning("Large k leads to generally worse conditioning; k=0,1,2 are the most stable choices.")
+  
+  cond = (1/n) * ((max(x) - min(x)) / min(diff(x)))^(k+1)
+  if (!thinning && any(is.infinite(cond))) {
+    stop("Cannot pass duplicate x values; use observation weights, or turn on thinning.")
   }
-  if (any(is.infinite(cond)) && !thinning) {
-    stop("Cannot pass duplicate x values (without thinning).")
+  if(!thinning && cond > 1e11) {
+    warning("The x values are ill-conditioned; consider thinning.\nSee ?trendfilter for more details.")
   }
-
-  # Thin the input data:
-  if (thinning) {
+  if (thinning && cond > control$x_cond) {
     z = .Call("thin_R",
           sY = as.double(y),
           sX = as.double(x),
@@ -44,10 +46,10 @@ trendfilter = function(y, x, weights, k = 2L,
     x = z$x
     weights = z$w
     n = z$n
+
+    #warning("Due to bad conditioning, the (x,y) pairs have been thinned before running trend filtering.\nSee ?trendfilter for more details.") 
   }
 
-  if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
-  if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
   if (missing(lambda)) {
     if (nlambda < 1L || nlambda != floor(nlambda)) stop("nlambda must be a positive integer.")
     if (lambda.min.ratio <= 0 | lambda.min.ratio >= 1) stop("lamba.min.ratio must be between 0 and 1.")
@@ -83,7 +85,6 @@ trendfilter = function(y, x, weights, k = 2L,
   if (is.null(z)) stop("Unspecified error in C code.")
   if (is.null(z$obj)) z$obj = NA_real_
   colnames(z$beta) = as.character(round(z$lambda, 3))
-  if (!objective) z$obj = matrix(NA_real_)
 
   out = new("trendfilter", y = y, x = x, w = weights, k = as.integer(k), lambda = z$lambda,
             beta = z$beta, family = family, method = method, n = length(y),
@@ -92,9 +93,9 @@ trendfilter = function(y, x, weights, k = 2L,
   out
 }
 
-trendfilter.control.list = function(rho=1, obj_tol=1e-10, maxiter=25L,
-                          max_inner_iter=250L, x_cond=1e11,
-                          alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=50L) {
+trendfilter.control.list = function(rho=1, obj_tol=1e-6, maxiter=200L,
+                          max_inner_iter=100L, x_cond=1e11,
+                          alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=20L) {
 
   z <- list(rho=rho, obj_tol=obj_tol, maxiter=maxiter,
             max_inner_iter=max_inner_iter, x_cond=x_cond,

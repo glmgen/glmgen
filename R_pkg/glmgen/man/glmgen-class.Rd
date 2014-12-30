@@ -81,7 +81,7 @@ to estimation algorithms such as \code{\link{trendfilter}}.
 	}
 }
 \author{
-Taylor B. Arnold, Ryan Tibshirani, Veerun Sadhanala
+Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
 }
 \seealso{
 \code{\linkS4class{trendfilter}},
