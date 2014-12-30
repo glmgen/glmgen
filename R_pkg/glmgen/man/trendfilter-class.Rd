@@ -28,8 +28,6 @@ to the function \code{\link{trendfilter}}.
     and 'poisson'.}
     \item{\code{method}:}{method used to fit the generalized lasso}
     \item{\code{n}:}{an integer giving the length of \code{y}}
-    \item{\code{p}:}{an integer giving the number of columns
-    in the penalty matrix \code{D}}
     \item{\code{m}:}{an integer giving the number of rows
     in the penalty matrix \code{D}}
     \item{\code{obj}:}{a matrix giving the objective values of the fit,

@@ -88,13 +88,12 @@ trendfilter = function(y, x, weights, k = 2L,
 
   out = new("trendfilter", y = y, x = x, w = weights, k = as.integer(k), lambda = z$lambda,
             beta = z$beta, family = family, method = method, n = length(y),
-            p = length(y), m = length(y) - as.integer(k) - 1L, obj = z$obj,
-            call = cl)
+            m = length(y) - as.integer(k) - 1L, obj = z$obj, call = cl)
   out
 }
 
 trendfilter.control.list = function(rho=1, obj_tol=1e-6, maxiter=200L,
-                          max_inner_iter=100L, x_cond=1e11,
+                          max_inner_iter=200L, x_cond=1e11,
                           alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=20L) {
 
   z <- list(rho=rho, obj_tol=obj_tol, maxiter=maxiter,
