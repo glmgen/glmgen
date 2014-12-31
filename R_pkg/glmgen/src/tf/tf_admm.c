@@ -1,5 +1,6 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala,           *
+ *                       Ryan Tibshirani                                    *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
@@ -19,9 +20,9 @@
 
 /**
  * @file tf_admm.c
- * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
+ * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
- * @brief Fitting trendfiltering using the ADMM algorithm.
+ * @brief Fitting trend filtering using the ADMM algorithm.
  *
  * Contains all of the functions specific to the ADMM algorithm
  * implementation; allows for Gaussian, binomial, and poisson
@@ -324,7 +325,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
 }
 
 /**
- * @brief Low level fitting routine for a Gaussian trendfiltering problem.
+ * @brief Low level fitting routine for a Gaussian trend filtering problem.
  * Function used by tf_admm to fit a Gaussian ADMM trendfilter, or as a
  * subproblem by tf_admm_glm when using logistic or poisson losses. Fits
  * the solution for a single value of lambda. Most users will want to call
@@ -377,9 +378,10 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     /* Compute objective */
     loss = 0; pen = 0;
     for (i=0; i<n; i++) loss += w[i]*(y[i]-beta[i])*(y[i]-beta[i]);
+    loss = loss/2;
     tf_dx(x,n,k+1,beta,db); /* IMPORTANT: use k+1 here! */
     for (i=0; i<n-k-1; i++) pen += fabs(db[i]);
-    obj[0] = loss/2+lam*pen;
+    obj[0] = loss+lam*pen;
 
     free(db);
     return;
@@ -395,7 +397,8 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
   v = (double*) malloc(n*sizeof(double));
   z = (double*) malloc(n*sizeof(double));
 
-  if (verbose) printf("Iteration\tObjective\tPenalty\n");
+  if (verbose) printf("\nlambda=%0.3e\n",lam);
+  if (verbose) printf("Iteration\tObjective\tLoss\tPenalty\n");
 
   for(it=0; it < max_iter; it++)
   {
@@ -406,8 +409,6 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     /* Solve the least squares problem with sparse QR */
     glmgen_qrsol(kernmat_qr, beta);
 
-    if(verbose) printf("it=%d\tbeta = %g", it, l1norm(beta,n));
-
     /* Update alpha: 1d fused lasso
      * Build the response vector */
     tf_dxtil(x,n,k,beta,v);
@@ -417,29 +418,24 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     }
     /* Use Nick's DP algorithm */
     tf_dp(n-k,z,lam/rho,alpha);
-    if(verbose) printf("\talpha = %g", l1norm(alpha,n-k));
 
     /* Update u: dual update */
     for (i=0; i<n-k; i++)
     {
       u[i] = u[i]+alpha[i]-v[i];
     }
-    if(verbose) printf("\tu = %g\n", l1norm(u,n-k));
 
     /* Compute loss */
     loss = 0;
-    for (i=0; i<n; i++)
-    {
-      loss += w[i]*(y[i]-beta[i])*(y[i]-beta[i]);
-    }
+    for (i=0; i<n; i++) loss += w[i]*(y[i]-beta[i])*(y[i]-beta[i]);
+    loss = loss/2;
     /* Compute penalty */
     tf_dx(x,n,k+1,beta,z); /* IMPORTANT: use k+1 here! */
     pen = 0;
-    for (i=0; i<n-k-1; i++)
-    {
-      pen += fabs(z[i]);
-    }
-    obj[it] = loss/2+lam*pen;
+    for (i=0; i<n-k-1; i++) pen += fabs(z[i]);
+    obj[it] = loss+lam*pen;
+
+    if (verbose) printf("%i\t%0.3e\t%0.3e\t%0.3e\n",it+1,obj[it],loss,lam*pen);
 
     /* Stop if relative difference of objective values <= obj_tol */
     if(it > 0)
@@ -457,7 +453,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
 }
 
 /**
- * @brief Low level fitting routine for non-Gaussian trendfiltering problems.
+ * @brief Low level fitting routine for non-Gaussian trend filtering problems.
  * Can be configured to handle arbirary losses, as it takes the link function
  * and it first two derivaties as inputs. Fits the solution for a single value
  * of lambda. Most users will want to call tf_admm, rather than tf_admm_glm directly.
@@ -510,7 +506,6 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
   int iter_admm;
   double * Db;
   double * Dd;
-  double pobj;
   double loss;
   double pen;
   double t; /* stepsize */
@@ -527,7 +522,8 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
 
   obj_admm = (double*)malloc(max_inner_iter*sizeof(double));
 
-  if (verbose) printf("Iteration\tObjective\tLoss\t\tPenalty\n");
+  if (verbose) printf("\nlambda=%0.3e\n",lam);
+  if (verbose) printf("Iteration\tObjective\tLoss\tPenalty\tADMM iters\n");
 
   /* One Prox Newton step per iteration */
   for (it=0; it < max_iter; it++)
@@ -544,8 +540,6 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
       {
         yt[i] = beta[i] + (y[i]-b1(beta[i]));
       }
-      /* IMPORTANT: set yt = Wyt */
-      /* yt[i] = H[i]*beta[i] + y[i] - b1(beta[i]); */
     }
 
     /* Prox Newton step */
@@ -554,7 +548,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
         max_inner_iter, lam,
         d, alpha, u,
         obj_admm, &iter_admm, rho, obj_tol,
-        DktDk, verbose);
+        DktDk, 0);
 
     for(i=0; i<n; i++)
     {
@@ -562,8 +556,8 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
     }
 
     t = line_search(y, x, w, n, k, lam, b, b1, beta, d, alpha_ls, gamma_ls, max_iter_ls, iter_ls, Db, Dd);
+    /* if (verbose) printf("Stepsize t=%.3e,\titers=%d\n", t, *iter_ls+1); */
 
-    if(verbose) printf("Stepsize t=%.2e,\titers=%d\n", t, *iter_ls);
     for(i=0; i<n; i++)
     {
       beta[i] = beta[i] + t * d[i];
@@ -572,25 +566,18 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
     /* Compute objective */
     /* Compute loss */
     loss = 0;
-    for (i=0; i<n; i++)
-    {
-      loss += w[i] * (-y[i]*beta[i] + b(beta[i]));
-    }
+    for (i=0; i<n; i++) loss += w[i] * (-y[i]*beta[i] + b(beta[i]));
     /* Compute penalty */
     tf_dx(x,n,k+1,beta,z); /* IMPORTANT: use k+1 here! */
     pen = 0;
-    for (i=0; i<n-k-1; i++)
-    {
-      pen += fabs(z[i]);
-    }
-    pobj = loss+lam*pen;
-    obj[it] = pobj;
+    for (i=0; i<n-k-1; i++) pen += fabs(z[i]);
+    obj[it] = loss+lam*pen;
 
-    if (verbose) printf("GLM \t%i\t%0.3e\t%0.3e\t%0.3e\n",it,pobj, loss, lam*pen);
+    if (verbose) printf("\t%i\t%0.3e\t%0.3e\t%0.3e\t%i\n",it+1,obj[it],loss,lam*pen,iter_admm);
 
     if(it > 0)
     {
-      if( fabs(pobj - obj[it-1]) < fabs(pobj) * obj_tol )
+      if( fabs(obj[it] - obj[it-1]) < fabs(obj[it]) * obj_tol )
       {
         break;
       }

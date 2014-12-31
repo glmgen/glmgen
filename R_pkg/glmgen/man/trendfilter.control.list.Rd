@@ -1,17 +1,17 @@
 \name{trendfilter.control.list}
 \alias{trendfilter.control.list}
 \title{
-Control list for tuning trendfiltering algorithm
+Control list for tuning trend filtering algorithm
 }
 \description{
-Constructs the control parameters for the trendfiltering
+Constructs the control parameters for the trend filtering
 algorithm. Allows the user to customize as many or as
 little as desired.
 }
 \usage{
-trendfilter.control.list(rho=1, obj_tol=1e-10, maxiter=25L,
-                          max_inner_iter=250L, x_cond=1e11,
-                          alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=50L)
+trendfilter.control.list(rho=1, obj_tol=1e-6, maxiter=200L,
+                          max_inner_iter=200L, x_cond=1e11,
+                          alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=20L)
 }
 \arguments{
   \item{rho}{
@@ -25,23 +25,24 @@ the tolerance used in the stopping criterion.
 number of admm iterations used; ignored for k=0.
 }
   \item{max_inner_iter}{
-for glm losses, the number of inner iterations used to approximate a non-linear loss.
+for non-Gaussian GLM losses, the number of inner iterations used to in quadratic
+approximation.
 }
   \item{x_cond}{
 condition number to control the degree of thinning, when applicable. Lower numbers
 give more thinning.
 }
   \item{alpha_ls}{
-tuning parameter for the line search used inside of the ADMM procedure for glm
-losses.
+tuning parameter for the line search used inside of the ADMM procedure for non-Gaussian
+GLM losses.
 }
   \item{gamma_ls}{
-tuning parameter for the line search used inside of the ADMM procedure for glm
-losses.
+tuning parameter for the line search used inside of the ADMM procedure for non-Gaussian
+GLM losses.
 }
   \item{max_iter_ls}{
-tuning parameter for the number of iterations to use in the line search used
-inside of the ADMM procedure for glm losses.
+tuning parameter for the number of iterations to use in the line search used inside of
+the ADMM procedure for non-Gaussian GLM losses.
 }
 }
 \value{
@@ -54,7 +55,10 @@ Taylor B. Arnold
 \code{\linkS4class{trendfilter}}
 }
 \examples{
-  x = runif(25, min=-2*pi, max=2*pi)
-  y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
-  out = trendfilter(y, x, k=3, trendfilter.control.list(rho=3))
+  set.seed(0)
+  n = 100
+  x = runif(n, min=-2*pi, max=2*pi)
+  y = 1.5*sin(x) + sin(2*x) + rnorm(n, sd=0.2)
+  out = trendfilter(y, x, k=2, control=trendfilter.control.list(rho=3))
+
 }

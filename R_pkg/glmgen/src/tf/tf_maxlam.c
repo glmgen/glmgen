@@ -1,5 +1,6 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala,           *
+ *                       Ryan Tibshirani                                    *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
@@ -19,9 +20,9 @@
 
 /**
  * @file tf_maxlam.c
- * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
+ * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
- * @brief Calculate the maximum lambda value for a trendfiltering problem.
+ * @brief Calculate the maximum lambda value for a trend filtering problem.
  *
  * Will return the largest lambda value for which the penalty term is zero
  * for Gaussian losses. Will only be approximate for other loss functions.

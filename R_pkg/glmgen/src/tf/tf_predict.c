@@ -1,5 +1,6 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala,           *
+ *                       Ryan Tibshirani                                    *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
@@ -19,9 +20,9 @@
 
 /**
  * @file tf_predict.c
- * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
+ * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
- * @brief Prediction algorithms for trendfiltering.
+ * @brief Prediction algorithms for trend filtering.
  *
  * Routines take a beta vector, and therefore are agnostic to
  * the algorithm used for calculating the fit.

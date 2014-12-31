@@ -1,7 +1,9 @@
 \name{predict-methods}
 \docType{methods}
 \alias{predict,trendfilter-method}
-\title{ Make predictions given a trendfilter object }
+\title{
+  Make predictions given a trendfilter object
+}
 \description{
   Once a trendfilter object has been fit, predictions
   can be made for a new set of x points and a new set
@@ -19,18 +21,27 @@
           of the linear predictors; the alternative \code{response} is on
           the scale of the response variable.}
   \item{lambda}{option vector of lambda values at which to predict. If \code{NULL},
-          the set of lambda used in fitting are used for prediction.}
+          the set of lambdas used for fitting are used for prediction.}
   \item{x.new}{optional vector of locations to use for prediction. If \code{NULL},
           the set of locations used for fitting are used for prediction.}
   \item{zero_tol}{tolerance for the prediction algorithm; a small number slightly
-          greater than zero greatly speds up the fitting with negligable degradation
+          greater than zero greatly speeds up the fitting with negligable degradation
           to the fit.}
 }
 \examples{
-  x = 1:25
-  y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
-  out = trendfilter(y, x, k=3)
+  set.seed(0)
+  n = 100
+  x = runif(n, min=-2*pi, max=2*pi)
+  y = 1.5*sin(x) + sin(2*x) + rnorm(n, sd=0.2)
+  out = trendfilter(y, x, k=2)
 
-  pred = predict(out)
+  xx = seq(min(x),max(x),length=500)
+  lambda = out@lambda[25]
+  yy = predict(out,x.new=xx,lambda=lambda)
+  plot(x,y)
+  lines(xx,yy,col=2)
+
+  # Will throw a warning
+  predict(out,x.new=-10,lambda=lambda)
 }
 \keyword{methods}

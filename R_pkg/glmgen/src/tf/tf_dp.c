@@ -1,5 +1,6 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala,           *
+ *                       Ryan Tibshirani                                    *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
@@ -19,9 +20,9 @@
 
 /**
  * @file tf_dp.c
- * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
+ * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
- * @brief Main calling function for fitting trendfiltering model.
+ * @brief Main workhorse function for fitting trend filtering model.
  *
  * Here.
  */
@@ -137,13 +138,6 @@ void tf_dp (int n, double *y, double lam, double *beta)
     bfirst = -y[k+1]-lam;
     alast = -1;
     blast = y[k+1]-lam;
-
-    /* double check=0; */
-    /* check += afirst+alast; */
-    /* for (i=l; i<=r; i++) check += a[i]; */
-    /* if (check!=0) printf("k=%i, check=%f\n",k,check); */
-    /* if (alo==0) printf("k=%d, alo=%f, lo=%d, r=%d, tm[k]=%e, x[lo]=%e\n",k,alo,lo,r,tm[k],x[lo]); */
-    /* if (ahi==0) printf("k=%d, ahi=%f, hi=%d, l=%d, tp[k]=%e, x[hi]=%e\n",k,ahi,hi,l,tp[k],x[hi]); */
   }
 
   /* Compute the last coefficient: this is where
@@ -286,13 +280,6 @@ void tf_dp (int n, double *y, double lam, double *beta)
     bfirst = -w[k+1]*y[k+1]-lam;
     alast = -w[k+1];
     blast = w[k+1]*y[k+1]-lam;
-
-    /* double check=0; */
-    /* check += afirst+alast; */
-    /* for (i=l; i<=r; i++) check += a[i]; */
-    /* if (check!=0) printf("k=%i, check=%f\n",k,check); */
-    /* if (alo==0) printf("k=%d, alo=%f, lo=%d, r=%d, tm[k]=%e, x[lo]=%e\n",k,alo,lo,r,tm[k],x[lo]); */
-    /* if (ahi==0) printf("k=%d, ahi=%f, hi=%d, l=%d, tp[k]=%e, x[hi]=%e\n",k,ahi,hi,l,tp[k],x[hi]); */
   }
 
   /* Compute the last coefficient: this is where

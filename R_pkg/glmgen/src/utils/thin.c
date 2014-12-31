@@ -1,5 +1,6 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala,           *
+ *                       Ryan Tibshirani                                    *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
@@ -19,7 +20,7 @@
 
 /**
  * @file thin.c
- * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
+ * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
  * @brief Code for thinning large or ill-conditioned input values.
  */
@@ -65,7 +66,7 @@ void thin( double* x, double* y, double* w, int n, int k,
   nt = 0;
   for(j = 0; j < n; j++)
   {
-    intvl_xj = (int) floor( (x[j] -x[0]) / delta ) + 1;
+    intvl_xj = (int) floor( (x[j]-x[0]) / delta ) + 1;
     intvl[j] = MAX(1, MIN(intvl_xj, m));
 
     if( j == 0 || intvl[j] != intvl[j-1] ) nt++;
