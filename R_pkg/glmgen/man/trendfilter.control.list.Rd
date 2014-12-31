@@ -9,9 +9,9 @@ algorithm. Allows the user to customize as many or as
 little as desired.
 }
 \usage{
-trendfilter.control.list(rho=1, obj_tol=1e-10, maxiter=25L,
-                          max_inner_iter=250L, x_cond=1e11,
-                          alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=50L)
+trendfilter.control.list(rho=1, obj_tol=1e-6, maxiter=200L,
+                          max_inner_iter=200L, x_cond=1e11,
+                          alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=20L)
 }
 \arguments{
   \item{rho}{
@@ -41,7 +41,7 @@ tuning parameter for the line search used inside of the ADMM procedure for non-G
 GLM losses.
 }
   \item{max_iter_ls}{
-tuning parameter for the number of iterations to use in the line search used inside of 
+tuning parameter for the number of iterations to use in the line search used inside of
 the ADMM procedure for non-Gaussian GLM losses.
 }
 }
@@ -55,7 +55,10 @@ Taylor B. Arnold
 \code{\linkS4class{trendfilter}}
 }
 \examples{
-  x = runif(25, min=-2*pi, max=2*pi)
-  y = 1.5*sin(x) + sin(2*x) + rnorm(100, sd=0.2)
-  out = trendfilter(y, x, k=3, trendfilter.control.list(rho=3))
+  set.seed(0)
+  n = 100
+  x = runif(n, min=-2*pi, max=2*pi)
+  y = 1.5*sin(x) + sin(2*x) + rnorm(n, sd=0.2)
+  out = trendfilter(y, x, k=2, control=trendfilter.control.list(rho=3))
+
 }

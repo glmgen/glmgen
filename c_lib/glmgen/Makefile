@@ -15,9 +15,6 @@ all:
 docs:
 	doxygen Doxyfile
 
-ex:
-	${CC} ${CFLAGS} -c -fPIC ./examples/test_utils.c -I./examples -I./src/utils -I./src/tf -I./include/ -o examples/test_utils.o
-
 clean:
 	rm obj/*.o examples/*.o
 

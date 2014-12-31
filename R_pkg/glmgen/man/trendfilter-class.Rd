@@ -30,6 +30,8 @@ to the function \code{\link{trendfilter}}.
     \item{\code{n}:}{an integer giving the length of \code{y}}
     \item{\code{m}:}{an integer giving the number of rows
     in the penalty matrix \code{D}}
+    \item{\code{p}:}{an integer giving the number of columns
+    in the penalty matrix \code{D}}
     \item{\code{obj}:}{a matrix giving the objective values of the fit,
     with one column for each value of lambda}
     \item{\code{call}:}{the function \code{call} used for fitting
@@ -55,7 +57,7 @@ Class \code{"\linkS4class{glmgen}"}, directly.
   Tibshirani, R. J. (2014), "Adaptive piecewise polynomial estimation
   via trend filtering", Annals of Statistics 42 (1): 285--323.
 
-  Ramdas, A. and Tibshirani R. J. (2014), "Fast and flexible ADMMM algorithms 
+  Ramdas, A. and Tibshirani R. J. (2014), "Fast and flexible ADMMM algorithms
   for trend filtering", arXiv: 1406.2082.
 }
 \author{

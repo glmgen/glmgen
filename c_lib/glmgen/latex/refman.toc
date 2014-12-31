@@ -1,7 +1,0 @@
-\contentsline {chapter}{\numberline {1}File Index}{1}{chapter.1}
-\contentsline {section}{\numberline {1.1}File List}{1}{section.1.1}
-\contentsline {chapter}{\numberline {2}File Documentation}{3}{chapter.2}
-\contentsline {section}{\numberline {2.1}src/tf/tf\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}\_\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}admm.c File Reference}{3}{section.2.1}
-\contentsline {subsection}{\numberline {2.1.1}Detailed Description}{3}{subsection.2.1.1}
-\contentsline {subsection}{\numberline {2.1.2}Function Documentation}{3}{subsection.2.1.2}
-\contentsline {subsubsection}{\numberline {2.1.2.1}tf\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}\_\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}admm}{3}{subsubsection.2.1.2.1}

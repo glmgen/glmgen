@@ -53,7 +53,7 @@ setMethod("predict", signature(object = "trendfilter"),
                 x.new = object@x
               } else {
                 if (min(x.new) < min(object@x) | max(x.new) > max(object@x))
-                  warning("Predict called at new x values of the original range.") 
+                  warning("Predict called at new x values of the original range.")
               }
 
               if (type == "link") {

@@ -13,8 +13,8 @@
 trendfilter(y, x, weights, k = 2L, family = c("gaussian",
             "logistic", "poisson"), method = c("admm"), lambda,
             nlambda = 50L, lambda.min.ratio = 1e-05,
-            thinning = TRUE, verbose = FALSE, 
-	    control = trendfilter.control.list())
+            thinning = TRUE, verbose = FALSE,
+	          control = trendfilter.control.list())
 }
 \arguments{
   \item{y}{
@@ -30,8 +30,8 @@ to be constant across all samples.
 }
   \item{k}{
 the polynomial order of the trendfilter fit; a nonnegative integer (orders
-larger than 3 are not recommended). For instance, constant trend filtering 
-(i.e., the fused lasso) uses \code{k} equal to 0, linear trend filtering uses 
+larger than 3 are not recommended). For instance, constant trend filtering
+(i.e., the fused lasso) uses \code{k} equal to 0, linear trend filtering uses
 \code{k} equal to 1, quadratic trend filtering uses \code{k} equal to 2, etc.
 }
   \item{family}{
@@ -40,7 +40,7 @@ either "gaussian", "logistic", or "poisson".
 }
   \item{lambda}{
 a sequence of lambda values at which to produce a fit. Can be left blank
-(highly recommended for general use), at which point the algorithm will 
+(highly recommended for general use), at which point the algorithm will
 determine appropriate lambda values.
 }
   \item{nlambda}{
@@ -59,10 +59,6 @@ so that a smaller, better conditioned data set is fused for fitting. Defaults to
 }
   \item{method}{
 the method used to calculate the fit. Currently only 'admm' is supported.
-}
-  \item{objective}{
-logical flag indicating whether objective values of the fit should be
-returned.
 }
   \item{verbose}{
 logical. Should the function print out intermediate results as it is running.
@@ -83,14 +79,14 @@ an object of class \code{\linkS4class{trendfilter}}
   Tibshirani, R. J. (2014), "Adaptive piecewise polynomial estimation
   via trend filtering", Annals of Statistics 42 (1): 285--323.
 
-  Ramdas, A. and Tibshirani R. J. (2014), "Fast and flexible ADMMM algorithms 
+  Ramdas, A. and Tibshirani R. J. (2014), "Fast and flexible ADMMM algorithms
   for trend filtering", arXiv: 1406.2082.
 }
 \author{
 Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
 }
 \seealso{
-\code{\linkS4class{trendfilter}}
+\code{\linkS4class{trendfilter}}, \code{trendfilter-method}
 }
 \examples{
   set.seed(0)

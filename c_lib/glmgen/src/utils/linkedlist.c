@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani   *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
@@ -19,7 +19,7 @@
 
 /**
  * @file linkedlist.c
- * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
+ * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
  * @brief Construct and interact with a linked list.
  */
@@ -103,7 +103,7 @@ int isempty(linkedlist* ll)
 {
   return (ll == NULL);
 }
-int length(linkedlist* ll)
+int ll_length(linkedlist* ll)
 {
   int len = 0;
   while(ll != NULL)

@@ -1,8 +1,8 @@
 \name{predict-methods}
 \docType{methods}
 \alias{predict,trendfilter-method}
-\title{ 
-  Make predictions given a trendfilter object 
+\title{
+  Make predictions given a trendfilter object
 }
 \description{
   Once a trendfilter object has been fit, predictions
@@ -40,7 +40,7 @@
   yy = predict(out,x.new=xx,lambda=lambda)
   plot(x,y)
   lines(xx,yy,col=2)
-  
+
   # Will throw a warning
   predict(out,x.new=-10,lambda=lambda)
 }
