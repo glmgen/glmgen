@@ -13,7 +13,7 @@
 trendfilter(y, x, weights, k = 2L, family = c("gaussian",
             "logistic", "poisson"), method = c("admm"), lambda,
             nlambda = 50L, lambda.min.ratio = 1e-05,
-            thinning = TRUE, verbose = FALSE,
+            thinning = NULL, verbose = FALSE,
 	          control = trendfilter.control.list())
 }
 \arguments{
@@ -53,9 +53,10 @@ and smallest \code{lambda} values. The values are evenly spaced on a log scale,
 so this ratio should typically be set fairly small.
 }
   \item{thinning}{
-logical. If true, then in cases of poor problem conditioning (i.e., cases in which
-the numerical fitting algorithm will struggle to converge), the data are preprocessed
-so that a smaller, better conditioned data set is fused for fitting. Defaults to true.
+logical. If true, then the data are preprocessed so that a smaller, better
+conditioned data set is fused for fitting. When set to \code{NULL}, the
+default, function will auto detect whether thinning should be applied
+(i.e., cases in which the numerical fitting algorithm will struggle to converge).
 }
   \item{method}{
 the method used to calculate the fit. Currently only 'admm' is supported.

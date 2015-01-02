@@ -2,7 +2,7 @@ trendfilter = function(y, x, weights, k = 2L,
                         family = c("gaussian", "logistic", "poisson"),
                         method = c("admm"),
                         lambda, nlambda = 50L, lambda.min.ratio = 1e-05,
-                        thinning = TRUE, verbose = FALSE,
+                        thinning = NULL, verbose = FALSE,
                         control = trendfilter.control.list()) {
 
   cl = match.call()
@@ -27,15 +27,23 @@ trendfilter = function(y, x, weights, k = 2L,
   if (k > 3) warning("Large k leads to generally worse conditioning; k=0,1,2 are the most stable choices.")
 
   cond = (1/n) * ((max(x) - min(x)) / min(diff(x)))^(k+1)
-  if (!thinning && any(is.infinite(cond))) {
+  if (!is.null(thinning) && !thinning && any(is.infinite(cond))) {
     stop("Cannot pass duplicate x values; use observation weights, or turn on thinning.")
   }
-  if( !thinning && cond > control$x_cond ) {
+  if( !is.null(thinning) && !thinning && cond > control$x_cond ) {
     warning("The x values are ill-conditioned. Consider thinning. \nSee ?trendfilter for more info.")
   }
 
   # Thin the input data:
-  if (thinning && cond > control$x_cond) {
+  if (is.null(thinning)) {
+    if (cond > control$x_cond) {
+      thinning = TRUE
+    } else {
+      thinning = FALSE
+    }
+  }
+
+  if (thinning) {
     z = .Call("thin_R",
           sY = as.double(y),
           sX = as.double(x),

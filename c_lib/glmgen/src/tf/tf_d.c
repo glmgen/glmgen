@@ -1,5 +1,6 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala,           *
+ *                       Ryan Tibshirani                                    *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
@@ -25,7 +26,7 @@
  *
  * The penalty matrix D in the trend filtering problem has many nice properties
  * which distinquish it from arbitrary sparse of banded matricies. Much of the
- * speed and stability of the trend filtering algorithms come from taking advantage 
+ * speed and stability of the trend filtering algorithms come from taking advantage
  * of these properties. Helper functions for doing so are collected here.
  */
 

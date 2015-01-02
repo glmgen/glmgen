@@ -1,5 +1,6 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala,           *
+ *                       Ryan Tibshirani                                    *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
