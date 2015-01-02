@@ -1,6 +1,7 @@
 \name{predict-methods}
 \docType{methods}
 \alias{predict,trendfilter-method}
+\alias{predict.trendfilter}
 \title{
   Make predictions given a trendfilter object
 }
