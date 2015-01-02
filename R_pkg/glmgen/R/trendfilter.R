@@ -35,7 +35,7 @@ trendfilter = function(y, x, weights, k = 2L,
   }
 
   # Thin the input data:
-  if (thinning) {
+  if (thinning && cond > control$x_cond) {
     z = .Call("thin_R",
           sY = as.double(y),
           sX = as.double(x),
