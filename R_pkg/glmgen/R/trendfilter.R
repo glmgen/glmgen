@@ -99,6 +99,7 @@ trendfilter = function(y, x, weights, k = 2L,
   out = new("trendfilter", y = y, x = x, w = weights, k = as.integer(k), lambda = z$lambda,
             beta = z$beta, family = family, method = method, n = length(y),
             p = length(y), m = length(y) - as.integer(k) - 1L, obj = z$obj,
+            status = z$status, iter = z$iter,
             call = cl)
   out
 }

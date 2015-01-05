@@ -34,6 +34,10 @@ to the function \code{\link{trendfilter}}.
     in the penalty matrix \code{D}}
     \item{\code{obj}:}{a matrix giving the objective values of the fit,
     with one column for each value of lambda}
+    \item{\code{status}:}{a vector of integer codes indicating success
+    or failure of the optimization routines; one for each value of lambda.}
+    \item{\code{iter}:}{a vector of integers giving the number of iterations
+    used; one for each value of lambda.}
     \item{\code{call}:}{the function \code{call} used for fitting
     the generalized lasso model}
   }

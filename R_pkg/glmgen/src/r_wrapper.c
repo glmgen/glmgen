@@ -249,26 +249,29 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   }
 
   /* Create a list for the output */
-  PROTECT(sOutput = allocVector(VECSXP, 7));
-  PROTECT(sOutputNames = allocVector(STRSXP, 7));
+  PROTECT(sOutput = allocVector(VECSXP, 8));
+  PROTECT(sOutputNames = allocVector(STRSXP, 8));
 
   /* Assing beta, lambda, and obj to the list */
   SET_VECTOR_ELT(sOutput, 0, sBeta);
   SET_VECTOR_ELT(sOutput, 1, sLambda);
   SET_VECTOR_ELT(sOutput, 2, sObj);
   SET_VECTOR_ELT(sOutput, 3, sIter);
-  SET_VECTOR_ELT(sOutput, 4, sXt);
-  SET_VECTOR_ELT(sOutput, 5, sYt);
-  SET_VECTOR_ELT(sOutput, 6, sWt);
+  SET_VECTOR_ELT(sOutput, 4, sStatus);
+  SET_VECTOR_ELT(sOutput, 5, sXt);
+  SET_VECTOR_ELT(sOutput, 6, sYt);
+  SET_VECTOR_ELT(sOutput, 7, sWt);
+
 
   /* Attach names as an attribute to the returned SEXP */
   SET_STRING_ELT(sOutputNames, 0, mkChar("beta"));
   SET_STRING_ELT(sOutputNames, 1, mkChar("lambda"));
   SET_STRING_ELT(sOutputNames, 2, mkChar("obj"));
   SET_STRING_ELT(sOutputNames, 3, mkChar("iter"));
-  SET_STRING_ELT(sOutputNames, 4, mkChar("x"));
-  SET_STRING_ELT(sOutputNames, 5, mkChar("y"));
-  SET_STRING_ELT(sOutputNames, 6, mkChar("w"));
+  SET_STRING_ELT(sOutputNames, 4, mkChar("status"));
+  SET_STRING_ELT(sOutputNames, 5, mkChar("x"));
+  SET_STRING_ELT(sOutputNames, 6, mkChar("y"));
+  SET_STRING_ELT(sOutputNames, 7, mkChar("w"));
   setAttrib(sOutput, R_NamesSymbol, sOutputNames);
 
   /* Free the allocated objects for the gc and return the output as a list */
