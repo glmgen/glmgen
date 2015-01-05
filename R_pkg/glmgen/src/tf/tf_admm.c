@@ -65,13 +65,13 @@ double * tf_admm_default(double * y, int n)
   double alpha_ls;
   double gamma_ls;
   int max_iter_ls;
-  int max_inner_iter;
+  int max_iter_newton;
   int verbose;
 
   /* Set default constants */
   k = 2;
   family = FAMILY_GAUSSIAN;
-  max_iter = 25;
+  max_iter = 200;
   lam_flag = 0;
   nlambda = 50;
   lambda_min_ratio = 1e-11;
@@ -80,7 +80,7 @@ double * tf_admm_default(double * y, int n)
   alpha_ls = 0.5;
   gamma_ls = 0.8;
   max_iter_ls = 50;
-  max_inner_iter = 250;
+  max_iter_newton = 50;
   verbose = 0;
 
   /* Allocate space for input arrays */
@@ -118,7 +118,7 @@ double * tf_admm_default(double * y, int n)
   tf_admm(y, x, w, n, k, family, max_iter, lam_flag, lambda,
           nlambda, lambda_min_ratio, beta, obj, iter,
           status, rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
-          max_inner_iter, verbose);
+          max_iter_newton, verbose);
 
   /* Free allocated arrays (except beta; which is returned) */
   free(x);
@@ -160,7 +160,7 @@ double * tf_admm_default(double * y, int n)
  * @param alpha_ls             for family != 0, line search tuning parameter
  * @param gamma_ls             for family != 0, line search tuning parameter
  * @param max_iter_ls          for family != 0, max number of iterations in line search
- * @param max_inner_iter       for family != 0, max number of iterations in inner ADMM
+ * @param max_iter_newton      for family != 0, max number of iterations in inner ADMM
  * @param verbose              0/1 flag for printing progress
  * @return void
  * @see tf_admm_default
@@ -170,7 +170,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               int nlambda, double lambda_min_ratio, double * beta,
               double * obj, int * iter, int * status, double rho,
               double obj_tol, double alpha_ls, double gamma_ls,
-              int max_iter_ls, int max_inner_iter, int verbose)
+              int max_iter_ls, int max_iter_newton, int verbose)
 {
   int i;
   int j;
@@ -289,13 +289,13 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
 
       case FAMILY_LOGISTIC:
         tf_admm_glm(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha, u, obj+i*max_iter, iter+i,
-                    rho * lambda[i], obj_tol, alpha_ls, gamma_ls, max_iter_ls, max_inner_iter,
+                    rho * lambda[i], obj_tol, alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
                     DktDk, &logi_b, &logi_b1, &logi_b2, verbose);
         break;
 
       case FAMILY_POISSON:
         tf_admm_glm(y, x, w, n, k, max_iter, lambda[i], beta+i*n, alpha, u, obj+i*max_iter, iter+i,
-                    rho * lambda[i], obj_tol, alpha_ls, gamma_ls, max_iter_ls, max_inner_iter,
+                    rho * lambda[i], obj_tol, alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
                     DktDk, &pois_b, &pois_b1, &pois_b2, verbose);
         break;
     }
@@ -476,7 +476,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
  * @param alpha_ls             for family != 0, line search tuning parameter
  * @param gamma_ls             for family != 0, line search tuning parameter
  * @param max_iter_ls          for family != 0, max number of iterations in line search
- * @param max_inner_iter       for family != 0, max number of iterations in inner ADMM
+ * @param max_iter_newton      for family != 0, max number of iterations in inner ADMM
  * @param DktDk                pointer to the inner product of DktDk
  * @param b                    the link function for a given loss
  * @param b1                   first derivative of the link function for a given loss
@@ -490,7 +490,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
         double * beta, double * alpha, double * u,
         double * obj, int * iter,
         double rho, double obj_tol, double alpha_ls, double gamma_ls,
-        int max_iter_ls, int max_inner_iter,
+        int max_iter_ls, int max_iter_newton,
         cs * DktDk,
         func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
 {
@@ -520,13 +520,13 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
   Dd      = (double *) malloc(n*sizeof(double));
   iter_ls = (int *)    malloc(sizeof(int));
 
-  obj_admm = (double*)malloc(max_inner_iter*sizeof(double));
+  obj_admm = (double*)malloc(max_iter_newton*sizeof(double));
 
   if (verbose) printf("\nlambda=%0.3e\n",lam);
   if (verbose) printf("Iteration\tObjective\tLoss\tPenalty\tADMM iters\n");
 
   /* One Prox Newton step per iteration */
-  for (it=0; it < max_iter; it++)
+  for (it=0; it < max_iter_newton; it++)
   {
     /* Define weighted Hessian, and working response */
     for(i=0; i<n; i++)
@@ -545,7 +545,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
     /* Prox Newton step */
     iter_admm = 0;
     tf_admm_gauss (yt, x, H, n, k,
-        max_inner_iter, lam,
+        max_iter, lam,
         d, alpha, u,
         obj_admm, &iter_admm, rho, obj_tol,
         DktDk, 0);

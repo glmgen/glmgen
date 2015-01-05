@@ -47,7 +47,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
               int nlambda, double lambda_min_ratio, double * beta,
               double * obj, int * iter, int * status, double rho,
               double obj_tol, double alpha_ls, double gamma_ls,
-              int max_iter_ls, int max_inner_iter, int verbose);
+              int max_iter_ls, int max_iter_newton, int verbose);
 
 void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     int max_iter, double lam,
@@ -60,7 +60,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
     double * beta, double * alpha, double * u,
     double * obj, int * iter,
     double rho, double obj_tol, double alpha_ls, double gamma_ls,
-    int max_iter_ls, int max_iter_admm,
+    int max_iter_ls, int max_iter_newton,
     cs * DktDk,
     func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose);
 

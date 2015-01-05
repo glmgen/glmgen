@@ -186,7 +186,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   double alpha_ls;
   double gamma_ls;
   int max_iter_ls;
-  int max_inner_iter;
+  int max_iter_newton;
 
   /* Convert input SEXP variables into C style variables */
   y = REAL(sY);
@@ -235,12 +235,12 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
       alpha_ls = get_control_value(sControl, "alpha_ls");
       gamma_ls = get_control_value(sControl, "gamma_ls");
       max_iter_ls = get_control_value(sControl, "max_iter_ls");
-      max_inner_iter = get_control_value(sControl, "max_inner_iter");
+      max_iter_newton = get_control_value(sControl, "max_iter_newton");
 
       tf_admm(y, x, w, n, k, family, maxiter, lam_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj, iter, status,
               rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
-              max_inner_iter, verbose);
+              max_iter_newton, verbose);
       break;
 
     default:

@@ -10,7 +10,7 @@ little as desired.
 }
 \usage{
 trendfilter.control.list(rho=1, obj_tol=1e-6, maxiter=200L,
-                          max_inner_iter=200L, x_cond=1e11,
+                          max_iter_newton=50L, x_cond=1e11,
                           alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=20L)
 }
 \arguments{
@@ -24,9 +24,8 @@ the tolerance used in the stopping criterion.
   \item{maxiter}{
 number of admm iterations used; ignored for k=0.
 }
-  \item{max_inner_iter}{
-for non-Gaussian GLM losses, the number of inner iterations used to in quadratic
-approximation.
+  \item{max_iter_newton}{
+for non-Gaussian GLM losses, the number of outer iterations used in Newton's method.
 }
   \item{x_cond}{
 condition number to control the degree of thinning, when applicable. Lower numbers
