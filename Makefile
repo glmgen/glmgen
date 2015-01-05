@@ -25,3 +25,5 @@ all:
 	cd ${C_DIR}/obj; ${CC} ${CFLAGS}  -c -fPIC ../src/utils/*.c -I${IDIR}
 	cd ${C_DIR}/obj; ${CC} ${CFLAGS}  -c -fPIC ../src/tf/*.c -I${IDIR}
 	cd ${C_DIR}; ${CC} -shared -o lib/libglmgen.so ${OBJ}
+	cd ${C_DIR}; rm -rf lib
+	cd ${C_DIR}; rm -rf obj
