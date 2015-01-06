@@ -520,7 +520,7 @@ void tf_admm_glm (double * y, double * x, double * w, int n, int k,
   Dd      = (double *) malloc(n*sizeof(double));
   iter_ls = (int *)    malloc(sizeof(int));
 
-  obj_admm = (double*)malloc(max_iter_newton*sizeof(double));
+  obj_admm = (double*)malloc(max_iter*sizeof(double));
 
   if (verbose) printf("\nlambda=%0.3e\n",lam);
   if (verbose) printf("Iteration\tObjective\tLoss\tPenalty\tADMM iters\n");
