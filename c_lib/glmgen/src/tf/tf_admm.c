@@ -22,7 +22,7 @@
  * @file tf_admm.c
  * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
- * @brief Fitting trend filtering using the ADMM algorithm.
+ * @brief Fitting trend filtering estimates with the ADMM algorithm.
  *
  * Contains all of the functions specific to the ADMM algorithm
  * implementation; allows for Gaussian, binomial, and poisson
@@ -79,7 +79,7 @@ double * tf_admm_default(double * y, int n)
   obj_tol = 1e-10;
   alpha_ls = 0.5;
   gamma_ls = 0.8;
-  max_iter_ls = 50;
+  max_iter_ls = 20;
   max_iter_newton = 50;
   verbose = 0;
 

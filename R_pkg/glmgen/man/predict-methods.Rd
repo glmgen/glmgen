@@ -13,8 +13,7 @@
 }
 \usage{
 \S4method{predict}{trendfilter}(object, type = c("link", "response"),
-                                lambda = NULL, x.new = NULL,
-                                zero_tol=1e-6)
+        lambda = NULL, x.new = NULL, zero_tol=1e-6)
 }
 \arguments{
   \item{object}{an \R object inheriting from class \code{\linkS4class{trendfilter}}.}

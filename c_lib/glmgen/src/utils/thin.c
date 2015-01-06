@@ -22,7 +22,7 @@
  * @file thin.c
  * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
- * @brief Code for thinning large or ill-conditioned input values.
+ * @brief Code for thinning large or ill-conditioned data sets.
  */
 
 #include "utils.h"
