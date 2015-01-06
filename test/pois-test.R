@@ -14,7 +14,7 @@ plot_fit = function(n,k, nlambda) {
   u = exp(f)
   y = rpois(n,u)
   
-  fit = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=10, family="poisson",
+  fit = trendfilter(y, x, k=k, nlambda=nlambda, max_iter=10, family="poisson",
   control=list(obj_tol=0, rho=1))
   
   par(mfrow=c(1,nlambda))

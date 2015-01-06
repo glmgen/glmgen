@@ -16,7 +16,7 @@ f = predict(out,lambda=lambda)
 ff = predict(out,x.new=xx,lambda=lambda)
 
 plot(x,y)
-#points(out@x,f,pch=19)
+points(out@x,f,pch=19)
 lines(xx,ff,lwd=2,col=2)
 
 # * how to flag someone that "thinning" has been turned on? when i ran it for 100 points

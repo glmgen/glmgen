@@ -6,7 +6,7 @@ kvals=c(0, 1, 2)
 nlambda=4
 thinning = 1
 
-maxiter = 50;
+max_iter = 50;
 plot_fit = function(n,k, nlambda) {
 
   x = 1:n
@@ -14,7 +14,7 @@ plot_fit = function(n,k, nlambda) {
   p = 1/(1+exp(-f))
   y = rbinom(n,1,p)
 
-  fit = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=maxiter, family="logistic", control=list(obj_tol=0, rho=1))
+  fit = trendfilter(y, x, k=k, nlambda=nlambda, max_iter=max_iter, family="logistic", control=list(obj_tol=0, rho=1))
   
   par(mfrow=c(1,nlambda))
   for(i in 1:nlambda) {

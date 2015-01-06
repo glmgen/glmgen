@@ -3,13 +3,13 @@
 \alias{predict,trendfilter-method}
 \alias{predict.trendfilter}
 \title{
-  Make predictions given a trendfilter object
+  Make function predictions given a trendfilter object
 }
 \description{
   Once a trendfilter object has been fit, predictions
-  can be made for a new set of x points and a new set
-  of lambdas, provided each are within the range of
-  the original input values.
+  can be made for a new set of x points and/or a new set
+  of lambda values (provided that the new lambda values lie 
+  within the range of the original tuning parameter values). 
 }
 \usage{
 \S4method{predict}{trendfilter}(object, type = c("link", "response"),
@@ -26,8 +26,8 @@
   \item{x.new}{optional vector of locations to use for prediction. If \code{NULL},
           the set of locations used for fitting are used for prediction.}
   \item{zero_tol}{tolerance for the prediction algorithm; a small number slightly
-          greater than zero greatly speeds up the fitting with negligable degradation
-          to the fit.}
+          greater than zero greatly speeds up the computations with negligable 
+	  degradation to the predictions.}
 }
 \examples{
   set.seed(0)

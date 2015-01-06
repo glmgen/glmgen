@@ -14,7 +14,7 @@ plot_fit = function(n,k, nlambda) {
   p = 1/(1+exp(-f))
   y = rbinom(n,1,p)
   
-  fit = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=10, family="logistic",
+  fit = trendfilter(y, x, k=k, nlambda=nlambda, max_iter=10, family="logistic",
   control=list(obj_tol=0, rho=1))
   
   par(mfrow=c(1,nlambda))
@@ -53,17 +53,17 @@ dev.off()
 
 #nlam = 5
 #time0 = proc.time()
-#a0 = trendfilter(y, x, k=0, nlambda=nlam, maxiter=10, family="logistic",
+#a0 = trendfilter(y, x, k=0, nlambda=nlam, max_iter=10, family="logistic",
 #  control=list(obj_tol=0, rho=1))
 #proc.time()-time0
 
 #time1 = proc.time()
-#a1 = trendfilter(y, x, k=1,  nlambda=nlam, maxiter=10, family="logistic",
+#a1 = trendfilter(y, x, k=1,  nlambda=nlam, max_iter=10, family="logistic",
 #  control=list(obj_tol=0, rho=1))
 #proc.time()-time0
 
 #time2 = proc.time()
-#a2 = trendfilter(y, x, k=2, nlambda=nlam, maxiter=50, family="logistic",
+#a2 = trendfilter(y, x, k=2, nlambda=nlam, max_iter=50, family="logistic",
 #  control=list(obj_tol=0, rho=1))
 #proc.time()-time0
 

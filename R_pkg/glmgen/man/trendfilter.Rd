@@ -14,7 +14,7 @@ trendfilter(y, x, weights, k = 2L, family = c("gaussian",
             "logistic", "poisson"), method = c("admm"), lambda,
             nlambda = 50L, lambda.min.ratio = 1e-05,
             thinning = NULL, verbose = FALSE,
-	          control = trendfilter.control.list())
+	    control = trendfilter.control.list())
 }
 \arguments{
   \item{y}{
@@ -26,7 +26,7 @@ be the integers 1 through the length of \code{y}.
 }
   \item{weights}{
 optional vector of sample weights. If missing, the weights will be assumed
-to be constant across all samples.
+to be constant (unity) across all samples.
 }
   \item{k}{
 the polynomial order of the trendfilter fit; a nonnegative integer (orders
@@ -54,7 +54,7 @@ so this ratio should typically be set fairly small.
 }
   \item{thinning}{
 logical. If true, then the data are preprocessed so that a smaller, better
-conditioned data set is fused for fitting. When set to \code{NULL}, the
+conditioned data set is used for fitting. When set to \code{NULL}, the
 default, function will auto detect whether thinning should be applied
 (i.e., cases in which the numerical fitting algorithm will struggle to converge).
 }

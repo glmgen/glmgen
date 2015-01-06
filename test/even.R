@@ -21,7 +21,7 @@ compare_crit = function(n,k) {
 
   nlambda = 50
   npathsteps = min(2000, round( n * 0.9 ))
-  maxiter = max(100, min(500, round(n*0.1)))
+  max_iter = max(100, min(500, round(n*0.1)))
   
   # Path
   path = trendpath(y, x, ord=k, maxsteps=npathsteps)
@@ -30,10 +30,10 @@ compare_crit = function(n,k) {
   lambda.min.ratio = min(1e-5, 0.9* min(path$lambda)/max(path$lambda))
 
   # New ADMM
-  admm = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=maxiter, control=list(obj_tol=0, rho=1), lambda.min.ratio = lambda.min.ratio)
+  admm = trendfilter(y, x, k=k, nlambda=nlambda, max_iter=max_iter, control=list(obj_tol=0, rho=1), lambda.min.ratio = lambda.min.ratio)
 
   # Old ADMM
-  admm_old = trendfilterSim::trendfilter(y=y, k=k, lambda=admm$lambda, eabs=0, erel=0, maxiter=maxiter)
+  admm_old = trendfilterSim::trendfilter(y=y, k=k, lambda=admm$lambda, eabs=0, erel=0, max_iter=max_iter)
 
   crit_path = crit_admm = crit_admm_old = numeric(length(admm$lambda))
   D = getDtfSparse(n,k)

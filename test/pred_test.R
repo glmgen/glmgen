@@ -16,7 +16,7 @@ plot.trendpath = function(x, ...) {
 set.seed(1)
 
 nlambda = 3
-maxiter = 50
+max_iter = 50
 kvals = c(0, 1, 2, 3)
 nvals = c(1e5)
 kvals = c(3)
@@ -60,7 +60,7 @@ for(k in kvals) {
     xpred = sort(runif(np, min(x), max(x)))
 
     time0 = proc.time()    
-    admm = trendfilter(y, x, k=k, nlambda=nlambda, family=family, maxiter=maxiter, lambda.min.ratio = 1e-5, xpred=xpred, control=list(obj_tol=1e-10, thinning=thinning, x_cond=x_cond, npred=np, lam_num=lam_num))
+    admm = trendfilter(y, x, k=k, nlambda=nlambda, family=family, max_iter=max_iter, lambda.min.ratio = 1e-5, xpred=xpred, control=list(obj_tol=1e-10, thinning=thinning, x_cond=x_cond, npred=np, lam_num=lam_num))
     time0 = proc.time() - time0
 
     xt = admm$x; yt = admm$y; wt = admm$w; nt = length(xt)

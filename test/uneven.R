@@ -29,7 +29,7 @@ compare_crit = function(n,k, nlambda) {
   y = sin(x/(max(x)-min(x))*3*pi) + eps
 
   npathsteps = min(200, round( n * 0.9 ))
-  maxiter = max(100, min(200, round(n*0.1)))
+  max_iter = max(100, min(200, round(n*0.1)))
   
   # Path
   path = trendpath(y, x, ord=k, maxsteps=npathsteps)
@@ -38,8 +38,8 @@ compare_crit = function(n,k, nlambda) {
   lambda.min.ratio = min(1e-5, 0.9* min(path$lambda)/max(path$lambda))
 
   # New ADMM
-  #admm = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=maxiter, lambda.min.ratio = lambda.min.ratio, control=list(obj_tol=1e-10, rho=1) )
-  admm = trendfilter(y, x, k=k, nlambda=nlambda, maxiter=maxiter, lambda.min.ratio = lambda.min.ratio )
+  #admm = trendfilter(y, x, k=k, nlambda=nlambda, max_iter=max_iter, lambda.min.ratio = lambda.min.ratio, control=list(obj_tol=1e-10, rho=1) )
+  admm = trendfilter(y, x, k=k, nlambda=nlambda, max_iter=max_iter, lambda.min.ratio = lambda.min.ratio )
 
   crit_path = crit_admm = numeric(length(admm$lambda))
 
