@@ -17,7 +17,8 @@ all:
 	cd ${C_DIR}; mv html ../..
 	cd ${C_DIR}; rm -rf latex
 
-	git add *
+	git add -f glmgen-manual.pdf
+	git add html
 	git commit -m "auto commit documentation"
 	git push origin gh-pages
 	git checkout master
