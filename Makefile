@@ -1,5 +1,16 @@
 R_PKG_VERSION=0.0.2
-CC=gcc-4.9
+
+ifeq ($(whoami), taylor)
+	CC=gcc-4.9
+else
+  CC=gcc
+endif
+
+ifeq ($(whoami), ryantibs)
+	PREFIX=sudo
+else
+	PREFIX=
+endif
 
 R_DIR=R_pkg
 C_DIR=c_lib/glmgen
@@ -9,11 +20,11 @@ OBJ=obj/*.o
 IDIR=../include/
 
 all:
-	cd ${R_DIR}; R CMD build glmgen
-	cd ${R_DIR}; R CMD INSTALL glmgen_${R_PKG_VERSION}.tar.gz
-	cd ${R_DIR}; R CMD CHECK --as-cran glmgen_${R_PKG_VERSION}.tar.gz
-	cd ${R_DIR}; rm -rf glmgen.Rcheck
-	cd ${R_DIR}; rm glmgen_${R_PKG_VERSION}.tar.gz
+	cd ${R_DIR}; ${PREFIX} R CMD build glmgen
+	cd ${R_DIR}; ${PREFIX} R CMD INSTALL glmgen_${R_PKG_VERSION}.tar.gz
+	cd ${R_DIR}; ${PREFIX} R CMD CHECK --as-cran glmgen_${R_PKG_VERSION}.tar.gz
+	cd ${R_DIR}; ${PREFIX} rm -rf glmgen.Rcheck
+	cd ${R_DIR}; ${PREFIX} rm glmgen_${R_PKG_VERSION}.tar.gz
 
 	cp R_pkg/glmgen/src/tf/*.c c_lib/glmgen/src/tf/
 	cp R_pkg/glmgen/src/utils/*.c c_lib/glmgen/src/utils/
