@@ -2,7 +2,7 @@ trendfilter = function(y, x, weights, k = 2L,
                         family = c("gaussian", "logistic", "poisson"),
                         method = c("admm"),
                         lambda, nlambda = 50L, lambda.min.ratio = 1e-05,
-                        thinning = TRUE, verbose = FALSE,
+                        thinning = NULL, verbose = FALSE,
                         control = trendfilter.control.list()) {
 
   cl = match.call()
@@ -27,14 +27,22 @@ trendfilter = function(y, x, weights, k = 2L,
   if (k > 3) warning("Large k leads to generally worse conditioning; k=0,1,2 are the most stable choices.")
 
   cond = (1/n) * ((max(x) - min(x)) / min(diff(x)))^(k+1)
-  if (!thinning && any(is.infinite(cond))) {
+  if (!is.null(thinning) && !thinning && any(is.infinite(cond))) {
     stop("Cannot pass duplicate x values; use observation weights, or turn on thinning.")
   }
-  if( !thinning && cond > control$x_cond ) {
+  if( !is.null(thinning) && !thinning && cond > control$x_cond ) {
     warning("The x values are ill-conditioned. Consider thinning. \nSee ?trendfilter for more info.")
   }
 
   # Thin the input data:
+  if (is.null(thinning)) {
+    if (cond > control$x_cond) {
+      thinning = TRUE
+    } else {
+      thinning = FALSE
+    }
+  }
+
   if (thinning) {
     z = .Call("thin_R",
           sY = as.double(y),
@@ -88,19 +96,20 @@ trendfilter = function(y, x, weights, k = 2L,
   if (is.null(z$obj)) z$obj = NA_real_
   colnames(z$beta) = as.character(round(z$lambda, 3))
 
-  out = new("trendfilter", y = y, x = x, w = weights, k = as.integer(k), lambda = z$lambda,
-            beta = z$beta, family = family, method = method, n = length(y),
-            p = length(y), m = length(y) - as.integer(k) - 1L, obj = z$obj,
-            call = cl)
+  out = new("trendfilter", y = y, x = x, w = weights, k = as.integer(k),
+            lambda = z$lambda, beta = z$beta, family = family,
+            method = method, n = length(y), p = length(y),
+            m = length(y) - as.integer(k) - 1L, obj = z$obj,
+            status = z$status, iter = z$iter, call = cl)
   out
 }
 
-trendfilter.control.list = function(rho=1, obj_tol=1e-6, maxiter=200L,
-                          max_inner_iter=200L, x_cond=1e11,
+trendfilter.control.list = function(rho=1, obj_tol=1e-6, max_iter=200L,
+                          max_iter_newton=50L, x_cond=1e11,
                           alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=20L) {
 
-  z <- list(rho=rho, obj_tol=obj_tol, maxiter=maxiter,
-            max_inner_iter=max_inner_iter, x_cond=x_cond,
+  z <- list(rho=rho, obj_tol=obj_tol, max_iter=max_iter,
+            max_iter_newton=max_iter_newton, x_cond=x_cond,
             alpha_ls=alpha_ls, gamma_ls=gamma_ls,
             max_iter_ls=max_iter_ls)
   z

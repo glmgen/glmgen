@@ -6,9 +6,9 @@
   Fast generalized lasso algorithms
 }
 \description{
-  Efficient implementations of generalized lasso problems. Specialized
-  implementations are provided to deal with special problem classes, such
-  as trend filtering.
+  Efficient algorithms for generalized lasso problems. Specialized
+  implementations are provided to deal with special problem classes, 
+  such as trend filtering.
 }
 \details{
 \tabular{ll}{
@@ -24,7 +24,7 @@ Depends: \tab methods\cr
 \author{
 Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
 
-Maintainer: Taylor Arnold <taylor.arnold@aya.yale.edu>
+Maintainer: Taylor Arnold <taylor.arnold@acm.org>
 }
 \keyword{ package }
 \examples{

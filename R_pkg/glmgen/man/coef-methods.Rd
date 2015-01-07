@@ -6,18 +6,14 @@
 \title{Coefficients -- S4 Methods}
 \description{
   The \code{"glmgen"} package provides methods for
-  calculating the coefficients of a generalized lasso
-  fit via the generic function \code{coef}.
+  calculating generalized lasso coefficients fit via 
+  the generic function \code{coef}.
 }
 \section{Methods}{
 \describe{
-
 \item{\code{signature(object = "ANY")}}{
-
 }
-
 \item{\code{signature(object = "glmgen")}}{
-
 }
 }}
 \keyword{methods}

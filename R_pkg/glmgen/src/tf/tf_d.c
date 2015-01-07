@@ -128,7 +128,7 @@ cs * tf_calc_dk (int n, int k, const double * x)
 }
 
 /**
- * @brief Creates the penalty matrix D tilda of order k.
+ * @brief Creates the penalty matrix D tilde of order k.
  * Returns the matrix Dk premultipied by a diagonal
  * matrix of weights.
  *
@@ -225,8 +225,8 @@ void tf_dx(double *x, int n, int k,double *a, double *b)
 }
 
 /**
- * @brief Multiply by D tilda
- * Multiplies a vector by D tilda, without having to explictly
+ * @brief Multiply by D tilde
+ * Multiplies a vector by D tilde, without having to explictly
  * construct or use the matrix D.
  *
  * @param x                    locations of the responses
@@ -302,8 +302,8 @@ void tf_dtx(double *x, int n, int k, double *a, double *b)
 }
 
 /**
- * @brief Multiply by D tilda transponse
- * Multiplies a vector by D tilda transpose, without having
+ * @brief Multiply by D tilde transponse
+ * Multiplies a vector by D tilde transpose, without having
  * to explictly construct or use the matrix D.
  *
  * @param x                    locations of the responses

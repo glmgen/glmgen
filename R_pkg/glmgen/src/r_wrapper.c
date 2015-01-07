@@ -159,7 +159,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   int nt;
   int family;
   int method;
-  int maxiter;
+  int max_iter;
   int lam_flag;
   double * lambda;
   int nlambda;
@@ -186,7 +186,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   double alpha_ls;
   double gamma_ls;
   int max_iter_ls;
-  int max_inner_iter;
+  int max_iter_newton;
 
   /* Convert input SEXP variables into C style variables */
   y = REAL(sY);
@@ -198,7 +198,7 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
 
   family = asInteger(sFamily);
   method = asInteger(sMethod);
-  maxiter = get_control_value(sControl, "maxiter");
+  max_iter = get_control_value(sControl, "max_iter");
   lam_flag = asInteger(sLamFlag);
   PROTECT(sLambdaNew = duplicate(sLambda));
   lambda = REAL(sLambda);
@@ -206,9 +206,9 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   lambda_min_ratio = asReal(sLambdaMinRatio);
   PROTECT(sBeta = allocMatrix(REALSXP, n, nlambda));
   beta = REAL(sBeta);
-  PROTECT(sObj = allocMatrix(REALSXP, maxiter, nlambda));
+  PROTECT(sObj = allocMatrix(REALSXP, max_iter, nlambda));
   obj = REAL(sObj);
-  for(i = 0; i < maxiter * nlambda; i++) obj[i] = 0;
+  for(i = 0; i < max_iter * nlambda; i++) obj[i] = 0;
   PROTECT(sIter = allocVector(INTSXP, nlambda));
   iter = INTEGER(sIter);
   for(i = 0; i < nlambda; i++) iter[i] = 0;
@@ -235,12 +235,12 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
       alpha_ls = get_control_value(sControl, "alpha_ls");
       gamma_ls = get_control_value(sControl, "gamma_ls");
       max_iter_ls = get_control_value(sControl, "max_iter_ls");
-      max_inner_iter = get_control_value(sControl, "max_inner_iter");
+      max_iter_newton = get_control_value(sControl, "max_iter_newton");
 
-      tf_admm(y, x, w, n, k, family, maxiter, lam_flag, lambda,
+      tf_admm(y, x, w, n, k, family, max_iter, lam_flag, lambda,
               nlambda, lambda_min_ratio, beta, obj, iter, status,
               rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
-              max_inner_iter, verbose);
+              max_iter_newton, verbose);
       break;
 
     default:
@@ -249,26 +249,29 @@ SEXP tf_R ( SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   }
 
   /* Create a list for the output */
-  PROTECT(sOutput = allocVector(VECSXP, 7));
-  PROTECT(sOutputNames = allocVector(STRSXP, 7));
+  PROTECT(sOutput = allocVector(VECSXP, 8));
+  PROTECT(sOutputNames = allocVector(STRSXP, 8));
 
   /* Assing beta, lambda, and obj to the list */
   SET_VECTOR_ELT(sOutput, 0, sBeta);
   SET_VECTOR_ELT(sOutput, 1, sLambda);
   SET_VECTOR_ELT(sOutput, 2, sObj);
   SET_VECTOR_ELT(sOutput, 3, sIter);
-  SET_VECTOR_ELT(sOutput, 4, sXt);
-  SET_VECTOR_ELT(sOutput, 5, sYt);
-  SET_VECTOR_ELT(sOutput, 6, sWt);
+  SET_VECTOR_ELT(sOutput, 4, sStatus);
+  SET_VECTOR_ELT(sOutput, 5, sXt);
+  SET_VECTOR_ELT(sOutput, 6, sYt);
+  SET_VECTOR_ELT(sOutput, 7, sWt);
+
 
   /* Attach names as an attribute to the returned SEXP */
   SET_STRING_ELT(sOutputNames, 0, mkChar("beta"));
   SET_STRING_ELT(sOutputNames, 1, mkChar("lambda"));
   SET_STRING_ELT(sOutputNames, 2, mkChar("obj"));
   SET_STRING_ELT(sOutputNames, 3, mkChar("iter"));
-  SET_STRING_ELT(sOutputNames, 4, mkChar("x"));
-  SET_STRING_ELT(sOutputNames, 5, mkChar("y"));
-  SET_STRING_ELT(sOutputNames, 6, mkChar("w"));
+  SET_STRING_ELT(sOutputNames, 4, mkChar("status"));
+  SET_STRING_ELT(sOutputNames, 5, mkChar("x"));
+  SET_STRING_ELT(sOutputNames, 6, mkChar("y"));
+  SET_STRING_ELT(sOutputNames, 7, mkChar("w"));
   setAttrib(sOutput, R_NamesSymbol, sOutputNames);
 
   /* Free the allocated objects for the gc and return the output as a list */

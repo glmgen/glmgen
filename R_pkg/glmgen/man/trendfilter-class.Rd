@@ -24,8 +24,8 @@ to the function \code{\link{trendfilter}}.
     \item{\code{beta}:}{matrix of beta coefficents, with one column
     for each value of \code{lambda}}
     \item{\code{family}:}{character value giving the GLM family
-    used for estimation. Currently supports 'gaussian', 'binomial',
-    and 'poisson'.}
+    used for estimatio; currently supports 'gaussian', 'binomial',
+    and 'poisson'}
     \item{\code{method}:}{method used to fit the generalized lasso}
     \item{\code{n}:}{an integer giving the length of \code{y}}
     \item{\code{m}:}{an integer giving the number of rows
@@ -34,6 +34,11 @@ to the function \code{\link{trendfilter}}.
     in the penalty matrix \code{D}}
     \item{\code{obj}:}{a matrix giving the objective values of the fit,
     with one column for each value of lambda}
+    \item{\code{status}:}{a vector of integer codes indicating success
+    or failure of the optimization routines, with one component for each 
+    value of lambda} 
+    \item{\code{iter}:}{a vector of integers giving the number of iterations
+    used, with one component for each value of lambda}
     \item{\code{call}:}{the function \code{call} used for fitting
     the generalized lasso model}
   }
@@ -45,8 +50,8 @@ Class \code{"\linkS4class{glmgen}"}, directly.
   \describe{
     \item{predict}{\code{signature(object = "trendfilter")}: efficent
     calculation of predictions from the fit for a new set of \code{lambda}
-    and/or new set of \code{x} values. Both \code{lambda} and \code{x}
-    must lie within the range of the original input values.
+    and/or a new set of \code{x} values. The parameter \code{lambda} within 
+    the range of the original tuning parameter values.
     }
     \item{summary}{\code{signature(object = "trendfilter")}: produces
     a summary of the trendfilter fit.

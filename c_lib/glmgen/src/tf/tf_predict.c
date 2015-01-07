@@ -1,5 +1,6 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala,           *
+ *                       Ryan Tibshirani                                    *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
@@ -30,9 +31,9 @@
  #include "tf.h"
 
 /**
- * @brief Calculate maximum lambda value.
- * Will return the largest lambda value for which the penalty term is zero
- * for Gaussian losses. Will only be approximate for other loss functions.
+ * @brief Predict the trendfilter fit at new values of x given beta.
+ * For a given beta vector, this function will produce the predicted
+ * values from the trendfilter at an arbitrary vector of new locations.
  * @param beta                 the beta vector for the prediction; length n-k
  * @param x                    the original positions used in the fit
  * @param n                    number of observations
@@ -43,7 +44,8 @@
  * @param pred                 allocated space for the predicted values
  * @param zero_tol             tolerance for the fitting algorithm; default is 1e-11
  * @return  void
- * @note The results will not be valid unless the values in x0 are within the range of the original x inputs.
+ * @note The results will not be valid unless the values in x0 are within the range
+ * of the original x inputs.
  */
 void tf_predict(double * beta, double * x, int n, int k, int family,
                 double * x0, int n0, double * pred, double zero_tol)
@@ -77,8 +79,8 @@ void tf_predict(double * beta, double * x, int n, int k, int family,
 }
 
 /**
- * @brief Calculate maximum lambda value.
- * Lower level function for predicting from a Gaussian loss function.
+ * @brief Lower level function for predicting from a Gaussian loss function.
+ * Generally called from tf_predict.
  * @param beta                 the beta vector for the prediction; length n-k
  * @param x                    the original positions used in the fit
  * @param n                    number of observations

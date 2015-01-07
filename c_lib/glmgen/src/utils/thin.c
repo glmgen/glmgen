@@ -1,5 +1,6 @@
 /****************************************************************************
- * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani   *
+ * Copyright (C) 2014 by Taylor Arnold, Veeranjaneyulu Sadhanala,           *
+ *                       Ryan Tibshirani                                    *
  *                                                                          *
  * This file is part of the glmgen library / package.                       *
  *                                                                          *
@@ -21,7 +22,7 @@
  * @file thin.c
  * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
- * @brief Code for thinning large or ill-conditioned input values.
+ * @brief Code for thinning large or ill-conditioned data sets.
  */
 
 #include "utils.h"
