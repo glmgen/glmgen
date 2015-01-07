@@ -14,7 +14,7 @@ trendfilter(y, x, weights, k = 2L, family = c("gaussian",
             "logistic", "poisson"), method = c("admm"), lambda,
             nlambda = 50L, lambda.min.ratio = 1e-05,
             thinning = NULL, verbose = FALSE,
-	    control = trendfilter.control.list())
+            control = trendfilter.control.list())
 }
 \arguments{
   \item{y}{

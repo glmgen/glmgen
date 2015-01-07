@@ -23,7 +23,6 @@
  * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
  * @brief Fitting trend filtering estimates with the ADMM algorithm.
- *
  * Contains all of the functions specific to the ADMM algorithm
  * implementation; allows for Gaussian, binomial, and poisson
  * losses, as well as arbitrary sample weights.
@@ -33,8 +32,8 @@
 #include "utils.h"
 
 /**
- * @brief Default call to tf_admm
- * Example of how to call tf_admm, taking only the response vector @p and
+ * @brief Default call to tf_admm.
+ * Example of how to call tf_admm, taking only the response vector @p and 
  * observation size @n as inputs. Users will likely need to adjust tf_admm_default
  * for their own needs, using it as a starting template.
  * @param y                    a vector of responses
@@ -140,7 +139,7 @@ double * tf_admm_default(double * y, int n)
  * example of how to call the function, see the function tf_admm_default.
  *
  * @param y                    a vector of responses
- * @param x                    a vector of response locations; must be ordered
+ * @param x                    a vector of response locations; must be in increasing order
  * @param w                    a vector of sample weights
  * @param n                    the length of y, x, and w
  * @param k                    degree of the trendfilter; i.e., k=1 linear
@@ -332,7 +331,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
  * tf_admm, rather than tf_admm_gauss directly.
  *
  * @param y                    a vector of responses
- * @param x                    a vector of response locations; must be ordered
+ * @param x                    a vector of response locations; must be in increasing order
  * @param w                    a vector of sample weights
  * @param n                    the length of y, x, and w
  * @param k                    degree of the trendfilter; i.e., k=1 linear
@@ -459,7 +458,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
  * of lambda. Most users will want to call tf_admm, rather than tf_admm_glm directly.
  *
  * @param y                    a vector of responses
- * @param x                    a vector of response locations; must be ordered
+ * @param x                    a vector of response locations; must be in increasing order
  * @param w                    a vector of sample weights
  * @param n                    the length of y, x, and w
  * @param k                    degree of the trendfilter; i.e., k=1 linear

@@ -22,7 +22,7 @@
  * @file tf_dp.c
  * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
- * @brief Main workhorse function for fitting trend filtering model.
+ * @brief Dynamic programming algorithm for the 1d fused lasso. 
  *
  * Here.
  */
@@ -30,9 +30,9 @@
  #include "tf.h"
 
 /**
- * @brief Dynamic programming algorithm for the 1d fused lasso problem
- * Implementation of Nick Johnson's algorithm for O(n) calculation of the
- * entire solution path for the 1-d fused lasso.
+ * @brief Implementation of Nick Johnson's dynamic programming algorithm 
+ * for exact O(n) calculation of the 1d fused lasso solution (at a given
+ * tuning parameter value).
  * @param n                    number of observations
  * @param y                    response vector
  * @param lam                  the maximum lambda of the path
@@ -170,9 +170,8 @@ void tf_dp (int n, double *y, double lam, double *beta)
 }
 
 /**
- * @brief Weighted variant of the dynamic programming algorithm for the 1d fused lasso problem
- * Implementation of Nick Johnson's algorithm for O(n) calculation of the
- * entire solution path for the 1-d fused lasso, using weights.
+ * @brief Weighted variant of the dynamic programming algorithm for the 1d 
+ * fused lasso problem.
  * @param n                    number of observations
  * @param y                    response vector
  * @param w                    vector of weights

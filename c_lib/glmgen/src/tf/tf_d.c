@@ -23,7 +23,6 @@
  * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-24
  * @brief Utility functions for working with the trend filtering penalty matrix.
- *
  * The penalty matrix D in the trend filtering problem has many nice properties
  * which distinquish it from arbitrary sparse of banded matricies. Much of the
  * speed and stability of the trend filtering algorithms come from taking advantage
@@ -173,8 +172,7 @@ cs * tf_calc_dktil (int n, int k, const double * x)
 }
 
 /**
- * @brief Multiply by D
- * Multiplies a vector by D, without having to explictly
+ * @brief Multiplies a vector by D, without having to explictly
  * construct or use the matrix D. In symbols, Da = b.
  *
  * @param x                    locations of the responses
@@ -225,9 +223,8 @@ void tf_dx(double *x, int n, int k,double *a, double *b)
 }
 
 /**
- * @brief Multiply by D tilde
- * Multiplies a vector by D tilde, without having to explictly
- * construct or use the matrix D.
+ * @brief Multiplies a vector by D tilde, without having to 
+ * explictly construct or use the matrix D.
  *
  * @param x                    locations of the responses
  * @param n                    number of observations
@@ -251,8 +248,7 @@ void tf_dxtil(double *x, int n, int k,double *a, double *b)
 }
 
 /**
- * @brief Multiply by D transponse
- * Multiplies a vector by D transpose, without having
+ * @brief Multiplies a vector by D transpose, without having
  * to explictly construct or use the matrix D.
  *
  * @param x                    locations of the responses
@@ -302,8 +298,7 @@ void tf_dtx(double *x, int n, int k, double *a, double *b)
 }
 
 /**
- * @brief Multiply by D tilde transponse
- * Multiplies a vector by D tilde transpose, without having
+ * @brief Multiplies a vector by D tilde transpose, without having
  * to explictly construct or use the matrix D.
  *
  * @param x                    locations of the responses

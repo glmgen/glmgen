@@ -23,7 +23,6 @@
  * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
  * @brief Prediction algorithms for trend filtering.
- *
  * Routines take a beta vector, and therefore are agnostic to
  * the algorithm used for calculating the fit.
  */
@@ -31,10 +30,9 @@
  #include "tf.h"
 
 /**
- * @brief Predict the trendfilter fit at new values of x given beta.
- * For a given beta vector, this function will produce the predicted
- * values from the trendfilter at an arbitrary vector of new locations.
- * @param beta                 the beta vector for the prediction; length n-k
+ * @brief Predict from the trendfilter fit at new values of x.
+ *
+ * @param beta                 the beta vector for the prediction; length n
  * @param x                    the original positions used in the fit
  * @param n                    number of observations
  * @param k                    order of the fit
@@ -42,7 +40,7 @@
  * @param x0                   the new positions to predict at
  * @param n0                   the number of observations in x0
  * @param pred                 allocated space for the predicted values
- * @param zero_tol             tolerance for the fitting algorithm; default is 1e-11
+ * @param zero_tol             tolerance for the fitting algorithm; default is 1e-6
  * @return  void
  * @note The results will not be valid unless the values in x0 are within the range
  * of the original x inputs.
@@ -81,14 +79,15 @@ void tf_predict(double * beta, double * x, int n, int k, int family,
 /**
  * @brief Lower level function for predicting from a Gaussian loss function.
  * Generally called from tf_predict.
- * @param beta                 the beta vector for the prediction; length n-k
+ *
+ * @param beta                 the beta vector for the prediction; length n
  * @param x                    the original positions used in the fit
  * @param n                    number of observations
  * @param k                    order of the fit
  * @param x0                   the new positions to predict at
  * @param n0                   the number of observations in x0
  * @param pred                 allocated space for the predicted values
- * @param zero_tol             tolerance for the fitting algorithm; default is 1e-11
+ * @param zero_tol             tolerance for the fitting algorithm; default is 1e-6
  * @return  void
  * @see tf_predict
  */
@@ -113,8 +112,7 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
   theta = (double *)malloc((n)*sizeof(double));
   tf_dx(x,n,k+1,beta,theta);
   k_fac = glmgen_factorial(k);
-  for(i=0; i<n-k-1;i++)
-    theta[i] /= k_fac;
+  for(i=0; i<n-k-1; i++) theta[i] /= k_fac;
 
   /* Threshold small values */
   for (i=0; i<n-k-1; i++) if (fabs(theta[i])<zero_tol) theta[i]=0;
@@ -126,7 +124,6 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
     /* Loop over x points, polynomial basis */
     for (i=0; i<k+1; i++) {
       h = 1;
-      l=0;
       for (l=0; l<i; l++) {
         h *= (x0[j]-x[l]);
       }
@@ -141,11 +138,11 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
       /* Otherwise check the ith coef, and if it is nonzero,
        * compute the contribution of the ith basis function */
       if (theta[i]!=0) {
-	      h = 1;
-	      for (l=0; l<k; l++) {
-	        h *= (x0[j]-x[i+l+1]);
-	      }
-	      pred[j] += theta[i]*h;
+	h = 1;
+	for (l=0; l<k; l++) {
+	  h *= (x0[j]-x[i+l+1]);
+	}
+	pred[j] += theta[i]*h;
       }
     }
   }
@@ -157,9 +154,10 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
 /**
  * @brief Calculate polynomial coefficents of the fit.
  * Helper function to convert the beta vector into a polynomial.
+ *
  * @param x                    the original positions used in the fit
  * @param k                    order of the fit
- * @param beta                 the beta vector for the prediction; length n-k
+ * @param beta                 the beta vector for the prediction; length n
  * @param phi                  allocated memory of length k+1
  * @return  void
  */
