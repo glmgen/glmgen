@@ -3,8 +3,22 @@ PREFIX=
 
 R_DIR=R_pkg
 C_DIR=c_lib/glmgen
+CFLAGS=-O3 -Wall -Wextra -ansi -std=c89 -pedantic
+CFLAGS2=-O3
+OBJ=obj/*.o
+IDIR=../include/
 
 all:
+	cd ${R_DIR}; ${PREFIX} R CMD build glmgen
+
+	cd ${C_DIR}; mkdir -p lib
+	cd ${C_DIR}; mkdir -p obj
+	cd ${C_DIR}/obj; ${CC} ${CLFAGS2} -c -fPIC ../src/csparse/*.c -I${IDIR}
+	cd ${C_DIR}/obj; ${CC} ${CFLAGS}  -c -fPIC ../src/utils/*.c -I${IDIR}
+	cd ${C_DIR}/obj; ${CC} ${CFLAGS}  -c -fPIC ../src/tf/*.c -I${IDIR}
+	cd ${C_DIR}; ${CC} -shared -o lib/libglmgen.so ${OBJ}
+
+doc:
 	git checkout gh-pages
 	git rebase master
 	cd ${R_DIR}; ${PREFIX} R CMD build glmgen
