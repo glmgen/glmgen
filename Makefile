@@ -18,6 +18,12 @@ all:
 	cd ${C_DIR}/obj; ${CC} ${CFLAGS}  -c -fPIC ../src/tf/*.c -I${IDIR}
 	cd ${C_DIR}; ${CC} -shared -o lib/libglmgen.so ${OBJ}
 
+clean:
+	cd ${R_DIR}; ${PREFIX} rm -rf glmgen_${R_PKG_VERSION}.tar.gz
+
+	cd ${C_DIR}; rm -rf lib
+	cd ${C_DIR}; rm -rf obj
+
 doc:
 	git checkout gh-pages
 	git rebase master
