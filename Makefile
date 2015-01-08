@@ -34,6 +34,7 @@ doc:
 	cd ${R_DIR}; ${PREFIX} rm glmgen_${R_PKG_VERSION}.tar.gz
 
 	cd ${C_DIR}; doxygen Doxyfile
+	rm -rf html
 	cd ${C_DIR}; mv html ../..
 	cd ${C_DIR}; rm -rf latex
 
