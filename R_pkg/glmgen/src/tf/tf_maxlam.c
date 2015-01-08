@@ -23,7 +23,6 @@
  * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
  * @brief Calculate the maximum lambda value for a trend filtering problem.
- *
  * Will return the largest lambda value for which the penalty term is zero
  * for Gaussian losses. Will only be approximate for other loss functions.
  */
