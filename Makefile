@@ -20,6 +20,7 @@ all:
 
 clean:
 	cd ${R_DIR}; ${PREFIX} rm -rf glmgen_${R_PKG_VERSION}.tar.gz
+	cd ${R_DIR}; ${PREFIX} rm -rf glmgen.Rcheck
 
 	cd ${C_DIR}; rm -rf lib
 	cd ${C_DIR}; rm -rf obj
