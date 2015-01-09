@@ -1,0 +1,11 @@
+coef-methods            Coefficients - S4 Methods
+glmgen-class            Class '"glmgen"'
+glmgen-package          Fast generalized lasso algorithms
+predict,trendfilter-method
+                        Make function predictions given a trendfilter
+                        object
+trendfilter             Fit a trend filtering model
+trendfilter-class       Class '"trendfilter"'
+trendfilter.control.list
+                        Control list for tuning trend filtering
+                        algorithm

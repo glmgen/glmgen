@@ -1,0 +1,13 @@
+Package: glmgen
+Type: Package
+Title: Fast generalized lasso solver
+Version: 0.0.2
+Date: 2014-09-03
+Author: Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
+Maintainer: Taylor Arnold <taylor.arnold@acm.org>
+Description: Efficient algorithms for generalized lasso problems. 
+  Specialized implementations are provided to deal with special 
+  problem classes, such as trend filtering.
+License: GPL-2 | GPL-3
+Depends: methods
+Packaged: 2015-01-08 18:21:32 UTC; taylor
