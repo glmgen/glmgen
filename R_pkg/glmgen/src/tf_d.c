@@ -223,7 +223,7 @@ void tf_dx(double *x, int n, int k,double *a, double *b)
 }
 
 /**
- * @brief Multiplies a vector by D tilde, without having to 
+ * @brief Multiplies a vector by D tilde, without having to
  * explictly construct or use the matrix D.
  *
  * @param x                    locations of the responses
