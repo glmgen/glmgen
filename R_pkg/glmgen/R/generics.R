@@ -60,18 +60,18 @@ setMethod("predict", signature(object = "trendfilter"),
               if (type == "link") {
                 family_cd = 0L
               } else {
-                family_cd = match(out@family, c("gaussian", "logistic", "poisson")) - 1L
+                family_cd = match(object@family, c("gaussian", "logistic", "poisson")) - 1L
               }
 
-              if (is.null(lambda)) lambda = out@lambda
+              if (is.null(lambda)) lambda = object@lambda
 
               co = coef(object, lambda)
 
               z = .Call("tf_predict_R",
                     sBeta = as.double(co),
-                    sX = as.double(out@x),
-                    sN = length(out@y),
-                    sK = as.integer(out@k),
+                    sX = as.double(object@x),
+                    sN = length(object@y),
+                    sK = as.integer(object@k),
                     sX0 = as.double(x.new),
                     sN0 = length(x.new),
                     sNLambda = length(lambda),
