@@ -312,7 +312,7 @@ SEXP tf_predict_R (SEXP sBeta, SEXP sX, SEXP sN, SEXP sK, SEXP sX0, SEXP sN0,
 
   for (i = 0; i < nlambda; i++)
   {
-    tf_predict(beta, x, n, k, family, x0, n0, pred + n0*i, zero_tol);
+    tf_predict(beta + n*i, x, n, k, family, x0, n0, pred + n0*i, zero_tol);
   }
 
   /* Free the allocated objects for the gc and return the output as a list */
