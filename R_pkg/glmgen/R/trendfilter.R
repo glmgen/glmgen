@@ -13,14 +13,15 @@ trendfilter = function(y, x, weights, k = 2L,
 
   n = length(y)
   if (!missing(x) && length(x)!=n) stop("x and y must have the same length.")
-  if (!missing(x)) {
-    ord = order(x)
-    y = y[ord]
-    x = x[ord]
-  }
   if (missing(x)) x = 1L:n
+  ord = order(x)
+  y = y[ord]
+  x = x[ord]
+
   if (missing(weights)) weights = rep(1L,length(y))
   if (any(weights==0)) stop("Cannot pass zero weights.")
+  weights = weights[ord]
+
   if (is.na(family_cd)) stop("family argument must be one of 'gaussian', 'logistic', or 'poisson'.")
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
@@ -55,7 +56,7 @@ trendfilter = function(y, x, weights, k = 2L,
     y = z$y
     x = z$x
     weights = z$w
-    n = z$n
+    n = z$n    
   }
 
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
@@ -96,11 +97,24 @@ trendfilter = function(y, x, weights, k = 2L,
   if (is.null(z$obj)) z$obj = NA_real_
   colnames(z$beta) = as.character(round(z$lambda, 3))
 
+# Put back the order in which x,y,weights were given. 
+# When thinning reduces the number of points, do not put back the order
+  beta = z$beta
+  if( n == length(ord) ){ 
+    iord = order(ord)
+    y = y[iord]
+    x = x[iord]
+    weights = weights[iord]
+    beta = matrix(beta[iord,])
+  }
+
+  
   out = new("trendfilter", y = y, x = x, w = weights, k = as.integer(k),
-            lambda = z$lambda, beta = z$beta, family = family,
+            lambda = z$lambda, beta = beta, family = family,
             method = method, n = length(y), p = length(y),
             m = length(y) - as.integer(k) - 1L, obj = z$obj,
             status = z$status, iter = z$iter, call = cl)
+
   out
 }
 

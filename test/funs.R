@@ -294,6 +294,16 @@ st = function(x,s,r) {
 }
 
 ## Objective
+calcDx = function(x, beta, k) {
+  Db = diff(beta);
+  if( k >= 1 ) {
+    for( i in 1:k) {
+      Db = diff( i * (1/diff(x,i)) * Db)
+    }
+  }
+  Db
+}
+
 objective = function(x, y, w, k, lambda, beta) {
   Db = diff(beta);
   if( k >= 1 ) {
@@ -313,6 +323,7 @@ objectives = function(x, y, w, k, lam, beta ) {
   }
   obj
 }
+
 
 critD = function(y, D, lam, beta) {
   return (sum((y-beta)^2)/2 + lam*sum(abs(D %*% beta)))
