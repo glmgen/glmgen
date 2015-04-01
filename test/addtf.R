@@ -1,7 +1,18 @@
 library(glmgen)
 source("funs.R")
 
-addtf = function(y, x, ks, lambda, max_iter = 10L, verbose = FALSE) {
+compute_obj = function(y, x, ks, lambda, beta) {
+
+  d = ncol(x)
+  yc = y - mean(y)
+  obj = 0.5*sum((yc - rowSums(beta))^2);
+  for (j in 1:d) {
+    obj = obj + lambda * sum(abs(calcDx(x=x[,j], beta=beta[,j],k=ks[j])))
+  }
+  obj
+}
+
+addtf = function(y, x, ks, lambda, max_iter = 10L, verbose = FALSE, obj_tol = 1e-8) {
 
   n = nrow(x)
   d = ncol(x)
@@ -15,24 +26,24 @@ addtf = function(y, x, ks, lambda, max_iter = 10L, verbose = FALSE) {
   for (t in 1:max_iter) {
     for (j in 1:d) {
       cat( "t=", t, "\tj=", j, "\n")
+      
       fit = trendfilter( y=yc-rowSums(beta)+beta[,j], x = x[,j], k=ks[j], lambda = lambda)
-      # print( dim(fit@beta) )
-      # if thinning reduces # of points, then the following line fails
       beta[,j] = fit@beta
     }
 
-    # Compute objective
-    obj_t = 0.5*sum((yc - rowSums(beta))^2);
-    for (j in 1:d) {
-      obj_t = obj_t + lambda * sum(abs(calcDx(x=x[,j], beta=beta[,j],k=ks[j])))
+    obj[t] = compute_obj(y=y,x=x,ks=ks, lambda=lambda, beta=beta);
+
+    if (t > 1) {
+      if( abs(obj[t] - obj[t-1]) <= abs(obj[t]) * obj_tol ) {
+        break
+      }
     }
-    obj[t] = obj_t;
   }
   if( verbose ) {
     print(obj)
   }
 
-  out <- list(beta = beta, obj = obj)
+  out <- list(beta = beta, obj = obj, iter = t)
   out
 }
 

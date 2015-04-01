@@ -293,8 +293,12 @@ st = function(x,s,r) {
   return(z)
 }
 
-## Objective
+# D^{(x, k+1)} beta 
 calcDx = function(x, beta, k) {
+  ord = order(x)
+  x = x[ord]
+  beta = beta[ord]
+
   Db = diff(beta);
   if( k >= 1 ) {
     for( i in 1:k) {
@@ -304,15 +308,10 @@ calcDx = function(x, beta, k) {
   Db
 }
 
+## Objective
 objective = function(x, y, w, k, lambda, beta) {
-  Db = diff(beta);
-  if( k >= 1 ) {
-    for( i in 1:k) {
-      Db = diff( i * (1/diff(x,i)) * Db)
-    }
-  }
 
-  0.5 * sum(w*(y-beta)*(y-beta)) + lambda * sum(abs(Db))
+  0.5 * sum(w*(y-beta)*(y-beta)) + lambda * sum(abs(calcDx(x,beta,k)))
 }
 
 objectives = function(x, y, w, k, lam, beta ) {
