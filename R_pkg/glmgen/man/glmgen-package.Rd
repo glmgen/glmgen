@@ -3,7 +3,7 @@
 \alias{glmgen}
 \docType{package}
 \title{
-  Fast generalized lasso algorithms
+  Fast algorithms for generalized lasso problems
 }
 \description{
   Efficient algorithms for generalized lasso problems. Specialized
