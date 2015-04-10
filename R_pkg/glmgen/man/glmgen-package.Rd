@@ -7,7 +7,7 @@
 }
 \description{
   Efficient algorithms for generalized lasso problems. Specialized
-  implementations are provided to deal with special problem classes, 
+  implementations are provided to deal with particular problem classes,  
   such as trend filtering.
 }
 \details{

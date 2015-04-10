@@ -84,7 +84,7 @@ an object of class \code{\linkS4class{trendfilter}}
   for trend filtering", arXiv: 1406.2082.
 }
 \author{
-Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
+Taylor Arnold, Aaditya Ramdas, Veeranjaneyulu Sadhanala, Ryan Tibshirani
 }
 \seealso{
 \code{\linkS4class{trendfilter}}, \code{trendfilter-method}
