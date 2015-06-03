@@ -33,7 +33,7 @@
 
 /**
  * @brief Default call to tf_admm.
- * Example of how to call tf_admm, taking only the response vector @p and 
+ * Example of how to call tf_admm, taking only the response vector @p and
  * observation size @n as inputs. Users will likely need to adjust tf_admm_default
  * for their own needs, using it as a starting template.
  * @param y                    a vector of responses
