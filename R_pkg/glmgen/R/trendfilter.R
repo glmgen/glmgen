@@ -102,7 +102,7 @@ trendfilter = function(y, x, weights, k = 2L,
   if (is.na(family_cd)) stop("family argument must be one of 'gaussian', 'logistic', or 'poisson'.")
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
-  if (k > 3) warning("Large k leads to generally worse conditioning; k=0,1,2 are the most stable choices.")
+  if (k >= 3) warning("Large k leads to generally worse conditioning; k=0,1,2 are the most stable choices.")
 
   cond = (1/n) * ((max(x) - min(x)) / min(diff(x)))^(k+1)
   if (!is.null(thinning) && !thinning && any(is.infinite(cond))) {
