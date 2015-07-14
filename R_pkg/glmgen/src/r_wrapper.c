@@ -19,11 +19,14 @@
  ****************************************************************************/
 
 #include <Rinternals.h>
+#include <Rdefines.h>
 #include <string.h>
 #include <stdio.h>
 
 #include "tf.h"
 #include "utils.h"
+#include "lattice.h"
+
 
 double get_control_value(SEXP sControlList, const char * param_name)
 {
@@ -54,6 +57,35 @@ double get_control_value(SEXP sControlList, const char * param_name)
   }
 
   return param_output;
+}
+
+cs * dgTMatrix_to_cs (SEXP input)
+{
+  int *i;
+  int *j;
+  int k;
+  int m;
+  int n;
+  int d;
+  double *x;
+  cs *T;
+  cs *U;
+
+  i = INTEGER(GET_SLOT(input,Rf_install("i")));
+  j = INTEGER(GET_SLOT(input,Rf_install("j")));
+  m = INTEGER(GET_SLOT(input,Rf_install("Dim")))[0];
+  n = INTEGER(GET_SLOT(input,Rf_install("Dim")))[1];
+  d = LENGTH(GET_SLOT(input,Rf_install("i")));
+  x = REAL(GET_SLOT(input,Rf_install("x")));
+
+  T = cs_spalloc (m, n, d, 1, 1);
+  for (k = 0; k < d; k++)
+  {
+    cs_entry (T, i[k], j[k], x[k]);
+  }
+  U = cs_compress(T);
+  cs_spfree(T);
+  return U;
 }
 
 SEXP thin_R (SEXP sY, SEXP sX, SEXP sW, SEXP sN, SEXP sK, SEXP sControl)
@@ -320,6 +352,108 @@ SEXP tf_predict_R (SEXP sBeta, SEXP sX, SEXP sN, SEXP sK, SEXP sX0, SEXP sN0,
   return sPred;
 }
 
+SEXP lattice_R (SEXP sY, SEXP sW, SEXP sLambda, SEXP sRho, SEXP sEps,
+                SEXP sMaxiter, SEXP sVerbose, SEXP sNaflag,
+                SEXP sLatticeType, SEXP sE, SEXP sC, SEXP sBeta0)
+{
+  int k;
+  int n;
+  int m;
+  int p;
+  int d;
+  int N;
+  int max_iter;
+  int verbose;
+  int naflag;
+  int lattice_type;
+  double lambda;
+  double rho;
+  double eps;
+  double *y;
+  double *w;
+  double *output;
+  double *buff;
+  double *abuff;
+  double *thisy1;
+  double *thisy2;
+  double *thisy3;
+  double *beta0;
+  double *beta1;
+  double *beta2;
+  double *beta3;
+  double *u1;
+  double *u2;
+  double *u3;
+  double *u4;
+  double *c;
+  cs *E;
+  SEXP sOutput;
+
+  /* Load inputs into native c types*/
+  n = INTEGER(GET_DIM(sY))[0];
+  m = INTEGER(GET_DIM(sY))[1];
+  max_iter = INTEGER(sMaxiter)[0];
+  verbose = INTEGER(sVerbose)[0];
+  naflag = INTEGER(sNaflag)[0];
+  lattice_type = INTEGER(sLatticeType)[0];
+  if (lattice_type == LATTICE_3D_GRID)
+  {
+    p = INTEGER(GET_DIM(sY))[2];
+  } else {
+    p = 1;
+  };
+  lambda = REAL(sLambda)[0];
+  rho = REAL(sRho)[0];
+  eps = REAL(sEps)[0];
+  y = REAL(sY);
+  w = REAL(sW);
+  N = n * m * p;
+
+  /* Parse the (optional) constraint Eb=c */
+  E = dgTMatrix_to_cs(sE);
+  c = REAL(sC);
+  d = E->m;
+
+  /* Allocate output and working buffers */
+  sOutput = PROTECT(allocVector(REALSXP, N));
+  output  = REAL(sOutput);
+  buff    = REAL(PROTECT(allocVector(REALSXP, N)));
+  abuff   = REAL(PROTECT(allocVector(REALSXP, MAX(MAX(n,m), p))));
+  thisy1  = REAL(PROTECT(allocVector(REALSXP, N)));
+  thisy2  = REAL(PROTECT(allocVector(REALSXP, N)));
+  thisy3  = REAL(PROTECT(allocVector(REALSXP, N)));
+  beta0   = REAL(PROTECT(allocVector(REALSXP, N)));
+  beta1   = REAL(PROTECT(allocVector(REALSXP, N)));
+  beta2   = REAL(PROTECT(allocVector(REALSXP, N)));
+  beta3   = REAL(PROTECT(allocVector(REALSXP, N)));
+  u1      = REAL(PROTECT(allocVector(REALSXP, N)));
+  u2      = REAL(PROTECT(allocVector(REALSXP, N)));
+  u3      = REAL(PROTECT(allocVector(REALSXP, N)));
+  u4      = REAL(PROTECT(allocVector(REALSXP, d)));
+
+  for (k = 0; k < N; k++)
+  {
+    beta0[k] = beta1[k] = beta2[k] = beta3[k] = REAL(sBeta0)[k];
+    u1[k] = u2[k] = u3[k] = 0;
+  }
+  for (k = 0; k < d; k++)
+  {
+    u4[k] = 0;
+  }
+
+  do_lattice(y, w, n, m, p, max_iter, lambda, rho, eps,
+              verbose, naflag,
+              beta0, beta1, beta2, beta3,
+              thisy1, thisy2, thisy3,
+              u1, u2, u3, u4,
+              E, c, d,
+              buff, abuff, lattice_type);
+
+  memcpy(output, beta0, sizeof(double) * n * m * p);
+
+  UNPROTECT(14);
+  return sOutput;
+}
 
 
 

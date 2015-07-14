@@ -41,6 +41,11 @@
 #define FAMILY_LOGISTIC 1
 #define FAMILY_POISSON 2
 
+/* Lattice codes */
+#define LATTICE_2D_GRID 0
+#define LATTICE_HEX_GRID 1
+#define LATTICE_3D_GRID 2
+
 /* Define MAX and MIN functions */
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))

@@ -22,7 +22,7 @@
  * @file tf_dp.c
  * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
  * @date 2014-12-23
- * @brief Dynamic programming algorithm for the 1d fused lasso. 
+ * @brief Dynamic programming algorithm for the 1d fused lasso.
  *
  * Here.
  */
@@ -30,7 +30,7 @@
  #include "tf.h"
 
 /**
- * @brief Implementation of Nick Johnson's dynamic programming algorithm 
+ * @brief Implementation of Nick Johnson's dynamic programming algorithm
  * for exact O(n) calculation of the 1d fused lasso solution (at a given
  * tuning parameter value).
  * @param n                    number of observations
@@ -170,7 +170,7 @@ void tf_dp (int n, double *y, double lam, double *beta)
 }
 
 /**
- * @brief Weighted variant of the dynamic programming algorithm for the 1d 
+ * @brief Weighted variant of the dynamic programming algorithm for the 1d
  * fused lasso problem.
  * @param n                    number of observations
  * @param y                    response vector
