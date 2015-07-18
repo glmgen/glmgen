@@ -238,6 +238,16 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     /* Dt has a W^{-1/2}, so in the next step divide by sqrt(w) instead of w. */
     for (i = 0; i < n; i++) beta_max[i] = y[i] - beta_max[i]/sqrt(w[i]);
 
+		/* Check if beta_max = mean(y) is better */
+		double wdoty = 0, sumw = 0;
+		for (i = 0; i < n; i++) wdoty += w[i] * y[i];
+		for (i = 0; i < n; i++) sumw += w[i];
+		wdoty /= sumw;
+		for (i = 0; i < n; i++) temp_n[i] = wdoty;
+		double obj1 = tf_obj(y,x,w,n,k,max_lam,beta_max,alpha);
+		double obj2 = tf_obj(y,x,w,n,k,max_lam,temp_n,alpha);
+		if(obj2 < obj1) beta_max = temp_n;
+
     /* alpha_max */
     tf_dxtil(x, n, k, beta_max, alpha);
 
@@ -375,12 +385,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     db = (double *) malloc(n*sizeof(double));
 
     /* Compute objective */
-    loss = 0; pen = 0;
-    for (i=0; i<n; i++) loss += w[i]*(y[i]-beta[i])*(y[i]-beta[i]);
-    loss = loss/2;
-    tf_dx(x,n,k+1,beta,db); /* IMPORTANT: use k+1 here! */
-    for (i=0; i<n-k-1; i++) pen += fabs(db[i]);
-    obj[0] = loss+lam*pen;
+		obj[0] = tf_obj(y,x,w,n,k,lam,beta,db);
 
     free(db);
     return;
@@ -397,7 +402,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
   z = (double*) malloc(n*sizeof(double));
 
   if (verbose) printf("\nlambda=%0.3e\n",lam);
-  if (verbose) printf("Iteration\tObjective\tLoss\tPenalty\n");
+  if (verbose) printf("Iteration\tObjective\n");
 
   for(it=0; it < max_iter; it++)
   {
@@ -425,16 +430,9 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     }
 
     /* Compute loss */
-    loss = 0;
-    for (i=0; i<n; i++) loss += w[i]*(y[i]-beta[i])*(y[i]-beta[i]);
-    loss = loss/2;
-    /* Compute penalty */
-    tf_dx(x,n,k+1,beta,z); /* IMPORTANT: use k+1 here! */
-    pen = 0;
-    for (i=0; i<n-k-1; i++) pen += fabs(z[i]);
-    obj[it] = loss+lam*pen;
+		obj[it] = tf_obj(y,x,w,n,k,lam,beta,z);
 
-    if (verbose) printf("%i\t%0.3e\t%0.3e\t%0.3e\n",it+1,obj[it],loss,lam*pen);
+    if (verbose) printf("%i\t%0.3e\n",it+1,obj[it]);
 
     /* Stop if relative difference of objective values <= obj_tol */
     if(it > 0)
