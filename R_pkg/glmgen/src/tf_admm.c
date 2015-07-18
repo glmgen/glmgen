@@ -231,7 +231,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   } else {
 
     /* beta_max */
-    for (i = 0; i < n; i++) temp_n[i] = -sqrt(w[i]) * y[i];
+    for (i = 0; i < n; i++) temp_n[i] = sqrt(w[i]) * y[i];
     glmgen_qrsol (Dt_qr, temp_n);
     for (i = 0; i < n; i++) beta_max[i] = 0;
     cs_gaxpy(Dt, temp_n, beta_max);
