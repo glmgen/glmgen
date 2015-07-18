@@ -238,16 +238,6 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     /* Dt has a W^{-1/2}, so in the next step divide by sqrt(w) instead of w. */
     for (i = 0; i < n; i++) beta_max[i] = y[i] - beta_max[i]/sqrt(w[i]);
 
-		/* Check if beta_max = mean(y) is better */
-		double wdoty = 0, sumw = 0;
-		for (i = 0; i < n; i++) wdoty += w[i] * y[i];
-		for (i = 0; i < n; i++) sumw += w[i];
-		wdoty /= sumw;
-		for (i = 0; i < n; i++) temp_n[i] = wdoty;
-		double obj1 = tf_obj(y,x,w,n,k,max_lam,beta_max,alpha);
-		double obj2 = tf_obj(y,x,w,n,k,max_lam,temp_n,alpha);
-		if(obj2 < obj1) beta_max = temp_n;
-
     /* alpha_max */
     tf_dxtil(x, n, k, beta_max, alpha);
 
@@ -400,6 +390,20 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
   /* Other variables that will be useful during our iterations */
   v = (double*) malloc(n*sizeof(double));
   z = (double*) malloc(n*sizeof(double));
+
+	/* Check if beta = weighted mean(y) is better than beta */
+	double wdoty = 0, sumw = 0;
+	for (i = 0; i < n; i++) wdoty += w[i] * y[i];
+	for (i = 0; i < n; i++) sumw += w[i];
+	wdoty /= sumw;
+	for (i = 0; i < n; i++) z[i] = wdoty;
+	double obj1 = tf_obj(y,x,w,n,k,lam,beta,v);
+	double obj2 = tf_obj(y,x,w,n,k,lam,z,v);
+	if(obj2 < obj1) {		
+		for (i = 0; i < n; i++) beta[i] = wdoty;
+    tf_dxtil(x, n, k, beta, alpha);
+		for (i = 0; i < n; i++) u[i] = w[i] * (beta[i] - y[i]) / (rho * lam);	
+	}
 
   if (verbose) printf("\nlambda=%0.3e\n",lam);
   if (verbose) printf("Iteration\tObjective\n");
