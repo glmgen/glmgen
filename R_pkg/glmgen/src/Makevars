@@ -1,14 +1,2 @@
-.PHONY: all mylibs
-
-PKG_CPPFLAGS =  -I../inst/include
-PKG_LIBS = $(SUBLIBS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
-
-SUBLIBS = ./csparse/*.o ./tf/*.o ./utils/*.o
-
-all: $(SHLIB)
-$(SHLIB): mylibs
-
-mylibs:
-	(cd csparse; make)
-	(cd utils; make)
-	(cd tf; make)
+PKG_CPPFLAGS=-I../inst/include
+PKG_LIBS=$(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)

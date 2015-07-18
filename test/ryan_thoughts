@@ -1,2 +1,0 @@
-- why do we iterate so long at lambda=maxlam in tf_admm_gauss? it's because we don't shortcut to the exact algebraic solution here. is this good?
-- why do we need theta to be length n in tf_predict_gauss?

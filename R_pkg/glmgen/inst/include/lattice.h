@@ -18,36 +18,21 @@
  ****************************************************************************/
 
 /**
- * @file glmgen_api.c
+ * @file tf.h
  * @author Taylor Arnold, Ryan Tibshirani, Veerun Sadhanala
- * @date 2014-12-23
- * @brief Primary API entry points for user code.
+ * @date 2015-07-14
+ * @brief Main functions for fitting fused lasso over a lattice.
  *
  * Here.
  */
 
-#ifndef GLMGEN_API_H
-#define GLMGEN_API_H
+#ifndef LATTICE_H
+#define LATTICE_H
 
-#include "cs.h"
-#include "tf.h"
 #include "utils.h"
+#include "cs.h"
 
-/* user-level c functions here */
-double * tf_admm_default (double * y, int n);
-
-void tf_admm (double * y, double * x, double * w, int n, int k, int family,
-              int max_iter, int lam_flag, double * lambda,
-              int nlambda, double lambda_min_ratio, double * beta,
-              double * obj, int * iter, int * status, double rho,
-              double obj_tol, double alpha_ls, double gamma_ls,
-              int max_iter_ls, int max_inner_iter, int verbose);
-
-void tf_predict(double * beta, double * x, int n, int k, int family,
-    double * x0, int n0, double * pred, double zero_tol);
-
-void thin( double* x, double* y, double* w, int n, int k,
-  double** xt, double** yt, double** wt, int* nt_ptr, double x_cond);
+#define MIN_ITER 10
 
 void do_lattice (double *y, double *w, int n, int m, int p, int max_iter,
                   double lambda, double rho, double eps,
@@ -58,5 +43,24 @@ void do_lattice (double *y, double *w, int n, int m, int p, int max_iter,
                   double *u1, double *u2, double *u3, double *u4,
                   cs *E, double *c, int d,
                   double *buff, double *abuff, int lattice_type);
+
+void do_dp_rows    (double *y, double *buff,
+                      double *abuff, double *ans, int n, int m,
+                      double lambda);
+void do_dp_cols    (double *y, double *buff,
+                      double *abuff, double *ans, int n, int m,
+                      double lambda);
+void do_dp_hexs    (double *y, double *buff,
+                      double *abuff, double *ans, int n, int m,
+                      double lambda);
+void do_dp_cols_na (double *y, double *buff,
+                      double *abuff, double *ans, int n, int m,
+                      double lambda);
+void do_dp_rows_na (double *y, double *buff,
+                      double *abuff, double *ans, int n, int m,
+                      double lambda);
+void do_dp_hexs_na (double *y, double *buff,
+                      double *abuff, double *ans, int n, int m,
+                      double lambda);
 
 #endif
