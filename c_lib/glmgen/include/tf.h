@@ -74,10 +74,10 @@ void tf_predict(double * beta, double * x, int n, int k, int family,
 void tf_predict_gauss(double * beta, double * x, int n, int k,
     double * x0, int n0, double * pred, double zero_tol);
 
-/* Calculate maximum lambda for a trendfiltering problem */
+/* Calculate maximum lambda for a trend filtering problem */
 double tf_maxlam (int len, double * y, gqr * Dt_qr, double * w);
 
-/* Low-level utility functions for trendfiltering D matrix */
+/* Low-level utility functions for trend filtering D matrix */
 cs * tf_calc_dk (int n, int k, const double * x);
 cs * tf_calc_dktil (int n, int k, const double * x);
 void tf_dx(double *x, int n, int k,double *a, double *b);
@@ -86,4 +86,7 @@ void tf_dxtil(double *x, int n, int k,double *a, double *b);
 void tf_dtxtil(double *x, int n, int k, double *a, double *b);
 void poly_coefs(double *x, int k, double *beta, double *phi);
 
+/* Computes trend filtering objective */
+double tf_obj(double *y, double *x, double *w, int n, int k, double lambda, 
+		int family, double *beta, double *buf);
 #endif

@@ -209,6 +209,32 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
    * using the input lambda_min_ratio and equally spaced log points.
    */
   max_lam = tf_maxlam(n, y, Dt_qr, w);
+	if(family == FAMILY_GAUSSIAN){
+		if(max_lam <= 1e-10 * l1norm(y,n)/n) {		
+			for(i=0;i<nlambda;i++){
+				for(j=0;j<n;j++) beta[i*n+j] = y[j];
+				obj[i*max_iter] = 0;
+				lambda[i] = 0;
+			}
+			// TODO free stuff
+			cs_spfree(D);
+			cs_spfree(Dt);
+			cs_spfree(Dk);
+			cs_spfree(Dkt);
+			cs_spfree(DktDk);
+			glmgen_gqr_free(Dt_qr);
+			glmgen_gqr_free(Dkt_qr);
+
+			free(temp_n);
+			free(beta_max);
+			free(alpha);
+			free(u);
+			return;
+		}				
+	}
+	else {
+		max_lam += 1;
+	}
   if (!lam_flag)
   {
     min_lam = max_lam * lambda_min_ratio;
@@ -219,7 +245,7 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
   }
 
   rho = rho * pow( (x[n-1] - x[0])/n, (double)k);
-
+	
   /* Initiate alpha and u for a warm start */
   if (lambda[0] < max_lam * 1e-5)
   {
@@ -237,6 +263,27 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     cs_gaxpy(Dt, temp_n, beta_max);
     /* Dt has a W^{-1/2}, so in the next step divide by sqrt(w) instead of w. */
     for (i = 0; i < n; i++) beta_max[i] = y[i] - beta_max[i]/sqrt(w[i]);
+
+		/* Check if beta = weighted mean(y) is better than beta */
+		double yc = 0, sumw = 0;
+		for (i = 0; i < n; i++) yc += w[i] * y[i];
+		for (i = 0; i < n; i++) sumw += w[i];
+		yc /= sumw;
+		switch(family) {
+		case FAMILY_POISSON:
+			yc = (yc > 0)? log(yc) : -DBL_MAX;
+			break;
+		case FAMILY_LOGISTIC:
+			yc = (yc > 0) ? ( yc < 1 ? log(yc/(1-yc)) : DBL_MAX) : -DBL_MAX;
+			break;
+		default: break;
+		}
+		for (i = 0; i < n; i++) temp_n[i] = yc;
+		double obj1 = tf_obj(y,x,w,n,k,max_lam,family,beta_max,alpha);
+		double obj2 = tf_obj(y,x,w,n,k,max_lam,family,temp_n,alpha);
+		if(obj2 < obj1) {		
+			for (i = 0; i < n; i++) beta_max[i] = yc;
+		}
 
     /* alpha_max */
     tf_dxtil(x, n, k, beta_max, alpha);
@@ -302,10 +349,24 @@ void tf_admm (double * y, double * x, double * w, int n, int k, int family,
     /* If there any NaNs in beta: reset beta, alpha, u */
     if(has_nan(beta + i * n, n))
     {
-      for(j = 0; j < n; j++) beta[i*n + j] = 0;
-      for(j = 0; j < n-k; j++) { alpha[j] = 0; u[j] = 0; }
+			double yc = 0, sumw = 0;
+			for (i = 0; i < n; i++) yc += w[i] * y[i];
+			for (i = 0; i < n; i++) sumw += w[i];
+			yc /= sumw;
+			switch(family) {
+			case FAMILY_POISSON:
+				yc = (yc > 0)? log(yc) : -DBL_MAX;
+				break;
+			case FAMILY_LOGISTIC:
+				yc = (yc > 0) ? ( yc < 1 ? log(yc/(1-yc)) : DBL_MAX) : -DBL_MAX;
+				break;
+			default: break;
+			}
+			for(j = 0; j < n; j++)   beta[i*n + j] = yc;
+			for(j = 0; j < n-k; j++) alpha[j] = 0;
+			for(j = 0; j < n; j++) u[j] = w[j] * (beta[i*n+j] - y[j]) / (rho * lambda[i]);	
+			glmgen_qrsol (Dkt_qr, u);
       status[i] = 1;
-      printf("Numerical error in lambda[%d]=%f",i,lambda[i]);
     }
   }
 
@@ -375,12 +436,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     db = (double *) malloc(n*sizeof(double));
 
     /* Compute objective */
-    loss = 0; pen = 0;
-    for (i=0; i<n; i++) loss += w[i]*(y[i]-beta[i])*(y[i]-beta[i]);
-    loss = loss/2;
-    tf_dx(x,n,k+1,beta,db); /* IMPORTANT: use k+1 here! */
-    for (i=0; i<n-k-1; i++) pen += fabs(db[i]);
-    obj[0] = loss+lam*pen;
+		obj[0] = tf_obj(y,x,w,n,k,lam,FAMILY_GAUSSIAN,beta,db);
 
     free(db);
     return;
@@ -397,7 +453,7 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
   z = (double*) malloc(n*sizeof(double));
 
   if (verbose) printf("\nlambda=%0.3e\n",lam);
-  if (verbose) printf("Iteration\tObjective\tLoss\tPenalty\n");
+  if (verbose) printf("Iteration\tObjective\n");
 
   for(it=0; it < max_iter; it++)
   {
@@ -425,16 +481,9 @@ void tf_admm_gauss (double * y, double * x, double * w, int n, int k,
     }
 
     /* Compute loss */
-    loss = 0;
-    for (i=0; i<n; i++) loss += w[i]*(y[i]-beta[i])*(y[i]-beta[i]);
-    loss = loss/2;
-    /* Compute penalty */
-    tf_dx(x,n,k+1,beta,z); /* IMPORTANT: use k+1 here! */
-    pen = 0;
-    for (i=0; i<n-k-1; i++) pen += fabs(z[i]);
-    obj[it] = loss+lam*pen;
+		obj[it] = tf_obj(y,x,w,n,k,lam,FAMILY_GAUSSIAN,beta,z);
 
-    if (verbose) printf("%i\t%0.3e\t%0.3e\t%0.3e\n",it+1,obj[it],loss,lam*pen);
+    if (verbose) printf("%i\t%0.3e\n",it+1,obj[it]);
 
     /* Stop if relative difference of objective values <= obj_tol */
     if(it > 0)

@@ -91,14 +91,19 @@ trendfilter = function(y, x, weights, k = 2L,
 
   n = length(y)
   if (!missing(x) && length(x)!=n) stop("x and y must have the same length.")
-  if (!missing(x)) {
-    ord = order(x)
-    y = y[ord]
-    x = x[ord]
-  }
   if (missing(x)) x = 1L:n
+  orig_x = x
+  orig_y = y
+
+  ord = order(x)
+  y = y[ord]
+  x = x[ord]
+
   if (missing(weights)) weights = rep(1L,length(y))
   if (any(weights==0)) stop("Cannot pass zero weights.")
+  orig_w = weights
+  weights = weights[ord]
+
   if (is.na(family_cd)) stop("family argument must be one of 'gaussian', 'logistic', or 'poisson'.")
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
@@ -133,7 +138,7 @@ trendfilter = function(y, x, weights, k = 2L,
     y = z$y
     x = z$x
     weights = z$w
-    n = z$n
+    n = z$n    
   }
 
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
@@ -174,12 +179,37 @@ trendfilter = function(y, x, weights, k = 2L,
   if (is.null(z$obj)) z$obj = NA_real_
   colnames(z$beta) = as.character(round(z$lambda, 3))
 
-  out = structure(list(y = y, x = x, w = weights, k = as.integer(k),
-                        lambda = z$lambda, beta = z$beta, family = family,
-                        method = method, n = length(y), p = length(y),
-                        m = length(y) - as.integer(k) - 1L, obj = z$obj,
-                        status = z$status, iter = z$iter, call = cl),
-                        class=c("trendfilter","glmgen"))
+# Put back the order in which x,y,weights were given. 
+# When thinning reduces the number of points, do not put back the order
+  beta = z$beta
+  if( n == length(ord) ){ 
+    iord = order(ord)
+    y = y[iord]
+    x = x[iord]
+    weights = weights[iord]
+    beta = matrix(beta[iord,], nrow=n)
+  } else {
+    # get beta by prediction
+    beta = .Call("tf_predict_R",
+              sBeta = as.double(z$beta),
+              sX = as.double(x),
+              sN = length(x),
+              sK = as.integer(k),
+              sX0 = as.double(orig_x),
+              sN0 = length(orig_x),
+              sNLambda = length(lambda),
+              sFamily = family_cd,
+              PACKAGE = "glmgen")
+
+    beta = matrix(beta, nrow=n)
+  }
+
+  out = structure(list(y = orig_y, x = orig_x, w = orig_w, k = as.integer(k),
+            lambda = z$lambda, beta = beta, family = family,
+            method = method, n = length(y), p = length(y),
+            m = length(y) - as.integer(k) - 1L, obj = z$obj,
+            status = z$status, iter = z$iter, call = cl),
+            class=c("trendfilter","glmgen"))
   out
 }
 
@@ -227,8 +257,8 @@ trendfilter = function(y, x, weights, k = 2L,
 #'
 #' @export
 trendfilter.control.list = function(rho=1, obj_tol=1e-6, max_iter=200L,
-                          max_iter_newton=50L, x_cond=1e11,
-                          alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=20L) {
+                                    max_iter_newton=50L, x_cond=1e11,
+                                    alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=20L) {
 
   z <- list(rho=rho, obj_tol=obj_tol, max_iter=max_iter,
             max_iter_newton=max_iter_newton, x_cond=x_cond,
