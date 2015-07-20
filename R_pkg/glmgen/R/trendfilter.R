@@ -187,7 +187,7 @@ trendfilter = function(y, x, weights, k = 2L,
     y = y[iord]
     x = x[iord]
     weights = weights[iord]
-    beta = matrix(beta[iord,])
+    beta = matrix(beta[iord,], nrow=n)
   } else {
     # get beta by prediction
     beta = .Call("tf_predict_R",
@@ -201,7 +201,7 @@ trendfilter = function(y, x, weights, k = 2L,
               sFamily = family_cd,
               PACKAGE = "glmgen")
 
-    beta = matrix(beta, ncol=ncol(z$beta), dimnames=list(NULL, colnames(z$beta)))
+    beta = matrix(beta, nrow=n)
   }
 
   out = structure(list(y = orig_y, x = orig_x, w = orig_w, k = as.integer(k),

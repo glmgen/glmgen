@@ -88,5 +88,5 @@ void poly_coefs(double *x, int k, double *beta, double *phi);
 
 /* Computes trend filtering objective */
 double tf_obj(double *y, double *x, double *w, int n, int k, double lambda, 
-		double *beta, double *buf);
+		int family, double *beta, double *buf);
 #endif
