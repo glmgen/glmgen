@@ -201,7 +201,7 @@ trendfilter = function(y, x, weights, k = 2L,
               sFamily = family_cd,
               PACKAGE = "glmgen")
 
-    beta = matrix(beta, nrow=n)
+    beta = matrix(beta, ncol=length(lambda))
   }
 
   out = structure(list(y = orig_y, x = orig_x, w = orig_w, k = as.integer(k),
