@@ -145,7 +145,7 @@ trendfilter = function(y, x, weights, k = 2L,
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
   if (missing(lambda)) {
     if (nlambda < 1L || nlambda != floor(nlambda)) stop("nlambda must be a positive integer.")
-    if (lambda.min.ratio <= 0 | lambda.min.ratio >= 1) stop("lamba.min.ratio must be between 0 and 1.")
+    if (lambda.min.ratio <= 0 || lambda.min.ratio >= 1) stop("lamba.min.ratio must be between 0 and 1.")
     lambda = rep(0, nlambda)
     lambda_flag = FALSE
   } else {
@@ -154,7 +154,7 @@ trendfilter = function(y, x, weights, k = 2L,
     nlambda = length(lambda)
     lambda_flag = TRUE
   }
-  if (!is.list(control) | (is.null(names(control)) & length(control) != 0L))
+  if (!is.list(control) || (is.null(names(control)) && length(control) != 0L))
     stop("control must be a named list.")
   control = lapply(control, function(v) ifelse(is.numeric(v),
                    as.double(v[[1]]), stop("Elements of control must be numeric.")))
