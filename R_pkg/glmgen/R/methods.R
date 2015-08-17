@@ -3,7 +3,7 @@
 #' @method coef glmgen
 #'
 #' @param object
-#'   output of summary.iolm
+#'   output of glmgen function
 #' @param lambda
 #'   optional vector of lambda values to calculate coefficients
 #'   at. If missing, will use break points in the fit.
@@ -54,7 +54,7 @@ coef.glmgen = function (object, lambda = NULL, ...) {
 #' @method predict trendfilter
 #'
 #' @param object
-#'   output of summary.iolm
+#'   output of trendfilter function
 #' @param type
 #'   scale of the predictions
 #' @param lambda
@@ -64,7 +64,8 @@ coef.glmgen = function (object, lambda = NULL, ...) {
 #'   vector of new x points. Set to NULL (the default) to use the
 #'   original locations.
 #' @param zero_tol
-#'   numerical tolerance parameter
+#'   numerical tolerance parameter, for determining whether a 
+#    coefficient should be rounded to zero
 #' @param ...
 #'   optional, currently unused, arguments
 #'
