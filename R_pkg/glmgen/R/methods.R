@@ -88,20 +88,19 @@ predict.trendfilter = function (object, type = c("link", "response"),
   }
 
   if (is.null(lambda)) lambda = object$lambda
-
   co = coef(object, lambda)
 
   z = .Call("tf_predict_R",
-        sBeta = as.double(co),
-        sX = as.double(object$x),
-        sN = length(object$y),
-        sK = as.integer(object$k),
-        sX0 = as.double(x.new),
-        sN0 = length(x.new),
-        sNLambda = length(lambda),
-        sFamily = family_cd,
-        sZeroTol = as.double(zero_tol),
-        package = "glmgen")
+    sX = as.double(object$x),
+    sBeta = as.double(co),
+    sN = length(object$y),
+    sK = as.integer(object$k),
+    sX0 = as.double(x.new),
+    sN0 = length(x.new),
+    sNLambda = length(lambda),
+    sFamily = family_cd,
+    sZeroTol = as.double(zero_tol),
+    package = "glmgen")
 
   z = matrix(z, ncol=ncol(co), dimnames=list(NULL, colnames(co)))
   return(z)
