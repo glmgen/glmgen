@@ -39,30 +39,29 @@
 
 #define WEIGHT_SMALL DBL_EPSILON
 
-/* ADMM Functions */
-double * tf_admm_default (double * y, int n);
+/* ADMM functions */
+double * tf_admm_default(double * y, int n);
 
-void tf_admm (double * x, double * y, double * w, int n, int k, int family,
-              int max_iter, int lam_flag, double * lambda, 
-              int nlambda, double lambda_min_ratio, int * df, 
-              double * beta, double * obj, int * iter, int * status, 
-              double rho, double obj_tol, double alpha_ls, double gamma_ls,
-              int max_iter_ls, int max_iter_newton, int verbose);
+void tf_admm(double * x, double * y, double * w, int n, int k, int family,
+	     int max_iter, int lam_flag, double * lambda, 
+	     int nlambda, double lambda_min_ratio, int * df, 
+	     double * beta, double * obj, int * iter, int * status, 
+	     double rho, double obj_tol, double alpha_ls, double gamma_ls,
+	     int max_iter_ls, int max_iter_newton, int verbose);
 
-void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
-		    int max_iter, double lam, int * df,
-		    double * beta, double * alpha, double * u,
-		    double * obj, int * iter,
-		    double rho, double obj_tol, cs * DktDk, int verbose);
+void tf_admm_gauss(double * x, double * y, double * w, int n, int k,
+		   int max_iter, double lam, int * df,
+		   double * beta, double * alpha, double * u,
+		   double * obj, int * iter,
+		   double rho, double obj_tol, cs * DktDk, int verbose);
 
-void tf_admm_glm (double * x, double * y, double * w, int n, int k,
-		  int max_iter, double lam, int * df,
-		  double * beta, double * alpha, double * u,
-		  double * obj, int * iter,
-		  double rho, double obj_tol, double alpha_ls, double gamma_ls,
-		  int max_iter_ls, int max_iter_newton,
-		  cs * DktDk,
-		  func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose);
+void tf_admm_glm(double * x, double * y, double * w, int n, int k,
+		 int max_iter, double lam, int * df,
+		 double * beta, double * alpha, double * u,
+		 double * obj, int * iter,
+		 double rho, double obj_tol, double alpha_ls, double gamma_ls,
+		 int max_iter_ls, int max_iter_newton,
+		 cs * DktDk, func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose);
 
 /* Dynamic programming routines */
 void tf_dp (int n, double *y, double lam, double *beta);
@@ -73,7 +72,7 @@ void tf_predict(double * x, double * beta,  int n, int k, int family,
 		double * x0, int n0, double * pred, double zero_tol);
 void tf_predict_gauss(double * x, double * beta, int n, int k,
 		      double * x0, int n0, double * pred, double zero_tol);
-void poly_coefs (double *x, double *beta, int k, double *phi);
+void poly_coefs(double *x, double *beta, int k, double *phi);
 
 /* Calculate maximum lambda for a trend filtering problem */
 double tf_maxlam(int n, double * y, gqr * Dt_qr, double * w);
@@ -86,7 +85,12 @@ void tf_dtx (double *x, int n, int k, double *a, double *b);
 void tf_dxtil (double *x, int n, int k,double *a, double *b);
 void tf_dtxtil (double *x, int n, int k, double *a, double *b);
 
-/* Computes trend filtering objective */
+/* Compute trend filtering objective */
 double tf_obj(double *x, double *y, double *w, int n, int k, double lambda, 
-	      int family, double *beta, int *df, double *buf);
+	      int family, double *beta, double *buf);
+double tf_obj_gauss(double *x, double *y, double *w, int n, int k, double lambda, 
+		    double *beta, double *buf);
+double tf_obj_glm(double *x, double *y, double *w, int n, int k, double lambda, 
+		  func_RtoR b, double *beta, double *buf);
+
 #endif

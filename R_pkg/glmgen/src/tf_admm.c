@@ -273,8 +273,8 @@ void tf_admm (double * x, double * y, double * w, int n, int k, int family,
     default: break;
     }
     for (i = 0; i < n; i++) temp_n[i] = yc;
-    double obj1 = tf_obj(x,y,w,n,k,max_lam,family,beta_max,df,alpha);
-    double obj2 = tf_obj(x,y,w,n,k,max_lam,family,temp_n,df,alpha);
+    double obj1 = tf_obj(x,y,w,n,k,max_lam,family,beta_max,alpha);
+    double obj2 = tf_obj(x,y,w,n,k,max_lam,family,temp_n,alpha);
     if(obj2 < obj1) {		
       for (i = 0; i < n; i++) beta_max[i] = yc;
     }
@@ -414,12 +414,11 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
 		    double rho, double obj_tol, cs * DktDk, int verbose)
 {
   int i;
+  int d;
   int it;
   double *v;
   double *z;
   double *db;
-  double loss;
-  double pen;
 
   cs * kernmat;
   gqr * kernmat_qr;
@@ -430,9 +429,14 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
     /* Use Nick's DP algorithm, weighted version */
     tf_dp_weight(n,y,w,lam,beta);
 
-    /* Compute objective and df */
+    /* Compute df value */
+    d = 1;
+    for (i=0; i<n-1; i++) if (beta[i] != beta[i+1]) d += 1;
+    *df = d;
+
+    /* Compute objective */
     db = (double *) malloc(n*sizeof(double));
-    obj[0] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,df,db);
+    obj[0] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,db);
     free(db);
     return;
   }
@@ -450,7 +454,7 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
   if (verbose) printf("\nlambda=%0.3e\n",lam);
   if (verbose) printf("Iteration\tObjective\n");
 
-  for(it=0; it < max_iter; it++)
+  for (it=0; it < max_iter; it++)
   {
     /* Update beta: banded linear system (kernel matrix) */
     for (i=0; i < n-k; i++) v[i] = alpha[i] + u[i];
@@ -462,28 +466,28 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
     /* Update alpha: 1d fused lasso
      * Build the response vector */
     tf_dxtil(x,n,k,beta,v);
-    for (i=0; i<n-k; i++)
-    {
-      z[i] = v[i]-u[i];
-    }
+    for (i=0; i<n-k; i++) z[i] = v[i]-u[i];
+
     /* Use Nick's DP algorithm */
     tf_dp(n-k,z,lam/rho,alpha);
 
     /* Update u: dual update */
-    for (i=0; i<n-k; i++)
-    {
-      u[i] = u[i]+alpha[i]-v[i];
-    }
+    for (i=0; i<n-k; i++) u[i] = u[i]+alpha[i]-v[i];
 
-    /* Compute objective and df */
-    obj[it] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,df,z);
+    /* Compute objective */
+    obj[it] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,z);
     if (verbose) printf("%i\t%0.3e\n",it+1,obj[it]);
 
-    /* Stop if relative difference of objective values <= obj_tol */
+    /* Stop if relative difference of objective values < obj_tol */
     if (it > 0 && (fabs(obj[it] - obj[it-1]) < fabs(obj[it-1]) * obj_tol)) break;
   }
 
   *iter = it;
+
+  /* Compute final df value, based on alpha */
+  d = k+1;
+  for (i=0; i<n-k; i++) if (alpha[i] != alpha[i+1]) d += 1;
+  *df = d;
 
   cs_spfree(kernmat);
   glmgen_gqr_free(kernmat_qr);
@@ -531,42 +535,37 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 		  double * obj, int * iter,
 		  double rho, double obj_tol, double alpha_ls, double gamma_ls,
 		  int max_iter_ls, int max_iter_newton,
-		  cs * DktDk,
-		  func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
-{
-  double * d; /* line search direction */
-  double * yt;/* working response: ytilde */
-  double * H; /* weighted Hessian */
-  double * z;
+		  cs * DktDk, func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
+{ 
+  double * dir; /* line search direction */
+  double * yt;  /* working response: ytilde */
+  double * H;   /* weighted Hessian */
   double * obj_admm;
 
   int i;
-  int * iter_ls;
+  int d;
   int it;
   int iter_admm;
+  int * iter_ls;
   double * Db;
   double * Dd;
-  double loss;
-  double pen;
   double t; /* stepsize */
-  int dfval;
 
-  d  = (double*) malloc(n*sizeof(double)); /* line search direction */
-  yt = (double*) malloc(n*sizeof(double));/* working response: ytilde */
-  H  = (double*) malloc(n*sizeof(double)); /* weighted Hessian */
-  z  = (double*) malloc(n*sizeof(double));
+  dir  = (double*) malloc(n*sizeof(double)); /* line search direction */
+  yt = (double*) malloc(n*sizeof(double));   /* working response: ytilde */
+  H  = (double*) malloc(n*sizeof(double));   /* weighted Hessian */
 
   /* Buffers for line search */
   Db      = (double *) malloc(n*sizeof(double));
   Dd      = (double *) malloc(n*sizeof(double));
   iter_ls = (int *)    malloc(sizeof(int));
 
-  obj_admm = (double*)malloc(max_iter*sizeof(double));
+  obj_admm = (double*) malloc(max_iter*sizeof(double));
 
   if (verbose) printf("\nlambda=%0.3e\n",lam);
-  if (verbose) printf("Iteration\tObjective\tLoss\tPenalty\tADMM iters\n");
+  if (verbose) printf("Iteration\tObjective\tADMM iters\n");
 
-  /* One Prox Newton step per iteration */
+  /* One prox Newton step per iteration */
   for (it=0; it < max_iter_newton; it++)
   {
     /* Define weighted Hessian, and working response */
@@ -579,43 +578,34 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
     /* Prox Newton step */
     iter_admm = 0;
-    tf_admm_gauss (x, yt, H, n, k,
-		   max_iter, lam, df,
-		   d, alpha, u,
-		   obj_admm, &iter_admm, rho, obj_tol,
-		   DktDk, 0);
+    tf_admm_gauss(x, yt, H, n, k, max_iter, lam, df, dir, alpha, u,
+		  obj_admm, &iter_admm, rho, obj_tol, DktDk, 0);
 
-    for (i=0; i<n; i++) d[i] = d[i] - beta[i];
-    t = line_search(x, y, w, n, k, lam, b, b1, beta, d, alpha_ls, gamma_ls, max_iter_ls, iter_ls, Db, Dd);
-    /* if (verbose) printf("Stepsize t=%.3e,\titers=%d\n", t, *iter_ls+1); */
-
-    for (i=0; i<n; i++) beta[i] = beta[i] + t * d[i];
+    /* Line search */
+    for (i=0; i<n; i++) dir[i] = dir[i] - beta[i];
+    t = line_search(x, y, w, n, k, lam, b, b1, beta, dir, alpha_ls, gamma_ls, 
+		    max_iter_ls, iter_ls, Db, Dd);
+    for (i=0; i<n; i++) beta[i] = beta[i] + t * dir[i];
 
     /* Compute objective */
-    /* Compute loss */
-    loss = 0;
-    for (i=0; i<n; i++) loss += w[i] * (-y[i]*beta[i] + b(beta[i]));
-    /* Compute penalty and df */
-    tf_dx(x,n,k+1,beta,z); /* IMPORTANT: use k+1 here! */
-    pen = 0; dfval = k+1;
-    for (i=0; i<n-k-1; i++) {
-      pen += fabs(z[i]);
-      if (fabs(z[i]) > 1e-4) dfval += 1;
-    }
-    obj[it] = loss+lam*pen;
-    if (verbose) printf("\t%i\t%0.3e\t%0.3e\t%0.3e\t%i\n",it+1,obj[it],loss,lam*pen,iter_admm);
+    obj[it] = tf_obj_glm(x, y, w, n, k, lam, b, beta, yt);
+    if (verbose) printf("\t%i\t%0.3e\t%i\n",it+1,obj[it],iter_admm);
 
+    /* Stop if relative difference of objective values < obj_tol */
     if (it > 0 && (fabs(obj[it] - obj[it-1]) < fabs(obj[it-1]) * obj_tol)) break;
   }
 
   *iter = it;
-  *df = dfval;
+  
+  /* Compute final df value, based on alpha */
+  d = k+1;
+  for (i=0; i<n-k; i++) if (alpha[i] != alpha[i+1]) d += 1;
+  *df = d;
 
-  /* free */
+  /* Free everything */
   free(d);
   free(yt);
   free(H);
-  free(z);
   free(iter_ls);
   free(Db);
   free(Dd);

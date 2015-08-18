@@ -33,8 +33,7 @@ double glmgen_factorial(int n)
   int i=0;
   double x=1;
 
-  for(i=2; i<=n; i++)
-  {
+  for (i=2; i<=n; i++) {
     x *= i;
   }
   return x;
@@ -48,7 +47,7 @@ int count_nans(double * x, int n) {
   int i;
   int num_nans = 0;
 
-  for(i=0; i < n; i++) {
+  for (i=0; i < n; i++) {
     num_nans += is_nan(x[i]);
   }
   return num_nans;
@@ -56,8 +55,8 @@ int count_nans(double * x, int n) {
 
 int has_nan(double * x, int n) {
   int i;
-  for(i=0; i < n; i++) {
-    if(is_nan(x[i]))
+  for (i=0; i < n; i++) {
+    if (is_nan(x[i]))
       return 1;
   }
   return 0;
@@ -67,9 +66,7 @@ double l1norm(double * x, int n) {
   int i;
   double s;
   s = 0;
-  for(i=0; i < n; i++)
-    s += fabs(x[i]);
-
+  for (i=0; i < n; i++) s += fabs(x[i]);
   return s;
 }
 

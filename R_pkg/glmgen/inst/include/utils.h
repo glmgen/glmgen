@@ -81,7 +81,6 @@ struct llnode
 };
 
 typedef struct btreenode btnode;
-
 typedef struct llnode llnode;
 typedef llnode linkedlist;
 
