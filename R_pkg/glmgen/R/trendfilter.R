@@ -101,6 +101,11 @@ trendfilter = function(x, y, weights, k = 2L,
   y = y[ord]
   x = x[ord]
 
+  if (family_cd == 1L & !all(y %in% c(0,1)))
+    warning("Logistic family should have all 0/1 responses.")
+  if (family_cd == 2L & (any(round(y) != y) | any(y < 0)))
+    warning("Poisson family requires non-negative integer responses.")
+
   if (missing(weights)) weights = rep(1L,length(y))
   if (any(weights==0)) stop("Cannot pass zero weights.")
   ## orig_w = weights
@@ -140,7 +145,7 @@ trendfilter = function(x, y, weights, k = 2L,
     x = z$x
     y = z$y
     weights = z$w
-    n = z$n    
+    n = z$n
   }
 
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
@@ -153,6 +158,8 @@ trendfilter = function(x, y, weights, k = 2L,
   } else {
     if (length(lambda) == 0L) stop("Must specify at least one lambda value.")
     if (min(lambda) < 0L) stop("All specified lambda values must be nonnegative.")
+    if ((order(lambda) != length(lambda):1L) & (order(lambda) != length(lambda):1L))
+      warning("user-supplied lambda values should given in decending order for warm starts.")
     nlambda = length(lambda)
     lambda_flag = TRUE
   }
@@ -179,12 +186,12 @@ trendfilter = function(x, y, weights, k = 2L,
 
   if (is.null(z)) stop("Unspecified error in C code.")
   colnames(z$beta) = as.character(round(z$lambda, 3))
-  
+
   ## if (is.null(z$obj)) z$obj = NA_real_ ## Why is this here??
-## # Put back the order in which x,y,weights were given. 
+## # Put back the order in which x,y,weights were given.
 ## # When thinning reduces the number of points, do not put back the order
 ##   beta = z$beta
-##   if( n == length(ord) ){ 
+##   if( n == length(ord) ){
 ##     iord = order(ord)
 ##     y = y[iord]
 ##     x = x[iord]
@@ -208,7 +215,7 @@ trendfilter = function(x, y, weights, k = 2L,
   out = structure(list(y = y, x = x, weights = weights, k = as.integer(k),
     lambda = z$lambda, df = z$df, beta = z$beta, family = family,
     method = method, n = length(y), p = length(y),
-    m = length(y) - as.integer(k) - 1L, obj = z$obj, 
+    m = length(y) - as.integer(k) - 1L, obj = z$obj,
     status = z$status, iter = z$iter, call = cl),
     class = c("trendfilter","glmgen"))
   out
@@ -267,4 +274,6 @@ trendfilter.control.list = function(rho=1, obj_tol=1e-4, max_iter=200L,
             max_iter_ls=max_iter_ls)
   z
 }
+
+
 

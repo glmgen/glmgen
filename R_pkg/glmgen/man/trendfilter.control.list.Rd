@@ -4,8 +4,8 @@
 \alias{trendfilter.control.list}
 \title{Control list for tuning trend filtering algorithm}
 \usage{
-trendfilter.control.list(rho = 1, obj_tol = 1e-06, max_iter = 200L,
-  max_iter_newton = 50L, x_cond = 1e+11, alpha_ls = 0.5, gamma_ls = 0.8,
+trendfilter.control.list(rho = 1, obj_tol = 1e-04, max_iter = 200L,
+  max_iter_newton = 30L, x_cond = 1e+11, alpha_ls = 0.5, gamma_ls = 0.8,
   max_iter_ls = 20L)
 }
 \arguments{
@@ -46,7 +46,7 @@ set.seed(0)
  n = 100
  x = runif(n, min=-2*pi, max=2*pi)
  y = 1.5*sin(x) + sin(2*x) + rnorm(n, sd=0.2)
- out = trendfilter(y, x, k=2, control=trendfilter.control.list(rho=3))
+ out = trendfilter(x, y, k=2, control=trendfilter.control.list(rho=3))
 }
 \author{
 Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
