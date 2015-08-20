@@ -179,7 +179,8 @@ void tf_dp (int n, double *y, double lam, double *beta)
  * @param beta                 allocated space for the output
  * @return  void
  * @see tf_dp
- */void tf_dp_weight (int n, double *y, double *w, double lam, double *beta)
+ */
+void tf_dp_weight (int n, double *y, double *w, double lam, double *beta)
 {
   int i;
   int k;
