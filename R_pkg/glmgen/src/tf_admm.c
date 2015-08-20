@@ -603,12 +603,12 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
   *df = d;
 
   /* Free everything */
-  free(d);
+  free(dir);
   free(yt);
   free(H);
-  free(iter_ls);
   free(Db);
   free(Dd);
+  free(iter_ls);
   free(obj_admm);
 }
 
