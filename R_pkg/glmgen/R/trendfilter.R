@@ -158,7 +158,7 @@ trendfilter = function(x, y, weights, k = 2L,
   } else {
     if (length(lambda) == 0L) stop("Must specify at least one lambda value.")
     if (min(lambda) < 0L) stop("All specified lambda values must be nonnegative.")
-    if ((order(lambda) != length(lambda):1L) & (order(lambda) != length(lambda):1L))
+    if (any(order(lambda) != length(lambda):1L) & any(order(lambda) != 1L:length(lambda)))
       warning("user-supplied lambda values should given in decending order for warm starts.")
     nlambda = length(lambda)
     lambda_flag = TRUE
@@ -216,7 +216,7 @@ trendfilter = function(x, y, weights, k = 2L,
     lambda = z$lambda, df = z$df, beta = z$beta, family = family,
     method = method, n = length(y), p = length(y),
     m = length(y) - as.integer(k) - 1L, obj = z$obj,
-    status = z$status, iter = z$iter, call = cl),
+    status = z$status, iter = z$iter, family=family, call = cl),
     class = c("trendfilter","glmgen"))
   out
 }
