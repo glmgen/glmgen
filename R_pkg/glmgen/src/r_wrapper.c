@@ -461,6 +461,54 @@ SEXP lattice_R (SEXP sY, SEXP sW, SEXP sLambda, SEXP sRho, SEXP sEps,
   return sOutput;
 }
 
+SEXP matMultiply_R (SEXP sB, SEXP sK, SEXP sX, SEXP sMatrixCode)
+{
+  double *b;
+  double *x;
+  int k;
+  int matcode;
+  int n;
+
+  SEXP sOutput;
+  double *output;
+
+  b = REAL(sB);
+  k = INTEGER(sK)[0];
+  x = REAL(sX);
+  matcode = INTEGER(sMatrixCode)[0];
+  n = LENGTH(sB);
+  sOutput = PROTECT(allocVector(REALSXP, LENGTH(sB)));
+  output = REAL(sOutput);
+
+  switch(matcode)
+  {
+    case 0:
+      tf_dx(x, n, k, b, output);
+      break;
+
+    case 1:
+      tf_dtx(x, n, k, b, output);
+      break;
+
+    case 2:
+      tf_dxtil(x, n, k, b, output);
+      break;
+
+    case 3:
+      tf_dtxtil(x, n, k, b, output);
+      break;
+
+    default:
+      error("Method code not found.");
+      break;
+  }
+
+  UNPROTECT(1);
+  return sOutput;
+}
+
+
+
 
 
 

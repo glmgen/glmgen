@@ -275,5 +275,70 @@ trendfilter.control.list = function(rho=1, obj_tol=1e-4, max_iter=200L,
   z
 }
 
+#' Multiply a vector by Trendfilter Matricies
+#'
+#' Fast algorithms exist for multiplying a vector by
+#' the trendfiltering penalty matrix D and other
+#' related matricies, and are used internally in the
+#' function \code{\link{trendfilter}}. Here we expose
+#' functions for advanced users to
+#'
+#' @param b
+#'  a numeric vector to which the multiplication should
+#'  be supplied
+#' @param k
+#'  a positive integer; the order of the trendfiltering matrix
+#' @param x
+#'  the positions associated with the matrix. If set to NULL,
+#'  these will be automatically set to \code{1:length(b)}
+#' @param matrix
+#'  option for which matrix should be used for multiplication.
+#'  See Details for more information.
+#'
+#' @return a numeric vector with the result of the multiplication
+#' @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
+#' @references
+#'   Tibshirani, R. J. (2014), "Adaptive piecewise polynomial estimation
+#'     via trend filtering", Annals of Statistics 42 (1): 285--323.
+#'
+#'   Ramdas, A. and Tibshirani R. J. (2014), "Fast and flexible ADMM algorithms
+#'     for trend filtering", arXiv: 1406.2082.
+#' @seealso \code{\link{trendfilter}}
+#'
+#' @examples
+#'  set.seed(0)
+#'  n = 100
+#'  x = runif(n, min=-2*pi, max=2*pi)
+#'  y = 1.5*sin(x) + sin(2*x) + rnorm(n, sd=0.2)
+#'  tfMultiply(y)
+#'
+#' @export
+tfMultiply = function(b, k=1L, x=NULL, matrix=c("d", "dt", "dtil", "dtilh")) {
+  b = as.numeric(b)
+  if ((k = as.integer(k)[1]) < 0)
+    stop("k must be a non-negative integer")
+  if (!is.null(x)) {
+    x = as.numeric(x)
+    if (length(x) != length(b)) stop("length of x must be same length as b")
+  } else x = as.numeric(1L:length(b))
+  matrix = match.arg(matrix)
+  matrixCode = match(matrix, c("d", "dt", "dtil", "dtilh")) - 1L
+  if (is.na(matrixCode))
+    stop("Invalid matrix selection.")
+
+  z = .Call("matMultiply_R",
+    sB = as.numeric(b),
+    sK = as.integer(k),
+    x = as.numeric(x),
+    sMatrixCode = as.integer(matrixCode),
+    PACKAGE = "glmgen")
+
+  if (matrix == "d") z = z[1:(length(z) - k)]
+  z
+}
+
+
+
+
 
 

@@ -64,7 +64,7 @@ coef.glmgen = function (object, lambda = NULL, ...) {
 #'   vector of new x points. Set to NULL (the default) to use the
 #'   original locations.
 #' @param zero_tol
-#'   numerical tolerance parameter, for determining whether a 
+#'   numerical tolerance parameter, for determining whether a
 #    coefficient should be rounded to zero
 #' @param ...
 #'   optional, currently unused, arguments
@@ -84,7 +84,7 @@ predict.trendfilter = function (object, type = c("link", "response"),
   if (type == "link") {
     family_cd = 0L
   } else {
-    family_cd = match(object@family, c("gaussian", "logistic", "poisson")) - 1L
+    family_cd = match(object$family, c("gaussian", "logistic", "poisson")) - 1L
   }
 
   if (is.null(lambda)) lambda = object$lambda
