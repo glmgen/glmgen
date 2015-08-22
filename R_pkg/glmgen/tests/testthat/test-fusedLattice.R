@@ -3,7 +3,7 @@ library(glmgen)
 library(testthat)
 
 set.seed(0)
-EPS = 1e-3
+EPS = 1e-4
 
 # (1) Test fusedLattice and fusedGraph over a grid; compare to
 #   the genlasso::fusedlasso2d

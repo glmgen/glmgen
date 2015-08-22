@@ -358,9 +358,10 @@ SEXP tf_predict_R (SEXP sX, SEXP sBeta, SEXP sN, SEXP sK, SEXP sX0, SEXP sN0,
   return sPred;
 }
 
-SEXP lattice_R (SEXP sY, SEXP sW, SEXP sLambda, SEXP sRho, SEXP sEps,
-                SEXP sMaxiter, SEXP sVerbose, SEXP sNaflag,
-                SEXP sLatticeType, SEXP sE, SEXP sC, SEXP sBeta0)
+SEXP lattice_R (SEXP sY, SEXP sW, SEXP sWedge, SEXP sLambda, SEXP sRho,
+                SEXP sEps, SEXP sMaxiter, SEXP sVerbose, SEXP sNaflag,
+                SEXP sLatticeType, SEXP sMethodType,
+                SEXP sE, SEXP sC, SEXP sBeta0)
 {
   int k;
   int n;
@@ -368,21 +369,27 @@ SEXP lattice_R (SEXP sY, SEXP sW, SEXP sLambda, SEXP sRho, SEXP sEps,
   int p;
   int d;
   int N;
+  int edge_length;
   int max_iter;
   int verbose;
   int naflag;
   int lattice_type;
-  double lambda;
+  int method_type;
+  double thisLam;
   double rho;
   double eps;
   double *y;
   double *w;
+  double *ew;
+  double *lambda;
   double *output;
   double *buff;
   double *abuff;
+  double *wbuff;
   double *thisy1;
   double *thisy2;
   double *thisy3;
+  double *thisy4;
   double *beta0;
   double *beta1;
   double *beta2;
@@ -402,17 +409,19 @@ SEXP lattice_R (SEXP sY, SEXP sW, SEXP sLambda, SEXP sRho, SEXP sEps,
   verbose = INTEGER(sVerbose)[0];
   naflag = INTEGER(sNaflag)[0];
   lattice_type = INTEGER(sLatticeType)[0];
+  method_type = INTEGER(sMethodType)[0];
   if (lattice_type == LATTICE_3D_GRID)
   {
     p = INTEGER(GET_DIM(sY))[2];
   } else {
     p = 1;
   };
-  lambda = REAL(sLambda)[0];
+  thisLam = REAL(sLambda)[0];
   rho = REAL(sRho)[0];
   eps = REAL(sEps)[0];
   y = REAL(sY);
   w = REAL(sW);
+  ew = (TYPEOF(sWedge) == NILSXP) ? NULL : REAL(sWedge);
   N = n * m * p;
 
   /* Parse the (optional) constraint Eb=c */
@@ -420,14 +429,32 @@ SEXP lattice_R (SEXP sY, SEXP sW, SEXP sLambda, SEXP sRho, SEXP sEps,
   c = REAL(sC);
   d = E->m;
 
+  /* Determine number of edges */
+  edge_length = (n-1)*m*p + n*(m-1)*p;
+  switch(lattice_type)
+  {
+    case LATTICE_2D_GRID:
+    break;
+
+    case LATTICE_HEX_GRID:
+    edge_length += (n-1)*(m-1)*p;
+    break;
+
+    case LATTICE_3D_GRID:
+    edge_length += n*m*(p-1);
+    break;
+  }
+
   /* Allocate output and working buffers */
   sOutput = PROTECT(allocVector(REALSXP, N));
   output  = REAL(sOutput);
   buff    = REAL(PROTECT(allocVector(REALSXP, N)));
   abuff   = REAL(PROTECT(allocVector(REALSXP, MAX(MAX(n,m), p))));
+  wbuff   = REAL(PROTECT(allocVector(REALSXP, MAX(MAX(n,m), p))));
   thisy1  = REAL(PROTECT(allocVector(REALSXP, N)));
   thisy2  = REAL(PROTECT(allocVector(REALSXP, N)));
   thisy3  = REAL(PROTECT(allocVector(REALSXP, N)));
+  thisy4  = REAL(PROTECT(allocVector(REALSXP, N)));
   beta0   = REAL(PROTECT(allocVector(REALSXP, N)));
   beta1   = REAL(PROTECT(allocVector(REALSXP, N)));
   beta2   = REAL(PROTECT(allocVector(REALSXP, N)));
@@ -436,6 +463,7 @@ SEXP lattice_R (SEXP sY, SEXP sW, SEXP sLambda, SEXP sRho, SEXP sEps,
   u2      = REAL(PROTECT(allocVector(REALSXP, N)));
   u3      = REAL(PROTECT(allocVector(REALSXP, N)));
   u4      = REAL(PROTECT(allocVector(REALSXP, d)));
+  lambda  = REAL(PROTECT(allocVector(REALSXP, edge_length+1)));
 
   for (k = 0; k < N; k++)
   {
@@ -446,18 +474,129 @@ SEXP lattice_R (SEXP sY, SEXP sW, SEXP sLambda, SEXP sRho, SEXP sEps,
   {
     u4[k] = 0;
   }
+  for (k = 0; k < edge_length; k++)
+  {
+    lambda[k] = (ew == NULL) ? thisLam : thisLam*ew[k];
+  }
+  lambda[edge_length] = 1;
 
   do_lattice(y, w, n, m, p, max_iter, lambda, rho, eps,
               verbose, naflag,
               beta0, beta1, beta2, beta3,
-              thisy1, thisy2, thisy3,
+              thisy1, thisy2, thisy3, thisy4,
               u1, u2, u3, u4,
               E, c, d,
-              buff, abuff, lattice_type);
+              buff, abuff, wbuff,
+              lattice_type, method_type);
 
   memcpy(output, beta0, sizeof(double) * n * m * p);
 
-  UNPROTECT(14);
+  UNPROTECT(17);
+  return sOutput;
+}
+
+
+SEXP graph_fused_R (SEXP sY, SEXP sW, SEXP sEdge, SEXP sWedge,
+                SEXP sEdgeLen,
+                SEXP sLambda, SEXP sRho, SEXP sEps, SEXP sMaxiter,
+                SEXP sVerbose, SEXP sMethodType,
+                SEXP sE, SEXP sC, SEXP sBeta0)
+{
+  int i;
+  int k;
+  int n;
+  int num_chains;
+  int num_edge_index;
+  int d;
+  int max_iter;
+  int verbose;
+  int method_type;
+  int *elen;
+  int *e;
+  int  *ebuff;
+  double thisLam;
+  double rho;
+  double eps;
+  double *y;
+  double *w;
+  double *ew;
+  double *lambda;
+  double *output;
+  double *buff;
+  double *abuff;
+  double *wbuff;
+  double *thisY;
+  double *beta0;
+  double *B;
+  double *U;
+  double *u4;
+  double *c;
+  cs *E;
+  SEXP sOutput;
+
+  /* Load inputs into native c types*/
+  n = LENGTH(sY);
+  num_chains = LENGTH(sEdgeLen);
+  num_edge_index = LENGTH(sEdge);
+  max_iter = INTEGER(sMaxiter)[0];
+  verbose = INTEGER(sVerbose)[0];
+  method_type = INTEGER(sMethodType)[0];
+  thisLam = REAL(sLambda)[0];
+  rho = REAL(sRho)[0];
+  eps = REAL(sEps)[0];
+  elen = INTEGER(sEdgeLen);
+  y = REAL(sY);
+  w = REAL(sW);
+  e = INTEGER(sEdge);
+  ew = REAL(sWedge);
+
+  /* Parse the (optional) constraint Eb=c */
+  E = dgTMatrix_to_cs(sE);
+  c = REAL(sC);
+  d = E->m;
+
+  /* Allocate output and working buffers */
+  sOutput = PROTECT(allocVector(REALSXP, n));
+  output  = REAL(sOutput);
+  buff    = REAL(PROTECT(allocVector(REALSXP, n)));
+  abuff   = REAL(PROTECT(allocVector(REALSXP, n)));
+  wbuff   = REAL(PROTECT(allocVector(REALSXP, n)));
+  ebuff   = INTEGER(PROTECT(allocVector(INTSXP, n)));
+  thisY   = REAL(PROTECT(allocVector(REALSXP, n*(num_chains+1))));
+  beta0   = REAL(PROTECT(allocVector(REALSXP, n)));
+  B       = REAL(PROTECT(allocVector(REALSXP, n*num_chains)));
+  U       = REAL(PROTECT(allocVector(REALSXP, n*num_chains)));
+  u4      = REAL(PROTECT(allocVector(REALSXP, d)));
+  lambda  = REAL(PROTECT(allocVector(REALSXP, num_edge_index+1)));
+
+  for (k = 0; k < n; k++)
+  {
+    beta0[k] = REAL(sBeta0)[k];
+    for (i = 0; i < num_chains; i++)
+    {
+      B[k + i*n] = REAL(sBeta0)[k];
+      U[k + i*n] = 0;
+    }
+  }
+  for (k = 0; k < d; k++)
+  {
+    u4[k] = 0;
+  }
+  for (k = 0; k < num_edge_index; k++)
+  {
+    lambda[k] = thisLam*ew[k];
+  }
+  lambda[num_edge_index] = 1;
+
+  do_fused_graph(y, w, e, elen, n, num_chains, max_iter,
+              lambda, rho, eps,
+              verbose, beta0, B, thisY, U, u4, E, c, d,
+              buff, abuff, wbuff, ebuff,
+              method_type);
+
+  memcpy(output, beta0, sizeof(double) * n);
+
+  UNPROTECT(11);
   return sOutput;
 }
 

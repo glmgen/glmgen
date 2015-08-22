@@ -92,7 +92,7 @@ trendfilter = function(x, y, weights, k = 2L,
   method_cd = match(method, c("admm")) - 1L
 
   if (missing(x) || is.null(x)) stop("x must be passed.")
-  if (missing(y) || is.null(y)) { y = x; x = 1L:n }
+  if (missing(y) || is.null(y)) { y = x; x = 1L:length(y) }
   else if (length(x) != length(y)) stop("x and y must have the same length.")
   n = length(y)
   ## orig_x = x

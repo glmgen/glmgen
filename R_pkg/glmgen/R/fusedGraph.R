@@ -1,22 +1,21 @@
-#' Fit a fused lasso over a lattice
+#' Fit a fused lasso over a Decomposed Graph
 #'
-#' Calculates the fused lasso over a 2 dimensional square,
-#' hexagonal lattice, or 3 dimensional cube. Allows for an
-#' optional linear constraint on the result, seamlessly
-#' handles missing data, and allows for an optional set of
-#' observation weights.
+#' Calculates the fused lasso over a graph, which has been
+#' decomposed into a series of chains.
 #'
 #' @param y
-#'   the observed data points, as a matrix or 3 dimensional array.
-#'   See Details for how this is interpreted for a hexagonal lattice.
+#'   the observed data points as a numeric vector.
 #' @param weights
 #'   optional sample weights. If provided, it must be the same length
-#'   as \code{y}; it can be a vector, matrix, or array. Data will be
-#'   assumed to be missing if either \code{y} or \code{weights} is
-#'   \code{NA}. If missing, the weights will be assumed to be constant
-#'   (unity) across all samples.
+#'   as \code{y}.
+#' @param edges
+#'    a list object describing the edges in the chains. Each element in
+#'    the list should be a numeric vector describing the chains. See
+#'    Details for a description of how this should be specified.
 #' @param edgeWeights
-#'   optional edge weights. See Details for how to supply these.
+#'   an optional list of edge weights. Should be a list of the same
+#'   length as \code{edges}, with each component having the same length
+#'   as well.
 #' @param lambda
 #'   a sequence of lambda values at which to produce a fit. Can be
 #'   left blank (highly recommended for general use), at which point
@@ -38,13 +37,9 @@
 #'   an optional vector with one element per row of \code{E}. Gives
 #'   the right hand side of the constraint. If missing but \code{E}
 #'   is supplied, this will be assumed to be a vector of zeros.
-#' @param latticeType
-#'   the type of lattice to use. Will default to \code{square} if
-#'   \code{y} is a matrix and \code{cube} if it is a 3 dimensional
-#'   array.
 #' @param rho
 #'   a positive number used as a tuning parameter for the ADMM
-#"   procedure.
+#'   procedure.
 #' @param eps
 #'   stopping parameter for the iterative algorithm.
 #' @param maxIter
@@ -55,7 +50,7 @@
 #' @param method
 #'   method used to solve the 1D chains in the ADMM algorithms.
 #'   Currently either \code{dp} for Johnson's dynamic program or
-#'   \code{prox} for proximal optimization method for Barbero and
+#'   \code{prox} for the proximal optimization method for Barbero and
 #'   Suvrit.
 #' @param verbose
 #'   logical. Should the function print out intermediate results
@@ -63,13 +58,14 @@
 #'
 #' @details
 #'
-#'   When \code{latticeType} is set to \code{hex}, the algorithm
-#'   will assume the data are distributed over a 2 dimensional
-#'   hexagonal lattice. The coordinate system used assumes that
-#'   even rows are offset by a factor of negative one half from
-#'   the odd rows. Other patterns can be achieved by inserting
-#'   \code{NA} values in over this grid and shifting data
-#'   appropriately.
+#'   Each element in the list \code{edges} should idealy contain
+#'   some permutation of the integers 1 through the length of \code{y}
+#'   describing a path over the graph. This path may have holes, which
+#'   can be specified by inserting negative, zero, or \code{NA} values
+#'   into the list element. It is not strictly required that each chain
+#'   visit every node in the graph (these orphaned nodes are simply
+#'   considered to be have no constraints), however it is strictly not
+#'   allowed for a cycle to visit a node multiple times.
 #'
 #'   The \code{E} and \code{c} can be supplied to enforce the
 #'   constraint Eb=c, where b is a vector of coefficients
@@ -99,60 +95,32 @@
 #'
 #'  set.seed(1)
 #'
-#'  # Over a 20x10 grid
-#'  y = matrix(rnorm(200),20,10)
-#'  y[1:5,1:5] = y[1:5,1:5] + 2
-#'  z = fusedLattice(y, lambda = 3, eps=0.0001, maxIter=100)
-#'  print(matrix(z$beta, 20, 10))
-#'  z = fusedLattice(y, lambda = 0.0001, eps=0.0001, maxIter=100)
-#'  print(round(matrix(z$beta, 20, 10) - y),3)
-#'
-#'  # Linear constraint and missing values
-#'  y = matrix(rnorm(8*12),8,12)
-#'  y[1:5,1:5] = y[1:5,1:5] + 2
-#'  y[2,10] = NA
-#'  E = Matrix::Matrix(0,2,length(y))
-#'  E[1,1] = 1
-#'  E[1,2] = -1
-#'  E[2,9] = 1
-#'  E[2,11] = -1
-#'  c = c(0,1)
-#'
-#'  z = fusedLattice(y, lambda = 0.00001, eps=0.0001, maxIter=100,
-#'                   latticeType="square", E=E, c=c)
-#'
-#'  # 3D Lattice
-#'  y = array(rnorm(3 * 4 * 5),dim=c(5,4,3))
-#'  z = fusedLattice(y, lambda = 30, latticeType="cube")
-#'  array(z$beta, dim=dim(y))
-#'  z = fusedLattice(y, lambda = 0.0001, latticeType="cube")
-#'  array(z$beta, dim=dim(y)) - y
 #'
 #' @author Taylor Arnold
-#' @useDynLib glmgen lattice_R
+#' @useDynLib glmgen graph_fused_R
 #'
 #' @importFrom  Matrix bandSparse t solve
 #' @export
-fusedLattice = function(y, weights, edgeWeights=NULL, lambda=NULL,
-                        nlambda=20L, lambdaMinRatio=1e-05,
+fusedGraph = function(y, weights, edges, edgeWeights=NULL,
+                        lambda=NULL, nlambda=20L, lambdaMinRatio=1e-05,
                         E=NULL, c=NULL,
-                        latticeType=c("square","hex","cube"),
                         rho=1, eps=0.01, maxIter=20, beta0=NULL,
                         method=c("prox","dp"),
                         verbose=FALSE) {
 
-  # Extract lattice type and problem dimensions
-  if (is.matrix(y) && storage.mode(y) == "double") {
-    latticeType = match.arg(latticeType)
-  } else if (is.array(y) && length(dim(y)) == 3L &&
-              storage.mode(y) == "double") {
-    latticeType = "cube"
-  } else stop("y must be a numeric matrix or 3D array.")
-  latticeType = which(latticeType[[1]] == c("square","hex","cube")) - 1L
-
   # Create dummy observation weights if needed
   if (missing(weights))
     weights = rep(1, length(y))
+
+  # Test edges and convert to C format (0 indexed; -1 for holes)
+  if (!is.list(edges)) stop("edges must be a list object.")
+  edges = lapply(edges, function(v) as.integer(v - 1))
+  edges = lapply(edges, function(v) {v[is.na(v) | v < 0] = -1; v})
+  okay = sapply(edges, function(v) !any(duplicated(v[v >= 0])) &
+              !any(is.na(match(v, (-1):(length(y)-1)))))
+  if (any(!okay))
+    stop("bad element in edges list: ",
+         paste(which(!okay),collapse=","))
 
   # Select the method for solving the sub-problems
   method = match.arg(method)
@@ -165,30 +133,13 @@ fusedLattice = function(y, weights, edgeWeights=NULL, lambda=NULL,
   methodType = which(method == c("dp", "prox", "proxW")) - 1L
 
   # Test/Create edge weights
-  n = nrow(y); m = ncol(y); p = dim(y)[3]
-  if (is.na(p)) p = 1
-  numEdges = (n-1)*m*p + n*(m-1)*p
-  if (latticeType == 1)
-    numEdges = numEdges + (n-1)*(m-1)
-  if (latticeType == 2)
-    numEdges = numEdges + n*m*(p-1)
   if (is.null(edgeWeights)) {
-    edgeWeights = rep(1.0,numEdges)
+    edgeWeights = lapply(edges, function(v) rep(1,length(v)))
   } else {
-    if (length(edgeWeights <- as.numeric(edgeWeights)) != numEdges)
-      stop("Expect length(edgeWeights) to be ", numEdges,
-           ", but observed length to be ", length(edgeWeights), ".")
-  }
-
-  # Deal with missing values; if there are none we can use
-  # faster methods in the C code, so flag the non-NA case
-  naflag = TRUE
-  index = which(is.na(y) | is.na(weights))
-  if (length(index) == 0) {
-    naflag = FALSE
-  } else {
-    y[index] = NA
-    weights[index] = 0
+    if (length(edgeWeights) != length(edges) ||
+        any(sapply(edges,length) != sapply(edgeWeights,length)))
+      stop("length of edgeWeights and its elements must",
+           "match that of edges.")
   }
 
   # Deal with initialized value of beta0
@@ -219,35 +170,34 @@ fusedLattice = function(y, weights, edgeWeights=NULL, lambda=NULL,
 
   # Calculate an estimate of the lambda values:
   if (is.null(lambda)) {
-    if (latticeType == 0L) {
-      D1 = Matrix::bandSparse(nrow(y), m = nrow(y), c(0, 1),
-             diagonals = list(rep(-1, nrow(y)), rep(1, nrow(y) - 1)))
-      D2 = Matrix::bandSparse(ncol(y), m = ncol(y), c(0, 1),
-             diagonals = list(rep(-1, ncol(y)), rep(1, ncol(y) - 1)))
-      max_lam = max(max(abs(Matrix::solve(Matrix::t(D1)) %*% y),na.rm=TRUE),
-                    max(abs(Matrix::solve(Matrix::t(D1)) %*% y),na.rm=TRUE))
-    }
+    # if (latticeType == 0L) {
+    #   D1 = Matrix::bandSparse(nrow(y), m = nrow(y), c(0, 1),
+    #          diagonals = list(rep(-1, nrow(y)), rep(1, nrow(y) - 1)))
+    #   D2 = Matrix::bandSparse(ncol(y), m = ncol(y), c(0, 1),
+    #          diagonals = list(rep(-1, ncol(y)), rep(1, ncol(y) - 1)))
+    #   max_lam = max(max(abs(Matrix::solve(Matrix::t(D1)) %*% y),na.rm=TRUE),
+    #                 max(abs(Matrix::solve(Matrix::t(D1)) %*% y),na.rm=TRUE))
+    # }
 
-    min_lam = max_lam * lambdaMinRatio
-    lambda = exp(seq(log(max_lam), log(min_lam), length.out=nlambda))
+    # min_lam = max_lam * lambdaMinRatio
+    # lambda = exp(seq(log(max_lam), log(min_lam), length.out=nlambda))
   }
 
   output = list(y=y, w=weights, lambda=lambda, dims=dim(y),
-                latticeType=latticeType,
                 beta=matrix(NA, ncol=length(lambda), nrow=length(y)))
 
   for (i in 1:length(lambda)) {
-    output$beta[,i] = .Call("lattice_R",
-                            sY = y,
-                            sW = weights,
-                            sWedge = edgeWeights,
+    output$beta[,i] = .Call("graph_fused_R",
+                            sY = as.numeric(y),
+                            sW = as.numeric(weights),
+                            sEdge = as.integer(unlist(edges)),
+                            sWedge = as.numeric(unlist(edgeWeights)),
+                            sEdgeLen = as.integer(lapply(edges,length)),
                             sLambda = as.double(lambda[i]),
                             sRho = as.double(rho),
                             sEps = as.double(eps),
                             sMaxiter = as.integer(maxIter),
                             sVerbose = as.integer(verbose),
-                            sNaflag = as.integer(naflag),
-                            sLatticeType = as.integer(latticeType),
                             sMethodType = as.integer(methodType),
                             sE = E,
                             sC = as.double(c),
@@ -260,7 +210,4 @@ fusedLattice = function(y, weights, edgeWeights=NULL, lambda=NULL,
   class(output) = c("fusedLattice", "glmgen")
   output
 }
-
-
-
 

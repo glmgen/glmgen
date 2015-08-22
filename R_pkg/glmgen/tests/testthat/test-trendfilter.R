@@ -3,7 +3,7 @@ library(glmgen)
 library(testthat)
 
 set.seed(0)
-EPS = 1e-3
+EPS = 1e-4
 
 n = 100
 x = sort(runif(n, min=-2*pi, max=2*pi))
