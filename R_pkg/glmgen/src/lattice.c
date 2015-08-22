@@ -28,6 +28,8 @@
 #include "cs.h"
 #include "proxTV.h"
 
+#include <R_ext/Print.h>
+
 /**
  * @brief Calculates the left hand side of the beta0 step
  *        in the (optionally) constrained lattice. The
@@ -151,7 +153,7 @@ void do_lattice (double *y, double *w, int n, int m, int p,
 
   if (verbose)
   {
-    printf("lambda = %04.3f\n"
+    Rprintf("lambda = %04.3f\n"
            "==================================================\n",
             lambda[0]);
   }
@@ -287,7 +289,7 @@ void do_lattice (double *y, double *w, int n, int m, int p,
 
     if (verbose)
     {
-      printf("iter #%03d =>\n  ||bold - bnew||: %02.4f  "
+      Rprintf("iter #%03d =>\n  ||bold - bnew||: %02.4f  "
              "||b0 - b1||: %02.4f  "
              "||b0 - b2||: %02.4f  "
              "||E b0 - c||: %02.4f\n",
@@ -298,7 +300,7 @@ void do_lattice (double *y, double *w, int n, int m, int p,
 
   if (verbose)
   {
-    printf("\n");
+    Rprintf("\n");
   }
 
   glmgen_gqr_free(lhs_qr);
@@ -815,7 +817,7 @@ void do_fused_graph (double *y, double *w, int *e, int *elen,
 
   if (verbose)
   {
-    printf("lambda = %04.3f\n"
+    Rprintf("lambda = %04.3f\n"
            "==================================================\n",
             lambda[0]);
   }
@@ -892,14 +894,14 @@ void do_fused_graph (double *y, double *w, int *e, int *elen,
 
     if (verbose)
     {
-      printf("iter #%03d =>\n  max delta: %02.6f  max error: %02.6f\n", iter, err0, err1);
+      Rprintf("iter #%03d =>\n  max delta: %02.6f  max error: %02.6f\n", iter, err0, err1);
     }
     iter++;
   }
 
   if (verbose)
   {
-    printf("\n");
+    Rprintf("\n");
   }
 
   glmgen_gqr_free(lhs_qr);

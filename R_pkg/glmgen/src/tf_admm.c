@@ -31,6 +31,8 @@
 #include "tf.h"
 #include "utils.h"
 
+#include <R_ext/Print.h>
+
 /**
  * @brief Default call to tf_admm.
  * Example of how to call tf_admm, taking only the response vector @p and
@@ -451,8 +453,8 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
   v = (double*) malloc(n*sizeof(double));
   z = (double*) malloc(n*sizeof(double));
 
-  if (verbose) printf("\nlambda=%0.3e\n",lam);
-  if (verbose) printf("Iteration\tObjective\n");
+  if (verbose) Rprintf("\nlambda=%0.3e\n",lam);
+  if (verbose) Rprintf("Iteration\tObjective\n");
 
   for (it=0; it < max_iter; it++)
   {
@@ -476,7 +478,7 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
 
     /* Compute objective */
     obj[it] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,z);
-    if (verbose) printf("%i\t%0.3e\n",it+1,obj[it]);
+    if (verbose) Rprintf("%i\t%0.3e\n",it+1,obj[it]);
 
     /* Stop if relative difference of objective values < obj_tol */
     if (it > 0 && (fabs(obj[it] - obj[it-1]) < fabs(obj[it-1]) * obj_tol)) break;
@@ -562,8 +564,8 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
   obj_admm = (double*) malloc(max_iter*sizeof(double));
 
-  if (verbose) printf("\nlambda=%0.3e\n",lam);
-  if (verbose) printf("Iteration\tObjective\tADMM iters\n");
+  if (verbose) Rprintf("\nlambda=%0.3e\n",lam);
+  if (verbose) Rprintf("Iteration\tObjective\tADMM iters\n");
 
   /* One prox Newton step per iteration */
   for (it=0; it < max_iter_newton; it++)
@@ -589,7 +591,7 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
     /* Compute objective */
     obj[it] = tf_obj_glm(x, y, w, n, k, lam, b, beta, yt);
-    if (verbose) printf("\t%i\t%0.3e\t%i\n",it+1,obj[it],iter_admm);
+    if (verbose) Rprintf("\t%i\t%0.3e\t%i\n",it+1,obj[it],iter_admm);
 
     /* Stop if relative difference of objective values < obj_tol */
     if (it > 0 && (fabs(obj[it] - obj[it-1]) < fabs(obj[it-1]) * obj_tol)) break;
