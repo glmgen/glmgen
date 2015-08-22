@@ -97,7 +97,7 @@ set.seed(1)
  y = matrix(rnorm(8*12),8,12)
  y[1:5,1:5] = y[1:5,1:5] + 2
  y[2,10] = NA
- E = Matrix(0,2,length(y))
+ E = Matrix::Matrix(0,2,length(y))
  E[1,1] = 1
  E[1,2] = -1
  E[2,9] = 1
