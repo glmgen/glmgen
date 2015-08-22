@@ -298,22 +298,22 @@ trendfilter.control.list = function(rho=1, obj_tol=1e-4, max_iter=200L,
 #' @return a numeric vector with the result of the multiplication
 #' @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
 #' @references
+#'
 #'   Tibshirani, R. J. (2014), "Adaptive piecewise polynomial estimation
 #'     via trend filtering", Annals of Statistics 42 (1): 285--323.
 #'
 #'   Ramdas, A. and Tibshirani R. J. (2014), "Fast and flexible ADMM algorithms
 #'     for trend filtering", arXiv: 1406.2082.
+#'
 #' @seealso \code{\link{trendfilter}}
 #'
 #' @examples
 #'  set.seed(0)
-#'  n = 100
-#'  x = runif(n, min=-2*pi, max=2*pi)
-#'  y = 1.5*sin(x) + sin(2*x) + rnorm(n, sd=0.2)
-#'  tfMultiply(y)
+#'  y <- rnorm(100)
+#'  all.equal(diff(y), tfMultiply(y))
 #'
 #' @export
-tfMultiply = function(b, k=1L, x=NULL, matrix=c("d", "dt", "dtil", "dtilh")) {
+tfMultiply = function(b, k=1L, x=NULL, matrix=c("d")) {
   b = as.numeric(b)
   if ((k = as.integer(k)[1]) < 0)
     stop("k must be a non-negative integer")
@@ -322,7 +322,7 @@ tfMultiply = function(b, k=1L, x=NULL, matrix=c("d", "dt", "dtil", "dtilh")) {
     if (length(x) != length(b)) stop("length of x must be same length as b")
   } else x = as.numeric(1L:length(b))
   matrix = match.arg(matrix)
-  matrixCode = match(matrix, c("d", "dt", "dtil", "dtilh")) - 1L
+  matrixCode = match(matrix, c("d")) - 1L
   if (is.na(matrixCode))
     stop("Invalid matrix selection.")
 

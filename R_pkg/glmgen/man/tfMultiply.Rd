@@ -4,7 +4,7 @@
 \alias{tfMultiply}
 \title{Multiply a vector by Trendfilter Matricies}
 \usage{
-tfMultiply(b, k = 1L, x = NULL, matrix = c("d", "dt", "dtil", "dtilh"))
+tfMultiply(b, k = 1L, x = NULL, matrix = c("d"))
 }
 \arguments{
 \item{b}{a numeric vector to which the multiplication should
@@ -30,10 +30,8 @@ functions for advanced users to
 }
 \examples{
 set.seed(0)
- n = 100
- x = runif(n, min=-2*pi, max=2*pi)
- y = 1.5*sin(x) + sin(2*x) + rnorm(n, sd=0.2)
- tfMultiply(y)
+ y <- rnorm(100)
+ all.equal(diff(y), tfMultiply(y))
 }
 \author{
 Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani

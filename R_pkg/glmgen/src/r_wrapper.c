@@ -486,18 +486,6 @@ SEXP matMultiply_R (SEXP sB, SEXP sK, SEXP sX, SEXP sMatrixCode)
       tf_dx(x, n, k, b, output);
       break;
 
-    case 1:
-      tf_dtx(x, n, k, b, output);
-      break;
-
-    case 2:
-      tf_dxtil(x, n, k, b, output);
-      break;
-
-    case 3:
-      tf_dtxtil(x, n, k, b, output);
-      break;
-
     default:
       error("Method code not found.");
       break;
