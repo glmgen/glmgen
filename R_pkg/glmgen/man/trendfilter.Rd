@@ -4,16 +4,18 @@
 \alias{trendfilter}
 \title{Fit a trend filtering model}
 \usage{
-trendfilter(y, x, weights, k = 2L, family = c("gaussian", "logistic",
+trendfilter(x, y, weights, k = 2L, family = c("gaussian", "logistic",
   "poisson"), method = c("admm"), lambda, nlambda = 50L,
   lambda.min.ratio = 1e-05, thinning = NULL, verbose = FALSE,
   control = trendfilter.control.list())
 }
 \arguments{
-\item{y}{vector of observed data points.}
+\item{x}{vector of observed data locations, or when \code{y} is NULL, vector of
+observed responses.}
 
-\item{x}{optional vector of observed data locations. If missing, will be assumed to
-be the integers 1 through the length of \code{y}.}
+\item{y}{vector of observed reponses. If missing or NULL, the responses are assumed
+to be given through \code{x}, and the locations are assumed to be 1 through
+the length of \code{x}.}
 
 \item{weights}{optional vector of sample weights. If missing, the weights will be assumed
 to be constant (unity) across all samples.}
@@ -68,7 +70,7 @@ set.seed(0)
  n = 100
  x = runif(n, min=-2*pi, max=2*pi)
  y = 1.5*sin(x) + sin(2*x) + rnorm(n, sd=0.2)
- out = trendfilter(y, x, k=2)
+ out = trendfilter(x, y, k=2)
 
  xx = seq(min(x),max(x),length=100)
  lambda = out$lambda[25]

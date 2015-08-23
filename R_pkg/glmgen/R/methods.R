@@ -3,7 +3,7 @@
 #' @method coef glmgen
 #'
 #' @param object
-#'   output of summary.iolm
+#'   output of glmgen function
 #' @param lambda
 #'   optional vector of lambda values to calculate coefficients
 #'   at. If missing, will use break points in the fit.
@@ -54,7 +54,7 @@ coef.glmgen = function (object, lambda = NULL, ...) {
 #' @method predict trendfilter
 #'
 #' @param object
-#'   output of summary.iolm
+#'   output of trendfilter function
 #' @param type
 #'   scale of the predictions
 #' @param lambda
@@ -64,7 +64,8 @@ coef.glmgen = function (object, lambda = NULL, ...) {
 #'   vector of new x points. Set to NULL (the default) to use the
 #'   original locations.
 #' @param zero_tol
-#'   numerical tolerance parameter
+#'   numerical tolerance parameter, for determining whether a
+#    coefficient should be rounded to zero
 #' @param ...
 #'   optional, currently unused, arguments
 #'
@@ -83,24 +84,23 @@ predict.trendfilter = function (object, type = c("link", "response"),
   if (type == "link") {
     family_cd = 0L
   } else {
-    family_cd = match(object@family, c("gaussian", "logistic", "poisson")) - 1L
+    family_cd = match(object$family, c("gaussian", "logistic", "poisson")) - 1L
   }
 
   if (is.null(lambda)) lambda = object$lambda
-
   co = coef(object, lambda)
 
   z = .Call("tf_predict_R",
-        sBeta = as.double(co),
-        sX = as.double(object$x),
-        sN = length(object$y),
-        sK = as.integer(object$k),
-        sX0 = as.double(x.new),
-        sN0 = length(x.new),
-        sNLambda = length(lambda),
-        sFamily = family_cd,
-        sZeroTol = as.double(zero_tol),
-        package = "glmgen")
+    sX = as.double(object$x),
+    sBeta = as.double(co),
+    sN = length(object$y),
+    sK = as.integer(object$k),
+    sX0 = as.double(x.new),
+    sN0 = length(x.new),
+    sNLambda = length(lambda),
+    sFamily = family_cd,
+    sZeroTol = as.double(zero_tol),
+    package = "glmgen")
 
   z = matrix(z, ncol=ncol(co), dimnames=list(NULL, colnames(co)))
   return(z)

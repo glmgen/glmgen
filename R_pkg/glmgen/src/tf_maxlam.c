@@ -33,13 +33,13 @@
  * @brief Calculate maximum lambda value.
  * Will return the largest lambda value for which the penalty term is zero
  * for Gaussian losses. Will only be approximate for other loss functions.
- * @param len                  number of observations
+ * @param n                    number of observations
  * @param y                    a vector of responses
  * @param Dt_qr                QR decomposition of the Dt matrix
  * @param w                    vector of sample weights; must be filled
  * @return  Returns the maximum value of lambda.
  */
-double tf_maxlam (int len, double * y, gqr * Dt_qr, double * w)
+double tf_maxlam (int n, double * y, gqr * Dt_qr, double * w)
 {
 
   int i;
@@ -47,9 +47,9 @@ double tf_maxlam (int len, double * y, gqr * Dt_qr, double * w)
   double maxlam;
   double * y_work;
 
-  y_work = (double *) malloc(len * sizeof(double));
+  y_work = (double *) malloc(n * sizeof(double));
 
-  for(i = 0; i < len; i++) y_work[i] = sqrt(w[i]) * y[i];
+  for(i = 0; i < n; i++) y_work[i] = sqrt(w[i]) * y[i];
 
   glmgen_qrsol(Dt_qr, y_work);
 

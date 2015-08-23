@@ -46,6 +46,11 @@
 #define LATTICE_HEX_GRID 1
 #define LATTICE_3D_GRID 2
 
+/* Lattice ethod codes */
+#define LATTICE_DP 0
+#define LATTICE_PROX 1
+#define LATTICE_PROX_W 2
+
 /* Define MAX and MIN functions */
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -81,7 +86,6 @@ struct llnode
 };
 
 typedef struct btreenode btnode;
-
 typedef struct llnode llnode;
 typedef llnode linkedlist;
 

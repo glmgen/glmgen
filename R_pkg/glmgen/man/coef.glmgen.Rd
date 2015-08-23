@@ -7,7 +7,7 @@
 \method{coef}{glmgen}(object, lambda = NULL, ...)
 }
 \arguments{
-\item{object}{output of summary.iolm}
+\item{object}{output of glmgen function}
 
 \item{lambda}{optional vector of lambda values to calculate coefficients
 at. If missing, will use break points in the fit.}

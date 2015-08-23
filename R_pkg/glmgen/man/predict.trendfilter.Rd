@@ -8,7 +8,7 @@
   lambda = NULL, x.new = NULL, zero_tol = 1e-06, ...)
 }
 \arguments{
-\item{object}{output of summary.iolm}
+\item{object}{output of trendfilter function}
 
 \item{type}{scale of the predictions}
 
@@ -18,7 +18,7 @@ at. If missing, will use break points in the fit.}
 \item{x.new}{vector of new x points. Set to NULL (the default) to use the
 original locations.}
 
-\item{zero_tol}{numerical tolerance parameter}
+\item{zero_tol}{numerical tolerance parameter, for determining whether a}
 
 \item{...}{optional, currently unused, arguments}
 }

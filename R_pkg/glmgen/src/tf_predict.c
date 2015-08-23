@@ -32,26 +32,26 @@
 /**
  * @brief Predict from the trendfilter fit at new values of x.
  *
- * @param beta                 the beta vector for the prediction; length n
- * @param x                    the original positions used in the fit
+ * @param x                    the original data positions used in the fit; length n
+ * @param beta                 the beta vector for the prediction
  * @param n                    number of observations
- * @param k                    order of the fit
+ * @param k                    polynomial degree of the fitted trend
  * @param family               family of the fit
  * @param x0                   the new positions to predict at
  * @param n0                   the number of observations in x0
  * @param pred                 allocated space for the predicted values
- * @param zero_tol             tolerance for the fitting algorithm; default is 1e-6
+ * @param zero_tol             tolerance for rounding a basis coefficient to zero
  * @return  void
  * @note The results will not be valid unless the values in x0 are within the range
  * of the original x inputs.
  */
-void tf_predict(double * beta, double * x, int n, int k, int family,
+void tf_predict(double * x, double * beta, int n, int k, int family,
                 double * x0, int n0, double * pred, double zero_tol)
 {
   int i;
   double f;
 
-  tf_predict_gauss(beta, x, n, k, x0, n0, pred, zero_tol);
+  tf_predict_gauss(x, beta, n, k, x0, n0, pred, zero_tol);
 
   switch (family)
   {
@@ -80,18 +80,18 @@ void tf_predict(double * beta, double * x, int n, int k, int family,
  * @brief Lower level function for predicting from a Gaussian loss function.
  * Generally called from tf_predict.
  *
- * @param beta                 the beta vector for the prediction; length n
- * @param x                    the original positions used in the fit
+ * @param x                    the original positions used in the fit; length n
+ * @param beta                 the beta vector for the prediction 
  * @param n                    number of observations
- * @param k                    order of the fit
+ * @param k                    polynomial degree of the fitted trend
  * @param x0                   the new positions to predict at
  * @param n0                   the number of observations in x0
  * @param pred                 allocated space for the predicted values
- * @param zero_tol             tolerance for the fitting algorithm; default is 1e-6
+ * @param zero_tol             tolerance for rounding a basis coefficient to zero
  * @return  void
  * @see tf_predict
  */
-void tf_predict_gauss(double * beta, double * x, int n, int k,
+void tf_predict_gauss(double * x, double * beta, int n, int k,
 		      double * x0, int n0, double * pred, double zero_tol)
 {
   int i;
@@ -106,7 +106,7 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
 
   /* Compute phi (polynomial coefficients) */
   phi = (double *)malloc((k+1)*sizeof(double));
-  poly_coefs(x,k,beta,phi);
+  poly_coefs(x,beta,k,phi);
 
   /* Compute theta (falling fact coefficients) */
   theta = (double *)malloc((n)*sizeof(double));
@@ -156,12 +156,12 @@ void tf_predict_gauss(double * beta, double * x, int n, int k,
  * Helper function to convert the beta vector into a polynomial.
  *
  * @param x                    the original positions used in the fit
- * @param k                    order of the fit
- * @param beta                 the beta vector for the prediction; length n
+ * @param beta                 the beta vector for the prediction
+ * @param k                    polynomial order of the fit
  * @param phi                  allocated memory of length k+1
  * @return  void
  */
-void poly_coefs(double *x, int k, double *beta, double *phi)
+void poly_coefs(double *x, double *beta, int k, double *phi)
 {
   int j;
   int ell;
