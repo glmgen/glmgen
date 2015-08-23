@@ -107,8 +107,8 @@ double pois_b1(double x);
 double pois_b2(double x);
 
 void thin(double* x, double* y, double* w,
-          int n, int k, double** xt, double** yt,
-          double** wt, int* nt_ptr, double x_cond);
+	int n, int k, double** xt, double** yt,
+	double** wt, int* nt_ptr, double x_cond);
 
 /* Utility functions for solving a linear system with a gqr object */
 gqr * glmgen_qr(const cs * A);
@@ -117,10 +117,10 @@ csi glmgen_gqr_free(gqr * A);
 
 /* Generic line search */
 double line_search(double * y, double * x, double * w, int n, int k, double lam,
-    func_RtoR b, func_RtoR b1,
-    double * beta, double * d,
-    double alpha, double gamma, int max_iter,
-    int * iter, double * Db, double * Dd);
+	func_RtoR b, func_RtoR b1,
+	double * beta, double * d,
+	double alpha, double gamma, int max_iter,
+	int * iter, double * Db, double * Dd);
 
 /* Custom implementation of balanced trees */
 void bt_insert (btnode** bt, int id, double val);
@@ -129,7 +129,7 @@ void bt_delete (btnode** bt, int id, double val);
 void bt_delete_inner (btnode **bt, int id);
 void bt_delete_found_node(btnode **bt, btnode **parent, btnode *x);
 void bt_search (btnode **bt, double val,
-    btnode **par, btnode **x, int *found);
+	btnode **par, btnode **x, int *found);
 void bt_find_min (btnode* bt, btnode** x);
 void bt_find_min_twice (btnode* bt, btnode** x);
 void bt_inorder (btnode* bt);
