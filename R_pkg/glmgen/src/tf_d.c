@@ -29,7 +29,7 @@
  * of these properties. Helper functions for doing so are collected here.
  */
 
- #include "tf.h"
+#include "tf.h"
 
 /**
  * @brief Creates the penalty matrix of order k.
@@ -76,12 +76,12 @@ cs * tf_calc_dk (int n, int k, const double * x)
   Dk->nz = (n-tk)*2;
   for (i = 0; i < (n-tk)*2; i++)
   {
-     D1->p[i] = (i+1) / 2;
-     Dk->p[i] = D1->p[i];
-     D1->i[i] = i / 2;
-     Dk->i[i] = D1->i[i];
-     D1->x[i] = -1 + 2*(i % 2);
-     Dk->x[i] = D1->x[i];
+    D1->p[i] = (i+1) / 2;
+    Dk->p[i] = D1->p[i];
+    D1->i[i] = i / 2;
+    Dk->i[i] = D1->i[i];
+    D1->x[i] = -1 + 2*(i % 2);
+    Dk->x[i] = D1->x[i];
   }
 
   /* Create a column compressed version of Dk, and
@@ -265,7 +265,7 @@ void tf_dtx(double *x, int n, int k, double *a, double *b)
   int j;
   double fact;
 
-  for(i=0; i < n; i++) b[i] = a[i];
+  for(i=0; i < n-k; i++) b[i] = a[i];
 
   if( k < 1 || k >= n )
     return;

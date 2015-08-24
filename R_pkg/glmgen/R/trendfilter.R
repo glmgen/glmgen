@@ -218,6 +218,7 @@ trendfilter = function(x, y, weights, k = 2L,
     m = length(y) - as.integer(k) - 1L, obj = z$obj,
     status = z$status, iter = z$iter, family=family, call = cl),
     class = c("trendfilter","glmgen"))
+
   out
 }
 

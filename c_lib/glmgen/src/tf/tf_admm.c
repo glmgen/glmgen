@@ -31,6 +31,8 @@
 #include "tf.h"
 #include "utils.h"
 
+#include <R_ext/Print.h>
+
 /**
  * @brief Default call to tf_admm.
  * Example of how to call tf_admm, taking only the response vector @p and
@@ -65,7 +67,7 @@ double * tf_admm_default(double * y, int n)
   double alpha_ls;
   double gamma_ls;
   int max_iter_ls;
-  int max_iter_newton;
+  int max_iter_inner;
   int verbose;
 
   /* Set default constants */
@@ -80,7 +82,7 @@ double * tf_admm_default(double * y, int n)
   alpha_ls = 0.5;
   gamma_ls = 0.8;
   max_iter_ls = 20;
-  max_iter_newton = 30;
+  max_iter_inner = 30;
   verbose = 0;
 
   /* Allocate space for input arrays */
@@ -103,7 +105,7 @@ double * tf_admm_default(double * y, int n)
   /* Initalize output arrays with 0's */
   for (i = 0; i < nlambda; i++)
   {
-    lambda[i] = 0; 
+    lambda[i] = 0;
     df[i] = 0;
     for (j = 0; j < n; j++) beta[i + j*nlambda] = 0;
     for (j = 0; j < max_iter; j++) obj[i + j*nlambda] = 0;
@@ -114,7 +116,7 @@ double * tf_admm_default(double * y, int n)
   tf_admm(x, y, w, n, k, family, max_iter, lam_flag, lambda,
           nlambda, lambda_min_ratio, df, beta, obj, iter,
           status, rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
-          max_iter_newton, verbose);
+          max_iter_inner, verbose);
 
   /* Free allocated arrays (except beta; which is returned) */
   free(x);
@@ -140,7 +142,7 @@ double * tf_admm_default(double * y, int n)
  * @param y                    a vector of responses
  * @param w                    a vector of sample weights
  * @param n                    the length of x, y, and w
- * @param k                    polynomial degree of the fitted trend; i.e., k=1 for linear 
+ * @param k                    polynomial degree of the fitted trend; i.e., k=1 for linear
  * @param family               family code for the type of fit; family=0 for OLS
  * @param max_iter             maximum number of ADMM interations; ignored for k=0
  * @param lam_flag             0/1 flag for whether lambda sequence needs to be estimated
@@ -158,17 +160,17 @@ double * tf_admm_default(double * y, int n)
  * @param alpha_ls             for family != 0, line search tuning parameter
  * @param gamma_ls             for family != 0, line search tuning parameter
  * @param max_iter_ls          for family != 0, max number of iterations in line search
- * @param max_iter_newton      for family != 0, max number of iterations in inner ADMM
+ * @param max_iter_inner       for family != 0, max number of iterations in inner ADMM
  * @param verbose              0/1 flag for printing progress
  * @return void
  * @see tf_admm_default
  */
-void tf_admm (double * x, double * y, double * w, int n, int k, int family,
-              int max_iter, int lam_flag, double * lambda,
-              int nlambda, double lambda_min_ratio, int * df,
-	      double * beta, double * obj, int * iter, int * status, 
-	      double rho, double obj_tol, double alpha_ls, double gamma_ls,
-              int max_iter_ls, int max_iter_newton, int verbose)
+void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
+	int max_iter, int lam_flag, double * lambda,
+	int nlambda, double lambda_min_ratio, int * df,
+	double * beta, double * obj, int * iter, int * status,
+	double rho, double obj_tol, double alpha_ls, double gamma_ls,
+	int max_iter_ls, int max_iter_inner, int verbose)
 {
   int i;
   int j;
@@ -209,13 +211,12 @@ void tf_admm (double * x, double * y, double * w, int n, int k, int family,
    */
   max_lam = tf_maxlam(n, y, Dt_qr, w);
   if (family == FAMILY_GAUSSIAN) {
-    if (max_lam <= 1e-10 * l1norm(y,n)/n) {		
+    if (max_lam <= 1e-10 * l1norm(y,n)/n) {
       for (i=0; i<nlambda; i++) {
-	for (j=0; j<n; j++) beta[i*n+j] = y[j];
-	obj[i*max_iter] = 0;
-	lambda[i] = 0;
+				for (j=0; j<n; j++) beta[i*n+j] = y[j];
+				obj[i*max_iter] = 0;
+				lambda[i] = 0;
       }
-      // TODO free stuff
       cs_spfree(D);
       cs_spfree(Dt);
       cs_spfree(Dk);
@@ -228,7 +229,7 @@ void tf_admm (double * x, double * y, double * w, int n, int k, int family,
       free(alpha);
       free(u);
       return;
-    }				
+    }
   }
   else {
     max_lam += 1;
@@ -240,7 +241,7 @@ void tf_admm (double * x, double * y, double * w, int n, int k, int family,
       lambda[i] = exp((log(max_lam) * (nlambda - i -1) + log(min_lam) * i) / (nlambda-1));
   }
   rho = rho * pow((x[n-1] - x[0])/n, (double)k);
-  
+
   /* Initiate alpha and u for a warm start */
   if (lambda[0] < max_lam * 1e-5)
   {
@@ -275,10 +276,10 @@ void tf_admm (double * x, double * y, double * w, int n, int k, int family,
     for (i = 0; i < n; i++) temp_n[i] = yc;
     double obj1 = tf_obj(x,y,w,n,k,max_lam,family,beta_max,alpha);
     double obj2 = tf_obj(x,y,w,n,k,max_lam,family,temp_n,alpha);
-    if(obj2 < obj1) {		
+    if(obj2 < obj1) {
       for (i = 0; i < n; i++) beta_max[i] = yc;
     }
-    
+
     /* alpha_max */
     tf_dxtil(x, n, k, beta_max, alpha);
 
@@ -323,21 +324,21 @@ void tf_admm (double * x, double * y, double * w, int n, int k, int family,
     {
       case FAMILY_GAUSSIAN:
         tf_admm_gauss(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
-		      alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], 
+		      alpha, u, obj+i*max_iter, iter+i, rho * lambda[i],
 		      obj_tol, DktDk, verbose);
         break;
 
       case FAMILY_LOGISTIC:
-        tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n, 
-		    alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol, 
-		    alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
-                    DktDk, &logi_b, &logi_b1, &logi_b2, verbose);
+        tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
+		    alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
+		    alpha_ls, gamma_ls, max_iter_ls, max_iter_inner,
+        DktDk, &logi_b, &logi_b1, &logi_b2, verbose);
         break;
 
       case FAMILY_POISSON:
-        tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n, 
-		    alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol, 
-		    alpha_ls, gamma_ls, max_iter_ls, max_iter_newton, 
+        tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
+		    alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
+		    alpha_ls, gamma_ls, max_iter_ls, max_iter_inner,
 		    DktDk, &pois_b, &pois_b1, &pois_b2, verbose);
         break;
     }
@@ -360,7 +361,7 @@ void tf_admm (double * x, double * y, double * w, int n, int k, int family,
       }
       for (j = 0; j < n; j++) beta[i*n + j] = yc;
       for (j = 0; j < n-k; j++) alpha[j] = 0;
-      for (j = 0; j < n; j++) u[j] = w[j] * (beta[i*n+j] - y[j]) / (rho * lambda[i]);	
+      for (j = 0; j < n; j++) u[j] = w[j] * (beta[i*n+j] - y[j]) / (rho * lambda[i]);
       glmgen_qrsol (Dkt_qr, u);
       status[i] = 1;
     }
@@ -408,10 +409,10 @@ void tf_admm (double * x, double * y, double * w, int n, int k, int family,
  * @see tf_admm
  */
 void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
-		    int max_iter, double lam, int * df,
-		    double * beta, double * alpha, double * u,
-		    double * obj, int * iter,
-		    double rho, double obj_tol, cs * DktDk, int verbose)
+	int max_iter, double lam, int * df,
+	double * beta, double * alpha, double * u,
+	double * obj, int * iter,
+	double rho, double obj_tol, cs * DktDk, int verbose)
 {
   int i;
   int d;
@@ -451,8 +452,8 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
   v = (double*) malloc(n*sizeof(double));
   z = (double*) malloc(n*sizeof(double));
 
-  if (verbose) printf("\nlambda=%0.3e\n",lam);
-  if (verbose) printf("Iteration\tObjective\n");
+  if (verbose) Rprintf("\nlambda=%0.3e\n",lam);
+  if (verbose) Rprintf("Iteration\tObjective\n");
 
   for (it=0; it < max_iter; it++)
   {
@@ -476,7 +477,7 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
 
     /* Compute objective */
     obj[it] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,z);
-    if (verbose) printf("%i\t%0.3e\n",it+1,obj[it]);
+    if (verbose) Rprintf("%i\t%0.3e\n",it+1,obj[it]);
 
     /* Stop if relative difference of objective values < obj_tol */
     if (it > 0 && (fabs(obj[it] - obj[it-1]) < fabs(obj[it-1]) * obj_tol)) break;
@@ -520,7 +521,7 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
  * @param alpha_ls             for family != 0, line search tuning parameter
  * @param gamma_ls             for family != 0, line search tuning parameter
  * @param max_iter_ls          for family != 0, max number of iterations in line search
- * @param max_iter_newton      for family != 0, max number of iterations in inner ADMM
+ * @param max_iter_inner      for family != 0, max number of iterations in inner ADMM
  * @param DktDk                pointer to the inner product of DktDk
  * @param b                    the link function for a given loss
  * @param b1                   first derivative of the link function for a given loss
@@ -530,13 +531,13 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
  * @see tf_admm
  */
 void tf_admm_glm (double * x, double * y, double * w, int n, int k,
-		  int max_iter, double lam, int * df, 
-		  double * beta, double * alpha, double * u,
-		  double * obj, int * iter,
-		  double rho, double obj_tol, double alpha_ls, double gamma_ls,
-		  int max_iter_ls, int max_iter_newton,
-		  cs * DktDk, func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
-{ 
+	int max_iter, double lam, int * df,
+	double * beta, double * alpha, double * u,
+	double * obj, int * iter,
+	double rho, double obj_tol, double alpha_ls, double gamma_ls,
+	int max_iter_ls, int max_iter_inner,
+	cs * DktDk, func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
+{
   double * dir; /* line search direction */
   double * yt;  /* working response: ytilde */
   double * H;   /* weighted Hessian */
@@ -551,22 +552,22 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
   double * Dd;
   double t; /* stepsize */
 
-  dir  = (double*) malloc(n*sizeof(double)); /* line search direction */
-  yt = (double*) malloc(n*sizeof(double));   /* working response: ytilde */
-  H  = (double*) malloc(n*sizeof(double));   /* weighted Hessian */
+  dir  = (double*) malloc(n*sizeof(double));
+  yt = (double*) malloc(n*sizeof(double));
+  H  = (double*) malloc(n*sizeof(double));
 
   /* Buffers for line search */
   Db      = (double *) malloc(n*sizeof(double));
   Dd      = (double *) malloc(n*sizeof(double));
   iter_ls = (int *)    malloc(sizeof(int));
 
-  obj_admm = (double*) malloc(max_iter*sizeof(double));
+  obj_admm = (double*) malloc(max_iter_inner*sizeof(double));
 
-  if (verbose) printf("\nlambda=%0.3e\n",lam);
-  if (verbose) printf("Iteration\tObjective\tADMM iters\n");
+  if (verbose) Rprintf("\nlambda=%0.3e\n",lam);
+  if (verbose) Rprintf("Iteration\tObjective\tADMM iters\n");
 
   /* One prox Newton step per iteration */
-  for (it=0; it < max_iter_newton; it++)
+  for (it=0; it < max_iter; it++)
   {
     /* Define weighted Hessian, and working response */
     for (i=0; i<n; i++)
@@ -578,37 +579,38 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
     /* Prox Newton step */
     iter_admm = 0;
-    tf_admm_gauss(x, yt, H, n, k, max_iter, lam, df, dir, alpha, u,
+    tf_admm_gauss(x, yt, H, n, k, max_iter_inner, lam, df, dir, alpha, u,
 		  obj_admm, &iter_admm, rho, obj_tol, DktDk, 0);
 
     /* Line search */
     for (i=0; i<n; i++) dir[i] = dir[i] - beta[i];
-    t = line_search(x, y, w, n, k, lam, b, b1, beta, dir, alpha_ls, gamma_ls, 
+    t = line_search(y, x, w, n, k, lam, b, b1, beta, dir, alpha_ls, gamma_ls,
 		    max_iter_ls, iter_ls, Db, Dd);
     for (i=0; i<n; i++) beta[i] = beta[i] + t * dir[i];
 
+		
     /* Compute objective */
     obj[it] = tf_obj_glm(x, y, w, n, k, lam, b, beta, yt);
-    if (verbose) printf("\t%i\t%0.3e\t%i\n",it+1,obj[it],iter_admm);
+    if (verbose) Rprintf("\t%i\t%0.3e\t%i\t%i\n",it+1,obj[it],iter_admm,*iter_ls);
 
     /* Stop if relative difference of objective values < obj_tol */
     if (it > 0 && (fabs(obj[it] - obj[it-1]) < fabs(obj[it-1]) * obj_tol)) break;
   }
 
   *iter = it;
-  
+
   /* Compute final df value, based on alpha */
   d = k+1;
   for (i=0; i<n-k; i++) if (alpha[i] != alpha[i+1]) d += 1;
   *df = d;
 
   /* Free everything */
-  free(d);
+  free(dir);
   free(yt);
   free(H);
-  free(iter_ls);
   free(Db);
   free(Dd);
+  free(iter_ls);
   free(obj_admm);
 }
 

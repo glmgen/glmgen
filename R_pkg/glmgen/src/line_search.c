@@ -29,6 +29,7 @@
 
 #include "tf.h"
 #include "math.h"
+#include "utils.h"
 
 /* backtracking linesearch. See Jason Lee et. al (2012)
  * f = g + h, g differentiable, h not necessarily so
@@ -93,6 +94,7 @@ double line_search(double * y, double * x, double * w, int n, int k, double lam,
     descent += lam * (norm_Dbn - norm_Db);
     bound = alpha * t * theta;
 
+    // printf("LINESEARCH %i\t%.3e\t%.3e\n", it, descent, bound);
     /* Check if the descent is sufficient */
     if (descent <= bound) break;
     else t = t * gamma;
