@@ -27,7 +27,7 @@
  * Here.
  */
 
- #include "tf.h"
+#include "tf.h"
 
 /**
  * @brief Implementation of Nick Johnson's dynamic programming algorithm
@@ -108,7 +108,7 @@ void tf_dp (int n, double *y, double lam, double *beta)
       blo += b[lo];
     }
 
-   /* Compute hi: step down from r until the
+    /* Compute hi: step down from r until the
        derivative is less than lam */
     ahi = alast;
     bhi = blast;
@@ -250,7 +250,7 @@ void tf_dp_weight (int n, double *y, double *w, double lam, double *beta)
       blo += b[lo];
     }
 
-   /* Compute hi: step down from r until the
+    /* Compute hi: step down from r until the
        derivative is less than lam */
     ahi = alast;
     bhi = blast;

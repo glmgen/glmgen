@@ -31,7 +31,7 @@
 #include <math.h>
 
 void thin( double* x, double* y, double* w, int n, int k,
-  double** xt, double** yt, double** wt, int* nt_ptr, double x_cond)
+    double** xt, double** yt, double** wt, int* nt_ptr, double x_cond)
 {
   int i,j, jj;
   int m;  /* number of intervals */

@@ -40,10 +40,10 @@
  * h(x) = lam |Dx|
  */
 double line_search(double * y, double * x, double * w, int n, int k, double lam,
-	func_RtoR b, func_RtoR b1,
-	double * beta, double * d,
-	double alpha, double gamma, int max_iter,
-	int * iter, double * Db, double * Dd)
+    func_RtoR b, func_RtoR b1,
+    double * beta, double * d,
+    double alpha, double gamma, int max_iter,
+    int * iter, double * Db, double * Dd)
 {
   int i;
   int it;
@@ -73,7 +73,7 @@ double line_search(double * y, double * x, double * w, int n, int k, double lam,
     grad_term += w[i] * (-y[i] + b1(beta[i])) * d[i];
   }
   theta += lam * ( norm_Dbn - norm_Db );
-	
+
   ip_yd = 0;
   for(i = 0; i < n; i++)
   {
@@ -94,7 +94,7 @@ double line_search(double * y, double * x, double * w, int n, int k, double lam,
     descent += lam * (norm_Dbn - norm_Db);
     bound = alpha * t * theta;
 
-		// printf("LINESEARCH %i\t%.3e\t%.3e\n", it, descent, bound);
+    // printf("LINESEARCH %i\t%.3e\t%.3e\n", it, descent, bound);
     /* Check if the descent is sufficient */
     if (descent <= bound) break;
     else t = t * gamma;

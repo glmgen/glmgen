@@ -114,9 +114,9 @@ double * tf_admm_default(double * y, int n)
   }
 
   tf_admm(x, y, w, n, k, family, max_iter, lam_flag, lambda,
-          nlambda, lambda_min_ratio, df, beta, obj, iter,
-          status, rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
-          max_iter_inner, verbose);
+      nlambda, lambda_min_ratio, df, beta, obj, iter,
+      status, rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
+      max_iter_inner, verbose);
 
   /* Free allocated arrays (except beta; which is returned) */
   free(x);
@@ -166,11 +166,11 @@ double * tf_admm_default(double * y, int n)
  * @see tf_admm_default
  */
 void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
-	int max_iter, int lam_flag, double * lambda,
-	int nlambda, double lambda_min_ratio, int * df,
-	double * beta, double * obj, int * iter, int * status,
-	double rho, double obj_tol, double alpha_ls, double gamma_ls,
-	int max_iter_ls, int max_iter_inner, int verbose)
+    int max_iter, int lam_flag, double * lambda,
+    int nlambda, double lambda_min_ratio, int * df,
+    double * beta, double * obj, int * iter, int * status,
+    double rho, double obj_tol, double alpha_ls, double gamma_ls,
+    int max_iter_ls, int max_iter_inner, int verbose)
 {
   int i;
   int j;
@@ -213,9 +213,9 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
   if (family == FAMILY_GAUSSIAN) {
     if (max_lam <= 1e-10 * l1norm(y,n)/n) {
       for (i=0; i<nlambda; i++) {
-				for (j=0; j<n; j++) beta[i*n+j] = y[j];
-				obj[i*max_iter] = 0;
-				lambda[i] = 0;
+        for (j=0; j<n; j++) beta[i*n+j] = y[j];
+        obj[i*max_iter] = 0;
+        lambda[i] = 0;
       }
       cs_spfree(D);
       cs_spfree(Dt);
@@ -265,13 +265,13 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
     for (i = 0; i < n; i++) sumw += w[i];
     yc /= sumw;
     switch(family) {
-    case FAMILY_POISSON:
-      yc = (yc > 0)? log(yc) : -DBL_MAX;
-      break;
-    case FAMILY_LOGISTIC:
-      yc = (yc > 0) ? ( yc < 1 ? log(yc/(1-yc)) : DBL_MAX) : -DBL_MAX;
-      break;
-    default: break;
+      case FAMILY_POISSON:
+        yc = (yc > 0)? log(yc) : -DBL_MAX;
+        break;
+      case FAMILY_LOGISTIC:
+        yc = (yc > 0) ? ( yc < 1 ? log(yc/(1-yc)) : DBL_MAX) : -DBL_MAX;
+        break;
+      default: break;
     }
     for (i = 0; i < n; i++) temp_n[i] = yc;
     double obj1 = tf_obj(x,y,w,n,k,max_lam,family,beta_max,alpha);
@@ -286,25 +286,25 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
     /* u_max */
     switch (family)
     {
-    case FAMILY_GAUSSIAN:
-      for (i = 0; i < n; i++) u[i] = w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
-      break;
+      case FAMILY_GAUSSIAN:
+        for (i = 0; i < n; i++) u[i] = w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
+        break;
 
-    case FAMILY_LOGISTIC:
-      for (i = 0; i < n; i++) {
-        u[i] = logi_b2(beta_max[i]) * w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
-      }
-      break;
+      case FAMILY_LOGISTIC:
+        for (i = 0; i < n; i++) {
+          u[i] = logi_b2(beta_max[i]) * w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
+        }
+        break;
 
-    case FAMILY_POISSON:
-      for (i = 0; i < n; i++) {
-        u[i] = pois_b2(beta_max[i]) * w[i] *(beta_max[i] - y[i]) / (rho * lambda[0]);
-      }
-      break;
+      case FAMILY_POISSON:
+        for (i = 0; i < n; i++) {
+          u[i] = pois_b2(beta_max[i]) * w[i] *(beta_max[i] - y[i]) / (rho * lambda[0]);
+        }
+        break;
 
-    default:
-      for (i = 0; i < nlambda; i++) status[i] = 2;
-      return;
+      default:
+        for (i = 0; i < nlambda; i++) status[i] = 2;
+        return;
     }
 
     glmgen_qrsol (Dkt_qr, u);
@@ -324,22 +324,22 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
     {
       case FAMILY_GAUSSIAN:
         tf_admm_gauss(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
-		      alpha, u, obj+i*max_iter, iter+i, rho * lambda[i],
-		      obj_tol, DktDk, verbose);
+            alpha, u, obj+i*max_iter, iter+i, rho * lambda[i],
+            obj_tol, DktDk, verbose);
         break;
 
       case FAMILY_LOGISTIC:
         tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
-		    alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-		    alpha_ls, gamma_ls, max_iter_ls, max_iter_inner,
-        DktDk, &logi_b, &logi_b1, &logi_b2, verbose);
+            alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
+            alpha_ls, gamma_ls, max_iter_ls, max_iter_inner,
+            DktDk, &logi_b, &logi_b1, &logi_b2, verbose);
         break;
 
       case FAMILY_POISSON:
         tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
-		    alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-		    alpha_ls, gamma_ls, max_iter_ls, max_iter_inner,
-		    DktDk, &pois_b, &pois_b1, &pois_b2, verbose);
+            alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
+            alpha_ls, gamma_ls, max_iter_ls, max_iter_inner,
+            DktDk, &pois_b, &pois_b1, &pois_b2, verbose);
         break;
     }
 
@@ -351,13 +351,13 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
       for (i = 0; i < n; i++) sumw += w[i];
       yc /= sumw;
       switch(family) {
-      case FAMILY_POISSON:
-	yc = (yc > 0) ? log(yc) : -DBL_MAX;
-	break;
-      case FAMILY_LOGISTIC:
-	yc = (yc > 0) ? ( yc < 1 ? log(yc/(1-yc)) : DBL_MAX) : -DBL_MAX;
-	break;
-      default: break;
+        case FAMILY_POISSON:
+          yc = (yc > 0) ? log(yc) : -DBL_MAX;
+          break;
+        case FAMILY_LOGISTIC:
+          yc = (yc > 0) ? ( yc < 1 ? log(yc/(1-yc)) : DBL_MAX) : -DBL_MAX;
+          break;
+        default: break;
       }
       for (j = 0; j < n; j++) beta[i*n + j] = yc;
       for (j = 0; j < n-k; j++) alpha[j] = 0;
@@ -409,10 +409,10 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
  * @see tf_admm
  */
 void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
-	int max_iter, double lam, int * df,
-	double * beta, double * alpha, double * u,
-	double * obj, int * iter,
-	double rho, double obj_tol, cs * DktDk, int verbose)
+    int max_iter, double lam, int * df,
+    double * beta, double * alpha, double * u,
+    double * obj, int * iter,
+    double rho, double obj_tol, cs * DktDk, int verbose)
 {
   int i;
   int d;
@@ -531,12 +531,12 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
  * @see tf_admm
  */
 void tf_admm_glm (double * x, double * y, double * w, int n, int k,
-	int max_iter, double lam, int * df,
-	double * beta, double * alpha, double * u,
-	double * obj, int * iter,
-	double rho, double obj_tol, double alpha_ls, double gamma_ls,
-	int max_iter_ls, int max_iter_inner,
-	cs * DktDk, func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
+    int max_iter, double lam, int * df,
+    double * beta, double * alpha, double * u,
+    double * obj, int * iter,
+    double rho, double obj_tol, double alpha_ls, double gamma_ls,
+    int max_iter_ls, int max_iter_inner,
+    cs * DktDk, func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
 {
   double * dir; /* line search direction */
   double * yt;  /* working response: ytilde */
@@ -580,15 +580,15 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
     /* Prox Newton step */
     iter_admm = 0;
     tf_admm_gauss(x, yt, H, n, k, max_iter_inner, lam, df, dir, alpha, u,
-		  obj_admm, &iter_admm, rho, obj_tol, DktDk, 0);
+        obj_admm, &iter_admm, rho, obj_tol, DktDk, 0);
 
     /* Line search */
     for (i=0; i<n; i++) dir[i] = dir[i] - beta[i];
     t = line_search(y, x, w, n, k, lam, b, b1, beta, dir, alpha_ls, gamma_ls,
-		    max_iter_ls, iter_ls, Db, Dd);
+        max_iter_ls, iter_ls, Db, Dd);
     for (i=0; i<n; i++) beta[i] = beta[i] + t * dir[i];
 
-		
+
     /* Compute objective */
     obj[it] = tf_obj_glm(x, y, w, n, k, lam, b, beta, yt);
     if (verbose) Rprintf("\t%i\t%0.3e\t%i\t%i\n",it+1,obj[it],iter_admm,*iter_ls);

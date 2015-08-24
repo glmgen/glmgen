@@ -27,7 +27,7 @@
  * for Gaussian losses. Will only be approximate for other loss functions.
  */
 
- #include "tf.h"
+#include "tf.h"
 
 /**
  * @brief Calculate maximum lambda value.

@@ -42,9 +42,9 @@ double get_control_value(SEXP sControlList, const char * param_name)
   {
     if (strcmp(CHAR(STRING_ELT(sControlListNames, i)), param_name) == 0)
     {
-     param_output = REAL(VECTOR_ELT(sControlList, i))[0];
-     okay_flag = 1;
-     break;
+      param_output = REAL(VECTOR_ELT(sControlList, i))[0];
+      okay_flag = 1;
+      break;
     }
   }
 
@@ -172,8 +172,8 @@ SEXP thin_R (SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sControl)
 }
 
 SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod,
-            SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio,
-            SEXP sVerbose, SEXP sControl )
+    SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio,
+    SEXP sVerbose, SEXP sControl )
 {
 
   /* Initialize all of the variables */
@@ -272,12 +272,12 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
       alpha_ls = get_control_value(sControl, "alpha_ls");
       gamma_ls = get_control_value(sControl, "gamma_ls");
       max_iter_ls = get_control_value(sControl, "max_iter_ls");
-		  max_iter_inner = get_control_value(sControl, "max_iter_inner");
+      max_iter_inner = get_control_value(sControl, "max_iter_inner");
 
       tf_admm(x, y, w, n, k, family, max_iter, lam_flag, lambda,
-              nlambda, lambda_min_ratio, df, beta, obj, iter, status,
-              rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
-              max_iter_inner, verbose);
+          nlambda, lambda_min_ratio, df, beta, obj, iter, status,
+          rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
+          max_iter_inner, verbose);
       break;
 
     default:
@@ -351,7 +351,7 @@ SEXP tf_predict_R (SEXP sX, SEXP sBeta, SEXP sN, SEXP sK, SEXP sX0, SEXP sN0,
 
   for (i = 0; i < nlambda; i++)
   {
-      tf_predict(x, beta+i*n, n, k, family, x0, n0, pred + n0*i, zero_tol);
+    tf_predict(x, beta+i*n, n, k, family, x0, n0, pred + n0*i, zero_tol);
   }
 
   /* Free the allocated objects for the gc and return the output */
@@ -360,9 +360,9 @@ SEXP tf_predict_R (SEXP sX, SEXP sBeta, SEXP sN, SEXP sK, SEXP sX0, SEXP sN0,
 }
 
 SEXP lattice_R (SEXP sY, SEXP sW, SEXP sWedge, SEXP sLambda, SEXP sRho,
-                SEXP sEps, SEXP sMaxiter, SEXP sVerbose, SEXP sNaflag,
-                SEXP sLatticeType, SEXP sMethodType,
-                SEXP sE, SEXP sC, SEXP sBeta0)
+    SEXP sEps, SEXP sMaxiter, SEXP sVerbose, SEXP sNaflag,
+    SEXP sLatticeType, SEXP sMethodType,
+    SEXP sE, SEXP sC, SEXP sBeta0)
 {
   int k;
   int n;
@@ -435,15 +435,15 @@ SEXP lattice_R (SEXP sY, SEXP sW, SEXP sWedge, SEXP sLambda, SEXP sRho,
   switch(lattice_type)
   {
     case LATTICE_2D_GRID:
-    break;
+      break;
 
     case LATTICE_HEX_GRID:
-    edge_length += (n-1)*(m-1)*p;
-    break;
+      edge_length += (n-1)*(m-1)*p;
+      break;
 
     case LATTICE_3D_GRID:
-    edge_length += n*m*(p-1);
-    break;
+      edge_length += n*m*(p-1);
+      break;
   }
 
   /* Allocate output and working buffers */
@@ -482,13 +482,13 @@ SEXP lattice_R (SEXP sY, SEXP sW, SEXP sWedge, SEXP sLambda, SEXP sRho,
   lambda[edge_length] = 1;
 
   do_lattice(y, w, n, m, p, max_iter, lambda, rho, eps,
-              verbose, naflag,
-              beta0, beta1, beta2, beta3,
-              thisy1, thisy2, thisy3, thisy4,
-              u1, u2, u3, u4,
-              E, c, d,
-              buff, abuff, wbuff,
-              lattice_type, method_type);
+      verbose, naflag,
+      beta0, beta1, beta2, beta3,
+      thisy1, thisy2, thisy3, thisy4,
+      u1, u2, u3, u4,
+      E, c, d,
+      buff, abuff, wbuff,
+      lattice_type, method_type);
 
   memcpy(output, beta0, sizeof(double) * n * m * p);
 
@@ -498,10 +498,10 @@ SEXP lattice_R (SEXP sY, SEXP sW, SEXP sWedge, SEXP sLambda, SEXP sRho,
 
 
 SEXP graph_fused_R (SEXP sY, SEXP sW, SEXP sEdge, SEXP sWedge,
-                SEXP sEdgeLen,
-                SEXP sLambda, SEXP sRho, SEXP sEps, SEXP sMaxiter,
-                SEXP sVerbose, SEXP sMethodType,
-                SEXP sE, SEXP sC, SEXP sBeta0)
+    SEXP sEdgeLen,
+    SEXP sLambda, SEXP sRho, SEXP sEps, SEXP sMaxiter,
+    SEXP sVerbose, SEXP sMethodType,
+    SEXP sE, SEXP sC, SEXP sBeta0)
 {
   int i;
   int k;
@@ -590,10 +590,10 @@ SEXP graph_fused_R (SEXP sY, SEXP sW, SEXP sEdge, SEXP sWedge,
   lambda[num_edge_index] = 1;
 
   do_fused_graph(y, w, e, elen, n, num_chains, max_iter,
-              lambda, rho, eps,
-              verbose, beta0, B, thisY, U, u4, E, c, d,
-              buff, abuff, wbuff, ebuff,
-              method_type);
+      lambda, rho, eps,
+      verbose, beta0, B, thisY, U, u4, E, c, d,
+      buff, abuff, wbuff, ebuff,
+      method_type);
 
   memcpy(output, beta0, sizeof(double) * n);
 
