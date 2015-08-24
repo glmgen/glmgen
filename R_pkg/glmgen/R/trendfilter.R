@@ -238,7 +238,7 @@ trendfilter = function(x, y, weights, k = 2L,
 #'  objective values is less than this value, the algorithm terminates.
 #' @param max_iter
 #'  number of ADMM iterations used; ignored for k=0.
-#' @param max_iter_inner
+#' @param max_iter_newton
 #'  for non-Gaussian GLM losses, the number of outer iterations used in Newton's method.
 #' @param x_cond
 #'  condition number to control the degree of thinning, when applicable. Lower numbers
@@ -266,11 +266,11 @@ trendfilter = function(x, y, weights, k = 2L,
 #'
 #' @export
 trendfilter.control.list = function(rho=1, obj_tol=1e-4, max_iter=200L,
-                                    max_iter_inner=30L, x_cond=1e11,
+                                    max_iter_newton=30L, x_cond=1e11,
                                     alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=20L) {
 
   z <- list(rho=rho, obj_tol=obj_tol, max_iter=max_iter,
-            max_iter_inner=max_iter_inner, x_cond=x_cond,
+            max_iter_newton=max_iter_newton, x_cond=x_cond,
             alpha_ls=alpha_ls, gamma_ls=gamma_ls,
             max_iter_ls=max_iter_ls)
   z

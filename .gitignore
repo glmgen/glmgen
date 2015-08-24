@@ -26,3 +26,5 @@
 # tar zips
 *.tar.gz
 
+test/
+todo_glm.txt

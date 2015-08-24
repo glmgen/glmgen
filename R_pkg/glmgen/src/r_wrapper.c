@@ -219,7 +219,8 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   double alpha_ls;
   double gamma_ls;
   int max_iter_ls;
-  int max_iter_inner;
+  int max_iter_newton;
+	int max_iter_outer;
 
   /* Convert input SEXP variables into C style variables */
   x = REAL(sX);
@@ -232,6 +233,8 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   family = asInteger(sFamily);
   method = asInteger(sMethod);
   max_iter = get_control_value(sControl, "max_iter");
+  max_iter_newton = get_control_value(sControl, "max_iter_newton");
+	max_iter_outer = (family == FAMILY_GAUSSIAN) ? max_iter : max_iter_newton;
   lam_flag = asInteger(sLamFlag);
   PROTECT(sLambdaNew = duplicate(sLambda));
   lambda = REAL(sLambda);
@@ -243,9 +246,9 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   PROTECT(sBeta = allocMatrix(REALSXP, n, nlambda));
   beta = REAL(sBeta);
 
-  PROTECT(sObj = allocMatrix(REALSXP, max_iter, nlambda));
+  PROTECT(sObj = allocMatrix(REALSXP, max_iter_outer, nlambda));
   obj = REAL(sObj);
-  for(i = 0; i < max_iter * nlambda; i++) obj[i] = 0;
+  for(i = 0; i < max_iter_outer * nlambda; i++) obj[i] = 0;
   PROTECT(sIter = allocVector(INTSXP, nlambda));
   iter = INTEGER(sIter);
   for(i = 0; i < nlambda; i++) iter[i] = 0;
@@ -272,12 +275,11 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
       alpha_ls = get_control_value(sControl, "alpha_ls");
       gamma_ls = get_control_value(sControl, "gamma_ls");
       max_iter_ls = get_control_value(sControl, "max_iter_ls");
-      max_iter_inner = get_control_value(sControl, "max_iter_inner");
 
       tf_admm(x, y, w, n, k, family, max_iter, lam_flag, lambda,
           nlambda, lambda_min_ratio, df, beta, obj, iter, status,
           rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
-          max_iter_inner, verbose);
+          max_iter_newton, verbose);
       break;
 
     default:
