@@ -100,7 +100,7 @@ SEXP thin_R (SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sControl)
   double * yt;
   double * wt;
   int nt;
-  double x_cond;
+  double x_tol;
 
   /* Initalize the output */
   SEXP sOutput;
@@ -115,7 +115,7 @@ SEXP thin_R (SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sControl)
   int * outputN;
 
   /* Grab condition number from the control list */
-  x_cond = get_control_value(sControl, "x_cond");
+  x_tol = get_control_value(sControl, "x_tol");
 
   /* Convert input SEXP variables into C style variables */
   x = REAL(sX);
@@ -125,7 +125,7 @@ SEXP thin_R (SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sControl)
   k = asInteger(sK);
 
   xt = yt = wt = NULL;
-  thin(x,y,w,n,k,&xt,&yt,&wt,&nt,x_cond);
+  thin(x,y,w,n,k,&xt,&yt,&wt,&nt,x_tol);
 
   if( xt != NULL )
   {
@@ -216,6 +216,7 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
 
   double rho;
   double obj_tol;
+  double obj_tol_newton;
   double alpha_ls;
   double gamma_ls;
   int max_iter_ls;
@@ -272,13 +273,14 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
     case TF_ADMM:
       rho = get_control_value(sControl, "rho");
       obj_tol = get_control_value(sControl, "obj_tol");
+      obj_tol_newton = get_control_value(sControl, "obj_tol_newton");
       alpha_ls = get_control_value(sControl, "alpha_ls");
       gamma_ls = get_control_value(sControl, "gamma_ls");
       max_iter_ls = get_control_value(sControl, "max_iter_ls");
 
       tf_admm(x, y, w, n, k, family, max_iter, lam_flag, lambda,
           nlambda, lambda_min_ratio, df, beta, obj, iter, status,
-          rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
+          rho, obj_tol, obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls,
           max_iter_newton, verbose);
       break;
 

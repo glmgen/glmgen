@@ -40,14 +40,14 @@ void tf_admm(double * x, double * y, double * w, int n, int k, int family,
 	     int max_iter, int lam_flag, double * lambda, 
 	     int nlambda, double lambda_min_ratio, int * df,
 	     double * beta, double * obj, int * iter, int * status, 
-	     double rho, double obj_tol, double alpha_ls, double gamma_ls,
-	     int max_iter_ls, int max_inner_iter, int verbose);
+	     double rho, double obj_tol, double obj_tol_newton, double alpha_ls,
+	     double gamma_ls, int max_iter_ls, int max_inner_iter, int verbose);
 
 void tf_predict(double * x, double * beta, int n, int k, int family,
 		double * x0, int n0, double * pred, double zero_tol);
 
 void thin(double* x, double* y, double* w, int n, int k,
-	  double** xt, double** yt, double** wt, int* nt_ptr, double x_cond);
+	  double** xt, double** yt, double** wt, int* nt_ptr, double x_tol);
 
 void do_lattice(double *y, double *w, int n, int m, int p, int max_iter,
 		double lambda, double rho, double eps,

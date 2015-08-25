@@ -27,7 +27,7 @@
  * the algorithm used for calculating the fit.
  */
 
- #include "tf.h"
+#include "tf.h"
 
 /**
  * @brief Predict from the trendfilter fit at new values of x.
@@ -46,7 +46,7 @@
  * of the original x inputs.
  */
 void tf_predict(double * x, double * beta, int n, int k, int family,
-                double * x0, int n0, double * pred, double zero_tol)
+    double * x0, int n0, double * pred, double zero_tol)
 {
   int i;
   double f;
@@ -92,7 +92,7 @@ void tf_predict(double * x, double * beta, int n, int k, int family,
  * @see tf_predict
  */
 void tf_predict_gauss(double * x, double * beta, int n, int k,
-		      double * x0, int n0, double * pred, double zero_tol)
+    double * x0, int n0, double * pred, double zero_tol)
 {
   int i;
   int j;
@@ -138,11 +138,11 @@ void tf_predict_gauss(double * x, double * beta, int n, int k,
       /* Otherwise check the ith coef, and if it is nonzero,
        * compute the contribution of the ith basis function */
       if (theta[i]!=0) {
-	h = 1;
-	for (l=0; l<k; l++) {
-	  h *= (x0[j]-x[i+l+1]);
-	}
-	pred[j] += theta[i]*h;
+        h = 1;
+        for (l=0; l<k; l++) {
+          h *= (x0[j]-x[i+l+1]);
+        }
+        pred[j] += theta[i]*h;
       }
     }
   }

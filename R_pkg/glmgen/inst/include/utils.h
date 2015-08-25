@@ -108,7 +108,7 @@ double pois_b2(double x);
 
 void thin(double * x, double * y, double * w,
 	int n, int k, double ** xt, double ** yt,
-	double ** wt, int * nt_ptr, double x_cond);
+	double ** wt, int * nt_ptr, double tol);
 
 /* Utility functions for solving a linear system with a gqr object */
 gqr * glmgen_qr(const cs * A);

@@ -83,7 +83,7 @@ trendfilter = function(x, y, weights, k = 2L,
                        method = c("admm"),
                        lambda, nlambda = 50L, lambda.min.ratio = 1e-5,
                        thinning = NULL, verbose = FALSE,
-                       control = trendfilter.control.list()) {
+                       control = trendfilter.control.list(x_tol=1e-6*IQR(x))) {
 
   cl = match.call()
   family = match.arg(family)
@@ -120,13 +120,13 @@ trendfilter = function(x, y, weights, k = 2L,
   if (!is.null(thinning) && !thinning && any(is.infinite(cond))) {
     stop("Cannot pass duplicate x values; use observation weights, or turn on thinning.")
   }
-  if( !is.null(thinning) && !thinning && cond > control$x_cond ) {
+  if( !is.null(thinning) && !thinning && cond > control$x_tol ) {
     warning("The x values are ill-conditioned. Consider thinning. \nSee ?trendfilter for more info.")
   }
 
   # Thin the input data:
   if (is.null(thinning)) {
-    if (cond > control$x_cond) {
+    if (cond > control$x_tol) {
       thinning = TRUE
     } else {
       thinning = FALSE
@@ -240,7 +240,7 @@ trendfilter = function(x, y, weights, k = 2L,
 #'  number of ADMM iterations used; ignored for k=0.
 #' @param max_iter_newton
 #'  for non-Gaussian GLM losses, the number of outer iterations used in Newton's method.
-#' @param x_cond
+#' @param x_tol
 #'  condition number to control the degree of thinning, when applicable. Lower numbers
 #'  enforce more thinning.
 #' @param alpha_ls
@@ -265,13 +265,14 @@ trendfilter = function(x, y, weights, k = 2L,
 #'  out = trendfilter(x, y, k=2, control=trendfilter.control.list(rho=3))
 #'
 #' @export
-trendfilter.control.list = function(rho=1, obj_tol=1e-4, max_iter=200L,
-                                    max_iter_newton=30L, x_cond=1e11,
-                                    alpha_ls=0.5, gamma_ls=0.8, max_iter_ls=20L) {
+trendfilter.control.list = function(rho=1, obj_tol=1e-6, obj_tol_newton=obj_tol,
+																		max_iter=500L, max_iter_newton=50L, 
+																		x_tol=1e-6, alpha_ls=0.5, gamma_ls=0.9,
+																		max_iter_ls=20L) {
 
-  z <- list(rho=rho, obj_tol=obj_tol, max_iter=max_iter,
-            max_iter_newton=max_iter_newton, x_cond=x_cond,
-            alpha_ls=alpha_ls, gamma_ls=gamma_ls,
+  z <- list(rho=rho, obj_tol=obj_tol, obj_tol_newton=obj_tol_newton,
+						max_iter=max_iter, max_iter_newton=max_iter_newton, 
+						x_tol=x_tol, alpha_ls=alpha_ls, gamma_ls=gamma_ls,
             max_iter_ls=max_iter_ls)
   z
 }

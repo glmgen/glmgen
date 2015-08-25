@@ -64,6 +64,7 @@ double * tf_admm_default(double * y, int n)
   int * status;
   double rho;
   double obj_tol;
+  double obj_tol_newton;
   double alpha_ls;
   double gamma_ls;
   int max_iter_ls;
@@ -74,16 +75,16 @@ double * tf_admm_default(double * y, int n)
   /* Set default constants */
   k = 2;
   family = FAMILY_GAUSSIAN;
-  max_iter = 200;
+  max_iter = 500;
   lam_flag = 0;
   nlambda = 50;
   lambda_min_ratio = 1e-5;
   rho = 1;
-  obj_tol = 1e-4;
+  obj_tol = 1e-6;
   alpha_ls = 0.5;
-  gamma_ls = 0.8;
+  gamma_ls = 0.9;
   max_iter_ls = 20;
-  max_iter_newton = 30;
+  max_iter_newton = 50;
   verbose = 0;
 
 	max_iter_outer = (family == FAMILY_GAUSSIAN) ? max_iter : max_iter_newton;
@@ -118,7 +119,7 @@ double * tf_admm_default(double * y, int n)
 
   tf_admm(x, y, w, n, k, family, max_iter, lam_flag, lambda,
       nlambda, lambda_min_ratio, df, beta, obj, iter,
-      status, rho, obj_tol, alpha_ls, gamma_ls, max_iter_ls,
+      status, rho, obj_tol, obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls,
       max_iter_newton, verbose);
 
   /* Free allocated arrays (except beta; which is returned) */
@@ -160,6 +161,7 @@ double * tf_admm_default(double * y, int n)
  * @param status               allocated space of size nlambda to store the status of each run
  * @param rho                  tuning parameter for the ADMM algorithm
  * @param obj_tol              stopping criteria tolerance
+ * @param obj_tol_newton       for family != 0, stopping criteria tolerance for prox Newton
  * @param alpha_ls             for family != 0, line search tuning parameter
  * @param gamma_ls             for family != 0, line search tuning parameter
  * @param max_iter_ls          for family != 0, max number of iterations in line search
@@ -172,7 +174,7 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
     int max_iter, int lam_flag, double * lambda,
     int nlambda, double lambda_min_ratio, int * df,
     double * beta, double * obj, int * iter, int * status,
-    double rho, double obj_tol, double alpha_ls, double gamma_ls,
+    double rho, double obj_tol, double obj_tol_newton, double alpha_ls, double gamma_ls,
     int max_iter_ls, int max_iter_newton, int verbose)
 {
   int i;
@@ -294,16 +296,19 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
       case FAMILY_LOGISTIC:
         tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
             alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-            alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
+            obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
             DktDk, &logi_b, &logi_b1, &logi_b2, verbose);
         break;
 
       case FAMILY_POISSON:
         tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
             alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-            alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
+            obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
             DktDk, &pois_b, &pois_b1, &pois_b2, verbose);
         break;
+			default:
+				printf("Unknown family, stopping calculation.\n");
+				status[i] = 2;
     }
 
     /* If there any NaNs in beta: reset beta, alpha, u */
@@ -477,7 +482,8 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
  * @param iter                 allocated space to store the number of iterations; will fill just one element
  * @param status               allocated space of size nlambda to store the status of each run
  * @param rho                  tuning parameter for the ADMM algorithm; set to 1 for default
- * @param obj_tol              stopping criteria tolerance; set to 1e-10 for default
+ * @param obj_tol              stopping criteria tolerance; set to 1e-6 for default
+ * @param obj_tol_newton       for family != 0, stopping criteria tolerance for prox Newton
  * @param alpha_ls             for family != 0, line search tuning parameter
  * @param gamma_ls             for family != 0, line search tuning parameter
  * @param max_iter_ls          for family != 0, max number of iterations in line search
@@ -494,8 +500,8 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
     int max_iter, double lam, int * df,
     double * beta, double * alpha, double * u,
     double * obj, int * iter,
-    double rho, double obj_tol, double alpha_ls, double gamma_ls,
-    int max_iter_ls, int max_iter_newton,
+    double rho, double obj_tol, double obj_tol_newton, 
+		double alpha_ls, double gamma_ls, int max_iter_ls, int max_iter_newton,
     cs * DktDk, func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
 {
   double * dir; /* line search direction */
@@ -553,7 +559,8 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
     if (verbose) Rprintf("\t%i\t%0.3e\t%i\t%i\n",it+1,obj[it],iter_admm,*iter_ls);
 
     /* Stop if relative difference of objective values < obj_tol */
-    if (it > 0 && (fabs(obj[it] - obj[it-1]) < fabs(obj[it-1]) * obj_tol)) break;
+    if (it > 0 && (fabs(obj[it] - obj[it-1]) < 
+									 fabs(obj[it-1]) * obj_tol_newton)) break;
   }
 
   *iter = it;

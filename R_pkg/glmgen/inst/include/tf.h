@@ -43,11 +43,11 @@
 double * tf_admm_default(double * y, int n);
 
 void tf_admm(double * x, double * y, double * w, int n, int k, int family,
-	     int max_iter, int lam_flag, double * lambda,
+	     int max_iter, int lam_flag, double * lambda, 
 	     int nlambda, double lambda_min_ratio, int * df,
-	     double * beta, double * obj, int * iter, int * status,
-	     double rho, double obj_tol, double alpha_ls, double gamma_ls,
-	     int max_iter_ls, int max_iter_newton, int verbose);
+	     double * beta, double * obj, int * iter, int * status, 
+	     double rho, double obj_tol, double obj_tol_newton, double alpha_ls,
+	     double gamma_ls, int max_iter_ls, int max_inner_iter, int verbose);
 
 void tf_admm_gauss(double * x, double * y, double * w, int n, int k,
 		   int max_iter, double lam, int * df,
@@ -59,8 +59,8 @@ void tf_admm_glm(double * x, double * y, double * w, int n, int k,
 		 int max_iter, double lam, int * df,
 		 double * beta, double * alpha, double * u,
 		 double * obj, int * iter,
-		 double rho, double obj_tol, double alpha_ls, double gamma_ls,
-		 int max_iter_ls, int max_iter_newton,
+		 double rho, double obj_tol, double obj_tol_newton, double alpha_ls,
+		 double gamma_ls, int max_iter_ls, int max_iter_newton,
 		 cs * DktDk, func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose);
 
 /* Dynamic programming routines */

@@ -4,25 +4,25 @@
 /*   Buffer buf should be big enough to hold D^{x,k+1} beta. */
 
 double tf_obj(double *x, double *y, double *w, int n, int k, double lambda, 
-	      int family, double *beta, double *buf) {
+    int family, double *beta, double *buf) {
 
   switch (family)
-    {
+  {
     case FAMILY_GAUSSIAN:
       return tf_obj_gauss(x,y,w,n,k,lambda,beta,buf);
-      
+
     case FAMILY_LOGISTIC:
       return tf_obj_glm(x,y,w,n,k,lambda,&logi_b,beta,buf);
 
     case FAMILY_POISSON:
       return tf_obj_glm(x,y,w,n,k,lambda,&pois_b,beta,buf);
-    }
-  
+  }
+
   return 0;
 }
 
 double tf_obj_gauss(double *x, double *y, double *w, int n, int k, double lambda, 
-		    double *beta, double *buf) {
+    double *beta, double *buf) {
 
   int i;
   double loss, pen;
@@ -37,7 +37,7 @@ double tf_obj_gauss(double *x, double *y, double *w, int n, int k, double lambda
 }
 
 double tf_obj_glm(double *x, double *y, double *w, int n, int k, double lambda, 
-		  func_RtoR b, double *beta, double *buf) {
+    func_RtoR b, double *beta, double *buf) {
   int i;
   double loss, pen;
 

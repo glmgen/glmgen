@@ -33,8 +33,7 @@ double glmgen_factorial(int n)
   int i=0;
   double x=1;
 
-  for(i=2; i<=n; i++)
-  {
+  for (i=2; i<=n; i++) {
     x *= i;
   }
   return x;
@@ -48,7 +47,7 @@ int count_nans(double * x, int n) {
   int i;
   int num_nans = 0;
 
-  for(i=0; i < n; i++) {
+  for (i=0; i < n; i++) {
     num_nans += is_nan(x[i]);
   }
   return num_nans;
@@ -56,8 +55,8 @@ int count_nans(double * x, int n) {
 
 int has_nan(double * x, int n) {
   int i;
-  for(i=0; i < n; i++) {
-    if(is_nan(x[i]))
+  for (i=0; i < n; i++) {
+    if (is_nan(x[i]))
       return 1;
   }
   return 0;
@@ -67,9 +66,7 @@ double l1norm(double * x, int n) {
   int i;
   double s;
   s = 0;
-  for(i=0; i < n; i++)
-    s += fabs(x[i]);
-
+  for (i=0; i < n; i++) s += fabs(x[i]);
   return s;
 }
 
@@ -152,3 +149,45 @@ cs * scalar_plus_diag (const cs * A, double b, double *D)
 
   return B;
 }
+
+
+void genInLogspace( double maxval, double minratio, int nvals, double * out)
+{
+	int i;
+	double minval;
+
+  minval = maxval * minratio;
+  out[0] = maxval;
+  for (i = 1; i < nvals; i++)
+    out[i] = exp((log(maxval) * (nvals-i-1) + log(minval) * i) / (nvals-1));	
+} 
+
+double weighted_mean(double * y, double * w, int n) 
+{
+	double yc;
+	double sumw;
+	int i;
+	yc = sumw = 0;
+
+	for (i = 0; i < n; i++) yc += w[i] * y[i];
+	for (i = 0; i < n; i++) sumw += w[i];
+	yc /= sumw;
+
+	return yc;
+}
+
+void calc_beta_max(double * y, double * w, int n, gqr * Dt_qr, cs * Dt,
+	double * temp_n, double * beta_max)
+{
+	int i;	
+  for (i = 0; i < n; i++) 
+		temp_n[i] = sqrt(w[i]) * y[i];
+  glmgen_qrsol (Dt_qr, temp_n);
+  for (i = 0; i < n; i++) 
+		beta_max[i] = 0;
+  cs_gaxpy(Dt, temp_n, beta_max);
+  /* Dt has a W^{-1/2}, so in the next step divide by sqrt(w) instead of w. */
+  for (i = 0; i < n; i++) 
+		beta_max[i] = y[i] - beta_max[i]/sqrt(w[i]);
+}
+

@@ -30,14 +30,25 @@
 #include <stdio.h>
 #include <math.h>
 
-void thin( double* x, double* y, double* w, int n, int k,
+void thin_old( double* x, double* y, double* w, int n, int k,
     double** xt, double** yt, double** wt, int* nt_ptr, double x_cond)
 {
-  int i,j, jj;
+  double r;
+  double delta;
+
+  r = x[n-1] - x[0];
+  delta = r * pow( n*x_cond, -1./(k+1) );
+
+	thin(x,y,w,n,k,xt,yt,wt,nt_ptr,delta);
+}
+
+void thin( double* x, double* y, double* w, int n, int k,
+    double** xt, double** yt, double** wt, int* nt_ptr, double tol)
+{
+	int i,j, jj;
   int m;  /* number of intervals */
   int nt; /* number of intervals with at least one point */
   double r;
-  double delta;
   double mindx;
   int * intvl;
   int intvl_xj;
@@ -46,27 +57,25 @@ void thin( double* x, double* y, double* w, int n, int k,
   int cur_intvl;
 
   r = x[n-1] - x[0];
-  delta = r * pow( n*x_cond, -1./(k+1) );
 
+	// Do not thin if minimum separation of x(mindx) is >= tol
   mindx = r;
   for(i = 0; i < n-1; i++)
     mindx = MIN(x[i+1] - x[i], mindx);
 
   *xt = *yt = *wt = NULL;
 
-  if( mindx >= delta ) return;
-
-  m = (int) MIN( floor(r/delta), 5*n );
-  delta = r/m;
-
-  if( m <= 1 ) return; /* Not thinning as it merges all points into one */
+  if( mindx >= tol ) return;
+	
+  m = (int) MAX(1, floor(r/tol));	
+  tol = r/m;
 
   intvl = (int*)malloc( n * sizeof(int) );
 
   nt = 0;
   for(j = 0; j < n; j++)
   {
-    intvl_xj = (int) floor( (x[j]-x[0]) / delta ) + 1;
+    intvl_xj = (int) floor( (x[j]-x[0]) / tol ) + 1;
     intvl[j] = MAX(1, MIN(intvl_xj, m));
 
     if( j == 0 || intvl[j] != intvl[j-1] ) nt++;
@@ -88,7 +97,7 @@ void thin( double* x, double* y, double* w, int n, int k,
     if( intvl[j] > cur_intvl ) /* crossed the current interval */
     {
       hi = j-1;
-      (*xt)[i] = x[0] + (cur_intvl - 0.5) * delta;
+      (*xt)[i] = x[0] + (cur_intvl - 0.5) * tol;
 
       (*wt)[i] = (*yt)[i] = 0.;
       for( jj = lo; jj <= hi; jj++)
@@ -106,7 +115,7 @@ void thin( double* x, double* y, double* w, int n, int k,
     {
       i = nt - 1;
       hi = n-1;
-      (*xt)[i] = x[0] + (m - 0.5) * delta;
+      (*xt)[i] = x[0] + (m - 0.5) * tol;
 
       (*wt)[i] = (*yt)[i] = 0.;
       for( jj = lo; jj <= hi; jj++)
