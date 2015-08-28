@@ -116,7 +116,7 @@ trendfilter = function(x, y, weights, k = 2L,
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
   if (k >= 3) warning("Large k leads to generally worse conditioning; k=0,1,2 are the most stable choices.")
 
-	thin_required = (min(diff(x)) < 1e-6*IQR(x))
+  thin_required = (min(diff(x)) < 1e-6*IQR(x))
   if (!is.null(thinning) && !thinning && min(diff(x)) == 0) {
     stop("Cannot pass duplicate x values; use observation weights, or turn on thinning.")
   }
@@ -133,8 +133,7 @@ trendfilter = function(x, y, weights, k = 2L,
     }
   }
 
-  if (thinning) {
-		print("trendfilter.R: Thinning ********\n")
+  if (thinning) {		
     z = .Call("thin_R",
       sX = as.double(x),
       sY = as.double(y),
@@ -187,31 +186,6 @@ trendfilter = function(x, y, weights, k = 2L,
 
   if (is.null(z)) stop("Unspecified error in C code.")
   colnames(z$beta) = as.character(round(z$lambda, 3))
-
-  ## if (is.null(z$obj)) z$obj = NA_real_ ## Why is this here??
-## # Put back the order in which x,y,weights were given.
-## # When thinning reduces the number of points, do not put back the order
-##   beta = z$beta
-##   if( n == length(ord) ){
-##     iord = order(ord)
-##     y = y[iord]
-##     x = x[iord]
-##     weights = weights[iord]
-##     beta = matrix(beta[iord,], nrow=n)
-##   } else {
-##   # get beta by prediction
-##     beta = .Call("tf_predict_R",
-##       sX = as.double(x),
-##       sBeta = as.double(z$beta),
-##       sN = length(x),
-##       sK = as.integer(k),
-##       sX0 = as.double(orig_x),
-##       sN0 = length(orig_x),
-##       sNLambda = length(lambda),
-##       sFamily = family_cd,
-##       PACKAGE = "glmgen")
-##     beta = matrix(beta, nrow=n)
-##   }
 
   out = structure(list(y = y, x = x, weights = weights, k = as.integer(k),
     lambda = z$lambda, df = z$df, beta = z$beta, family = family,
