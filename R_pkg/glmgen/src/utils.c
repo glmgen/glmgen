@@ -112,12 +112,12 @@ void diag_times_sparse (const cs * A, double * w)
   int j;
 
   for (j = 0; j < A->n; j++)
-  {
-    for (i = A->p[j] ; i < A->p[j+1] ; i++)
     {
-      A->x[i] *= w[ A->i[i] ];
+      for (i = A->p[j] ; i < A->p[j+1] ; i++)
+	{
+	  A->x[i] *= w[ A->i[i] ];
+	}
     }
-  }
 
 }
 
@@ -132,29 +132,28 @@ cs * scalar_plus_diag (const cs * A, double b, double *D)
   B = cs_spalloc(A->m, A->n, A->nzmax, 1, 0);
 
   for (j = 0; j < A->n; j++)
-  {
-    B->p[j] = A->p[j];
-    for (i = A->p[j] ; i < A->p[j+1] ; i++)
     {
-      if(A->i[i] == j)
-      {
-        B->x[i] = b * A->x[i] + D[j];
-      } else {
-        B->x[i] = b * A->x[i];
-      }
-      B->i[i] = A->i[i];
+      B->p[j] = A->p[j];
+      for (i = A->p[j] ; i < A->p[j+1] ; i++)
+	{
+	  if(A->i[i] == j)
+	    {
+	      B->x[i] = b * A->x[i] + D[j];
+	    } else {
+	    B->x[i] = b * A->x[i];
+	  }
+	  B->i[i] = A->i[i];
+	}
     }
-  }
   B->p[j] = A->p[j];
 
   return B;
 }
 
-
-void genInLogspace( double maxval, double minratio, int nvals, double * out)
+void seq_logspace(double maxval, double minratio, int nvals, double * out)
 {
-	int i;
-	double minval;
+  int i;
+  double minval;
 
   minval = maxval * minratio;
   out[0] = maxval;
@@ -164,30 +163,30 @@ void genInLogspace( double maxval, double minratio, int nvals, double * out)
 
 double weighted_mean(double * y, double * w, int n) 
 {
-	double yc;
-	double sumw;
-	int i;
-	yc = sumw = 0;
+  double yc;
+  double sumw;
+  int i;
+  yc = sumw = 0;
 
-	for (i = 0; i < n; i++) yc += w[i] * y[i];
-	for (i = 0; i < n; i++) sumw += w[i];
-	yc /= sumw;
+  for (i = 0; i < n; i++) yc += w[i] * y[i];
+  for (i = 0; i < n; i++) sumw += w[i];
+  yc /= sumw;
 
-	return yc;
+  return yc;
 }
 
 void calc_beta_max(double * y, double * w, int n, gqr * Dt_qr, cs * Dt,
-	double * temp_n, double * beta_max)
+		   double * temp_n, double * beta_max)
 {
-	int i;	
+  int i;	
   for (i = 0; i < n; i++) 
-		temp_n[i] = sqrt(w[i]) * y[i];
+    temp_n[i] = sqrt(w[i]) * y[i];
   glmgen_qrsol (Dt_qr, temp_n);
   for (i = 0; i < n; i++) 
-		beta_max[i] = 0;
+    beta_max[i] = 0;
   cs_gaxpy(Dt, temp_n, beta_max);
   /* Dt has a W^{-1/2}, so in the next step divide by sqrt(w) instead of w. */
   for (i = 0; i < n; i++) 
-		beta_max[i] = y[i] - beta_max[i]/sqrt(w[i]);
+    beta_max[i] = y[i] - beta_max[i]/sqrt(w[i]);
 }
 
