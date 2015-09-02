@@ -100,7 +100,7 @@ predict.trendfilter = function (object, type = c("link", "response"),
     sNLambda = length(lambda),
     sFamily = family_cd,
     sZeroTol = as.double(zero_tol),
-    package = "glmgen")
+    PACKAGE = "glmgen")
 
   z = matrix(z, ncol=ncol(co), dimnames=list(NULL, colnames(co)))
   return(z)
