@@ -285,43 +285,43 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
     for(j = 0; j < n; j++) beta[i*n + j] = beta_init[j];
 
     switch (family) {
-    case FAMILY_GAUSSIAN:
-      tf_admm_gauss(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
-		    alpha, u, obj+i*max_iter, iter+i, rho * lambda[i],
-		    obj_tol, DktDk, verbose);
-      break;
-      
-    case FAMILY_LOGISTIC:
-      tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
-		  alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-		  obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
-		  DktDk, &logi_b, &logi_b1, &logi_b2, verbose);
-      break;
-      
-    case FAMILY_POISSON:
-      tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
-		  alpha, u, obj+i*max_iter, iter+i, rho * lambda[i], obj_tol,
-		  obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
-		  DktDk, &pois_b, &pois_b1, &pois_b2, verbose);
-      break;
-      
-    default:
-      printf("Unknown family, stopping calculation.\n");
-      status[i] = 2;
+      case FAMILY_GAUSSIAN:
+        tf_admm_gauss(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
+            alpha, u, obj+i*max_iter, iter+i, rho * lambda[i],
+            obj_tol, DktDk, verbose);
+        break;
+
+      case FAMILY_LOGISTIC:
+        tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
+            alpha, u, obj+i*max_iter_newton, iter+i, rho * lambda[i], obj_tol,
+            obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
+            DktDk, &logi_b, &logi_b1, &logi_b2, verbose);
+        break;
+
+      case FAMILY_POISSON:
+        tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
+            alpha, u, obj+i*max_iter_newton, iter+i, rho * lambda[i], obj_tol,
+            obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
+            DktDk, &pois_b, &pois_b1, &pois_b2, verbose);
+        break;
+
+      default:
+        printf("Unknown family, stopping calculation.\n");
+        status[i] = 2;
     }
-    
+
     /* If there any NaNs in beta: reset beta, alpha, u */
     if (has_nan(beta + i*n, n))
     {
       double yc = weighted_mean(y,w,n);
       switch(family) {
-      case FAMILY_POISSON:
-	yc = (yc > 0) ? log(yc) : -DBL_MAX;
-	break;
-      case FAMILY_LOGISTIC:
-	yc = (yc > 0) ? ( yc < 1 ? log(yc/(1-yc)) : DBL_MAX) : -DBL_MAX;
-	break;
-      default: break;
+        case FAMILY_POISSON:
+          yc = (yc > 0) ? log(yc) : -DBL_MAX;
+          break;
+        case FAMILY_LOGISTIC:
+          yc = (yc > 0) ? ( yc < 1 ? log(yc/(1-yc)) : DBL_MAX) : -DBL_MAX;
+          break;
+        default: break;
       }
       for (j = 0; j < n; j++) beta[i*n + j] = yc;
       for (j = 0; j < n-k; j++) alpha[j] = 0;
@@ -339,8 +339,8 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
   glmgen_gqr_free(Dt_qr);
   glmgen_gqr_free(Dkt_qr);
 
-  free(temp_n);
   free(beta_max);
+  free(temp_n);
   free(alpha);
   free(u);
 }
@@ -416,8 +416,8 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
   v = (double*) malloc(n*sizeof(double));
   z = (double*) malloc(n*sizeof(double));
 
-  if (verbose) Rprintf("\nlambda=%0.3e\n",lam);
-  if (verbose) Rprintf("Iteration\tObjective\n");
+  if (verbose) printf("\nlambda=%0.3e\n",lam);
+  if (verbose) printf("Iteration\tObjective\n");
 
   for (it=0; it < max_iter; it++)
   {
@@ -441,7 +441,7 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
 
     /* Compute objective */
     obj[it] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,z);
-    if (verbose) Rprintf("%i\t%0.3e\n",it+1,obj[it]);
+    if (verbose) printf("%i\t%0.3e\n",it+1,obj[it]);
 
     /* Stop if relative difference of objective values < obj_tol */
     if (it > 0 && (fabs(obj[it] - obj[it-1]) < fabs(obj[it-1]) * obj_tol)) break;
@@ -500,7 +500,7 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
     double * beta, double * alpha, double * u,
     double * obj, int * iter,
     double rho, double obj_tol, double obj_tol_newton, 
-		double alpha_ls, double gamma_ls, int max_iter_ls, int max_iter_newton,
+    double alpha_ls, double gamma_ls, int max_iter_ls, int max_iter_newton,
     cs * DktDk, func_RtoR b, func_RtoR b1, func_RtoR b2, int verbose)
 {
   double * dir; /* line search direction */
@@ -526,10 +526,10 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
   Dd      = (double *) malloc(n*sizeof(double));
   iter_ls = (int *)    malloc(sizeof(int));
 
-  obj_admm = (double*) malloc(max_iter_newton*sizeof(double));
+  obj_admm = (double*) malloc(max_iter*sizeof(double));
 
-  if (verbose) Rprintf("\nlambda=%0.3e\n",lam);
-  if (verbose) Rprintf("Iteration\tObjective\tADMM iters\n");
+  if (verbose) printf("\nlambda=%0.3f\n",lam);
+  if (verbose) printf("Iteration\tObjective\tADMM iters\n");
 
   /* One prox Newton step per iteration */
   for (it=0; it < max_iter_newton; it++)
@@ -555,11 +555,11 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
     /* Compute objective */
     obj[it] = tf_obj_glm(x, y, w, n, k, lam, b, beta, yt);
-    if (verbose) Rprintf("\t%i\t%0.3e\t%i\t%i\n",it+1,obj[it],iter_admm,*iter_ls);
+    if (verbose) printf("\t%i\t%0.3e\t%i\t%i\n",it+1,obj[it],iter_admm,*iter_ls);
 
     /* Stop if relative difference of objective values < obj_tol */
     if (it > 0 && (fabs(obj[it] - obj[it-1]) < 
-		   fabs(obj[it-1]) * obj_tol_newton)) break;
+          fabs(obj[it-1]) * obj_tol_newton)) break;
   }
 
   *iter = it;
