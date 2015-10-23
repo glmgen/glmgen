@@ -95,8 +95,6 @@ trendfilter = function(x, y, weights, k = 2L,
   if (missing(y) || is.null(y)) { y = x; x = 1L:length(y) }
   else if (length(x) != length(y)) stop("x and y must have the same length.")
   n = length(y)
-  ## orig_x = x
-  ## orig_y = y
   ord = order(x)
   y = y[ord]
   x = x[ord]
@@ -108,7 +106,6 @@ trendfilter = function(x, y, weights, k = 2L,
 
   if (missing(weights)) weights = rep(1L,length(y))
   if (any(weights==0)) stop("Cannot pass zero weights.")
-  ## orig_w = weights
   weights = weights[ord]
 
   if (is.na(family_cd)) stop("family argument must be one of 'gaussian', 'logistic', or 'poisson'.")
@@ -116,36 +113,32 @@ trendfilter = function(x, y, weights, k = 2L,
   if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
   if (k >= 3) warning("Large k leads to generally worse conditioning; k=0,1,2 are the most stable choices.")
 
-  thin_required = (min(diff(x)) < 1e-6*IQR(x))
-  if (!is.null(thinning) && !thinning && min(diff(x)) == 0) {
-    stop("Cannot pass duplicate x values; use observation weights, or turn on thinning.")
-  }
-  if( !is.null(thinning) && !thinning && thin_required ) {
-    warning("The x values are ill-conditioned. Consider thinning. \nSee ?trendfilter for more info.")
+  mindx = min(diff(x))
+  if (!is.null(thinning) && !thinning && mindx == 0) {
+    stop("Cannot pass duplicate x values; use observation weights, or use thinning=TRUE.")
   }
 
-  # Thin the input data:
-  if (is.null(thinning)) {
-    if (thin_required) {
-      thinning = TRUE
-    } else {
-      thinning = FALSE
+  # If the minimum difference between x points is < 1e-6 times
+  # the interquartile range, then apply thinning, unless they
+  # explicitly tell us not to
+  if (mindx < 1e-6*IQR(x)) {    
+    if (!is.null(thinning) && !thinning) {
+      warning("The x values are ill-conditioned. Consider thinning. \nSee ?trendfilter for more info.")
     }
-  }
-
-  if (thinning) {		
-    z = .Call("thin_R",
-      sX = as.double(x),
-      sY = as.double(y),
-      sW = as.double(weights),
-      sN = length(y),
-      sK = as.integer(k),
-      sControl = control,
-      PACKAGE = "glmgen")
-    x = z$x
-    y = z$y
-    weights = z$w
-    n = z$n
+    else {	
+      z = .Call("thin_R",
+        sX = as.double(x),
+        sY = as.double(y),
+        sW = as.double(weights),
+        sN = length(y),
+        sK = as.integer(k),
+        sControl = control,
+        PACKAGE = "glmgen")
+      x = z$x
+      y = z$y
+      weights = z$w
+      n = z$n
+    }
   }
 
   if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
@@ -158,8 +151,8 @@ trendfilter = function(x, y, weights, k = 2L,
   } else {
     if (length(lambda) == 0L) stop("Must specify at least one lambda value.")
     if (min(lambda) < 0L) stop("All specified lambda values must be nonnegative.")
-    if (any(order(lambda) != length(lambda):1L) & any(order(lambda) != 1L:length(lambda)))
-      warning("user-supplied lambda values should given in decending order for warm starts.")
+    if (any(order(lambda) != length(lambda):1L) & any(order(lambda) != 1L:length(lambda))) # ????
+      warning("User-supplied lambda values should given in decending order for warm starts.")
     nlambda = length(lambda)
     lambda_flag = TRUE
   }
