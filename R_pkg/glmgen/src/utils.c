@@ -70,6 +70,14 @@ double l1norm(double * x, int n) {
   return s;
 }
 
+double l2norm(double * x, int n) {
+  int i;
+  double s;
+  s = 0;
+  for (i=0; i < n; i++) s += x[i] * x[i];
+  return sqrt(s);
+}
+
 /* b(x) = log( 1 + exp(x) ).
  * Avoid computing exp(x) when x >> 0 */
 double logi_b(double x)
@@ -112,12 +120,12 @@ void diag_times_sparse (const cs * A, double * w)
   int j;
 
   for (j = 0; j < A->n; j++)
+  {
+    for (i = A->p[j] ; i < A->p[j+1] ; i++)
     {
-      for (i = A->p[j] ; i < A->p[j+1] ; i++)
-	{
-	  A->x[i] *= w[ A->i[i] ];
-	}
+      A->x[i] *= w[ A->i[i] ];
     }
+  }
 
 }
 
@@ -132,19 +140,19 @@ cs * scalar_plus_diag (const cs * A, double b, double *D)
   B = cs_spalloc(A->m, A->n, A->nzmax, 1, 0);
 
   for (j = 0; j < A->n; j++)
+  {
+    B->p[j] = A->p[j];
+    for (i = A->p[j] ; i < A->p[j+1] ; i++)
     {
-      B->p[j] = A->p[j];
-      for (i = A->p[j] ; i < A->p[j+1] ; i++)
-	{
-	  if(A->i[i] == j)
-	    {
-	      B->x[i] = b * A->x[i] + D[j];
-	    } else {
-	    B->x[i] = b * A->x[i];
-	  }
-	  B->i[i] = A->i[i];
-	}
+      if(A->i[i] == j)
+      {
+        B->x[i] = b * A->x[i] + D[j];
+      } else {
+        B->x[i] = b * A->x[i];
+      }
+      B->i[i] = A->i[i];
     }
+  }
   B->p[j] = A->p[j];
 
   return B;
@@ -176,7 +184,7 @@ double weighted_mean(double * y, double * w, int n)
 }
 
 void calc_beta_max(double * y, double * w, int n, gqr * Dt_qr, cs * Dt,
-		   double * temp_n, double * beta_max)
+    double * temp_n, double * beta_max)
 {
   int i;	
   for (i = 0; i < n; i++) 

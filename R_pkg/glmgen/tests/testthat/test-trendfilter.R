@@ -26,19 +26,26 @@ predGenlasso = coef(outGenlasso, lambda=outGlmgen$lambda)$beta
 predGlmgen = predict(outGlmgen)
 expect_true(abs(max(predGenlasso - predGlmgen)) < EPS)
 
+p = trendfilter.control.list()
+p$max_iter = 2000
+p$obj_tol = 1e-10
+
 # Higher order trendfiltering w/o location values
 for (k in 1:2) {
   outGenlasso = genlasso::trendfilter(y, ord=k)
-  outGlmgen = glmgen::trendfilter(y, k=k, lambda=outGenlasso$lambda)
-  # expect_true(abs(max(outGenlasso$beta - outGlmgen$beta)) < EPS)
+  outGlmgen = glmgen::trendfilter(y, k=k, lambda=outGenlasso$lambda, control=p)
+  expect_true(abs(max(outGenlasso$beta - outGlmgen$beta)) < EPS)
   print(abs(max(outGenlasso$beta - outGlmgen$beta)))
 }
+
+p$max_iter = 4000
 
 # Higher order trendfiltering with location values
 for (k in 1:2) {
   outGenlasso = genlasso::trendfilter(y, x, ord=k)
-  outGlmgen = glmgen::trendfilter(x, y, k=k, lambda=outGenlasso$lambda)
-  # expect_true(abs(max(outGenlasso$beta - outGlmgen$beta)) < EPS)
+  outGlmgen = glmgen::trendfilter(x, y, k=k, lambda=outGenlasso$lambda, 
+    control=p)
+  expect_true(abs(max(outGenlasso$beta - outGlmgen$beta)) < 1e-2)
   print(abs(max(outGenlasso$beta - outGlmgen$beta)))
 }
 

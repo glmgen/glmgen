@@ -240,9 +240,9 @@ trendfilter = function(x, y, weights, k = 2L,
 #'  out = trendfilter(x, y, k=2, control=trendfilter.control.list(rho=3))
 #'
 #' @export
-trendfilter.control.list = function(rho=1, obj_tol=1e-6, obj_tol_newton=obj_tol,
-                                    max_iter=500L, max_iter_newton=50L, 
-									x_tol=1e-6, alpha_ls=0.5, gamma_ls=0.9,
+trendfilter.control.list = function(rho=1, obj_tol=1e-5, obj_tol_newton=obj_tol,
+                                    max_iter=200L, max_iter_newton=50L, 
+									x_tol=1e-6, alpha_ls=0.5, gamma_ls=0.8,
 									max_iter_ls=20L) {
 
   z <- list(rho=rho, obj_tol=obj_tol, obj_tol_newton=obj_tol_newton,

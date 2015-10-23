@@ -92,6 +92,7 @@ typedef llnode linkedlist;
 /* Small utility functions found in utils.c */
 double glmgen_factorial(int n);
 double l1norm(double * x, int n);
+double l2norm(double * x, int n);
 int is_nan(double x);
 int has_nan(double * x, int n);
 int count_nans(double * x, int n);
@@ -116,7 +117,7 @@ csi glmgen_qrsol(gqr * B, double * b);
 csi glmgen_gqr_free(gqr * A);
 
 /* Generate equi-spaced points in log-space */
-void genInLogspace( double maxval, double minratio, int npts, double * out);
+void seq_logspace( double maxval, double minratio, int npts, double * out);
 
 double weighted_mean(double * y, double * w, int n);
 
