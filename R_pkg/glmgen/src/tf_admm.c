@@ -419,7 +419,7 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
   z = (double*) malloc(n*sizeof(double));
   betabest = (double*) malloc(n*sizeof(double));
   alphabest = (double*) malloc(n*sizeof(double));
-  
+
   if (verbose) printf("\nlambda=%0.3e\n",lam);
   if (verbose) printf("Iteration\tObjective\n");
 
@@ -453,22 +453,22 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
     if (it > 0 && obj[it] - obj[itbest] <= 0 ) {
       memcpy(betabest, beta, n * sizeof(double));
       memcpy(alphabest, alpha, n * sizeof(double));
-            
+
       if (obj[itbest] - obj[it] <= fabs(obj[itbest]) * obj_tol) {
         itbest = it;
         break;
       }
       itbest = it;
     }
-    if (it - itbest >= 4)
+    if ((it > max_iter/3) && (it - itbest >= 4))
       break;
-    
-/*    if (it > 0 && (obj[itbest] - obj[it]) <= fabs(obj[itbest]) * obj_tol) break;*/
+
+    /*    if (it > 0 && (obj[itbest] - obj[it]) <= fabs(obj[itbest]) * obj_tol) break;*/
   }
 
   memcpy(beta, betabest, n * sizeof(double));
   memcpy(alpha, alphabest, n * sizeof(double));
-  
+
   *iter = itbest + 1;
 
   /* Compute final df value, based on alpha */
@@ -531,10 +531,12 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
   double * yt;  /* working response: ytilde */
   double * H;   /* weighted Hessian */
   double * obj_admm;
+  double * betabest;
+  double * alphabest;  
 
   int i;
   int d;
-  int it;
+  int it, itbest;
   int iter_admm;
   int * iter_ls;
   double * Db;
@@ -552,9 +554,13 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
   obj_admm = (double*) malloc(max_iter*sizeof(double));
 
+  betabest = (double*) malloc(n*sizeof(double));
+  alphabest = (double*) malloc(n*sizeof(double));
+
   if (verbose) printf("\nlambda=%0.3f\n",lam);
   if (verbose) printf("Iteration\tObjective\tADMM iters\n");
 
+  itbest = 0;
   /* One prox Newton step per iteration */
   for (it=0; it < max_iter_newton; it++)
   {
@@ -568,6 +574,7 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
     /* Prox Newton step */
     iter_admm = 0;
+    rho = rho/(double) (it+1);
     tf_admm_gauss(x, yt, H, n, k, max_iter, lam, df, dir, alpha, u,
         obj_admm, &iter_admm, rho, obj_tol, DktDk, 0);
 
@@ -575,18 +582,38 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
     for (i=0; i<n; i++) dir[i] = dir[i] - beta[i];
     t = line_search(y, x, w, n, k, lam, b, b1, beta, dir, alpha_ls, gamma_ls,
         max_iter_ls, iter_ls, Db, Dd);
+
+    if (t < 0) { // line search failed
+      break;
+    }
     for (i=0; i<n; i++) beta[i] = beta[i] + t * dir[i];
 
     /* Compute objective */
     obj[it] = tf_obj_glm(x, y, w, n, k, lam, b, beta, yt);
     if (verbose) printf("\t%i\t%0.3e\t%i\t%i\n",it+1,obj[it],iter_admm,*iter_ls);
 
+    if (it > 0 && obj[it] - obj[itbest] <= 0 ) {
+      memcpy(betabest, beta, n * sizeof(double));
+      memcpy(alphabest, alpha, n * sizeof(double));
+
+      if (obj[itbest] - obj[it] <= fabs(obj[itbest]) * obj_tol_newton) {
+        itbest = it;
+        break;
+      }
+      itbest = it;
+    }
+    if (it - itbest >= 4)
+      break;
+
     /* Stop if relative difference of objective values < obj_tol */
-    if (it > 0 && (fabs(obj[it] - obj[it-1]) < 
-          fabs(obj[it-1]) * obj_tol_newton)) break;
+    /*    if (it > 0 && (fabs(obj[it] - obj[it-1]) < */
+    /*          fabs(obj[it-1]) * obj_tol_newton)) break;*/
   }
 
-  *iter = it;
+  memcpy(beta, betabest, n * sizeof(double));
+  memcpy(alpha, alphabest, n * sizeof(double));
+
+  *iter = itbest + 1;
 
   /* Compute final df value, based on alpha */
   d = k+1;
@@ -601,6 +628,8 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
   free(Dd);
   free(iter_ls);
   free(obj_admm);
+  free(betabest);
+  free(alphabest);
 }
 
 
