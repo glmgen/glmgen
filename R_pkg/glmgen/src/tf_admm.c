@@ -380,10 +380,12 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
 {
   int i;
   int d;
-  int it;
+  int it, itbest;
   double *v;
   double *z;
   double *db;
+  double *betabest;
+  double *alphabest;
 
   cs * kernmat;
   gqr * kernmat_qr;
@@ -415,10 +417,13 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
   /* Other variables that will be useful during our iterations */
   v = (double*) malloc(n*sizeof(double));
   z = (double*) malloc(n*sizeof(double));
-
+  betabest = (double*) malloc(n*sizeof(double));
+  alphabest = (double*) malloc(n*sizeof(double));
+  
   if (verbose) printf("\nlambda=%0.3e\n",lam);
   if (verbose) printf("Iteration\tObjective\n");
 
+  itbest = 0;
   for (it=0; it < max_iter; it++)
   {
     /* Update beta: banded linear system (kernel matrix) */
@@ -443,11 +448,28 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
     obj[it] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,z);
     if (verbose) printf("%i\t%0.3e\n",it+1,obj[it]);
 
+
     /* Stop if relative difference of objective values < obj_tol */
-    if (it > 0 && (fabs(obj[it] - obj[it-1]) < fabs(obj[it-1]) * obj_tol)) break;
+    if (it > 0 && obj[it] - obj[itbest] <= 0 ) {
+      memcpy(betabest, beta, n * sizeof(double));
+      memcpy(alphabest, alpha, n * sizeof(double));
+            
+      if (obj[itbest] - obj[it] <= fabs(obj[itbest]) * obj_tol) {
+        itbest = it;
+        break;
+      }
+      itbest = it;
+    }
+    if (it - itbest >= 4)
+      break;
+    
+/*    if (it > 0 && (obj[itbest] - obj[it]) <= fabs(obj[itbest]) * obj_tol) break;*/
   }
 
-  *iter = it;
+  memcpy(beta, betabest, n * sizeof(double));
+  memcpy(alpha, alphabest, n * sizeof(double));
+  
+  *iter = itbest + 1;
 
   /* Compute final df value, based on alpha */
   d = k+1;
@@ -458,6 +480,8 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
   glmgen_gqr_free(kernmat_qr);
   free(v);
   free(z);
+  free(betabest);
+  free(alphabest);
 }
 
 /**
