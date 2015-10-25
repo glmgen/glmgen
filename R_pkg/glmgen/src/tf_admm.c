@@ -460,16 +460,12 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
       }
       itbest = it;
     }
-    if ((it > max_iter/3) && (it - itbest >= 4))
-      break;
-
-    /*    if (it > 0 && (obj[itbest] - obj[it]) <= fabs(obj[itbest]) * obj_tol) break;*/
   }
 
   memcpy(beta, betabest, n * sizeof(double));
   memcpy(alpha, alphabest, n * sizeof(double));
 
-  *iter = itbest + 1;
+  *iter = it;
 
   /* Compute final df value, based on alpha */
   d = k+1;
@@ -574,7 +570,7 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
     /* Prox Newton step */
     iter_admm = 0;
-    rho = rho/(double) (it+1);
+/*    rho = rho/(double) (it+1);*/
     tf_admm_gauss(x, yt, H, n, k, max_iter, lam, df, dir, alpha, u,
         obj_admm, &iter_admm, rho, obj_tol, DktDk, 0);
 
@@ -613,7 +609,7 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
   memcpy(beta, betabest, n * sizeof(double));
   memcpy(alpha, alphabest, n * sizeof(double));
 
-  *iter = itbest + 1;
+  *iter = it;
 
   /* Compute final df value, based on alpha */
   d = k+1;
