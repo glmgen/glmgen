@@ -44,7 +44,7 @@ double * tf_admm_default(double * y, int n);
 
 void tf_admm(double * x, double * y, double * w, int n, int k, int family,
 	     int max_iter, int lam_flag, double * lambda, 
-	     int nlambda, double lambda_min_ratio, int * df,
+	     int nlambda, double lambda_min_ratio, int tridiag, int * df,
 	     double * beta, double * obj, int * iter, int * status, 
 	     double rho, double obj_tol, double obj_tol_newton, double alpha_ls,
 	     double gamma_ls, int max_iter_ls, int max_iter_newton, int verbose);
@@ -55,8 +55,14 @@ void tf_admm_gauss(double * x, double * y, double * w, int n, int k,
 		   double * obj, int * iter,
 		   double rho, double obj_tol, cs * DktDk, int verbose);
 
+void tf_admm_gauss_tri (double * x, double * y, double * w, int n, int k,
+    int max_iter, double lam, int * df,
+    double * beta, double * alpha, double * u,
+    double * obj, int * iter,
+    double rho, double obj_tol, int verbose);
+
 void tf_admm_glm(double * x, double * y, double * w, int n, int k,
-		 int max_iter, double lam, int * df,
+		 int max_iter, double lam, int tridiag, int * df,
 		 double * beta, double * alpha, double * u,
 		 double * obj, int * iter,
 		 double rho, double obj_tol, double obj_tol_newton, double alpha_ls,
@@ -84,6 +90,8 @@ void tf_dx (double *x, int n, int k,double *a, double *b);
 void tf_dtx (double *x, int n, int k, double *a, double *b);
 void tf_dxtil (double *x, int n, int k,double *a, double *b);
 void tf_dtxtil (double *x, int n, int k, double *a, double *b);
+void tf_dx1(double *x, int n, int j, double *a, double *b);
+void tf_dtx1(double *x, int n, int j, double *a, double *b);
 
 /* Compute trend filtering objective */
 double tf_obj(double *x, double *y, double *w, int n, int k, double lambda,

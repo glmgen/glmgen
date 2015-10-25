@@ -130,5 +130,9 @@ double line_search(double * y, double * x, double * w, int n, int k, double lam,
 	double * beta, double * d,
 	double alpha, double gamma, int max_iter,
 	int * iter, double * Db, double * Dd);
+	
+/* Utility to form a tridiagonal system */
+void form_tridiag(double *x, int n, int j, double rho, double padding, 
+  double *d0, double *d1);
 
 #endif

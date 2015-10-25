@@ -30,6 +30,7 @@
 
 #include "tf.h"
 #include "utils.h"
+#include "tridiagsolve.h"
 
 #include <R_ext/Print.h>
 
@@ -57,6 +58,7 @@ double * tf_admm_default(double * y, int n)
   double * lambda;
   int nlambda;
   double lambda_min_ratio;
+  int tridiag;
   int * df;
   double * beta;
   double * obj;
@@ -79,6 +81,7 @@ double * tf_admm_default(double * y, int n)
   lam_flag = 0;
   nlambda = 50;
   lambda_min_ratio = 1e-5;
+  tridiag = 1;
   rho = 1;
   obj_tol = 1e-6;
   alpha_ls = 0.5;
@@ -86,6 +89,7 @@ double * tf_admm_default(double * y, int n)
   max_iter_ls = 20;
   max_iter_newton = 50;
   verbose = 0;
+  
 
   max_iter_outer = (family == FAMILY_GAUSSIAN) ? max_iter : max_iter_newton;
 
@@ -118,7 +122,7 @@ double * tf_admm_default(double * y, int n)
   }
 
   tf_admm(x, y, w, n, k, family, max_iter, lam_flag, lambda,
-      nlambda, lambda_min_ratio, df, beta, obj, iter,
+      nlambda, lambda_min_ratio, tridiag, df, beta, obj, iter,
       status, rho, obj_tol, obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls,
       max_iter_newton, verbose);
 
@@ -172,13 +176,14 @@ double * tf_admm_default(double * y, int n)
  */
 void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
     int max_iter, int lam_flag, double * lambda,
-    int nlambda, double lambda_min_ratio, int * df,
+    int nlambda, double lambda_min_ratio, int tridiag, int * df,
     double * beta, double * obj, int * iter, int * status,
     double rho, double obj_tol, double obj_tol_newton, double alpha_ls, double gamma_ls,
     int max_iter_ls, int max_iter_newton, int verbose)
 {
   int i;
   int j;
+  int numDualVars;
   double max_lam;
   double min_lam;
   double * temp_n;
@@ -196,8 +201,12 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
 
   beta_max = (double *) malloc(n * sizeof(double));
   temp_n   = (double *) malloc(n * sizeof(double));
-  alpha    = (double *) malloc(n * sizeof(double)); /* we use extra buffer (n vs n-k) */
-  u        = (double *) malloc(n * sizeof(double)); /* we use extra buffer (n vs n-k) */
+
+  numDualVars = tridiag ? k : 1;
+
+  /* we use extra buffer below (n vs n-k) */
+  alpha    = (double *) malloc(n * numDualVars * sizeof(double)); 
+  u        = (double *) malloc(n * numDualVars * sizeof(double)); 
 
   /* Assume w does not have zeros */
   for (i = 0; i < n; i++) temp_n[i] = 1/sqrt(w[i]);
@@ -286,20 +295,26 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
 
     switch (family) {
       case FAMILY_GAUSSIAN:
-        tf_admm_gauss(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
-            alpha, u, obj+i*max_iter, iter+i, rho * lambda[i],
-            obj_tol, DktDk, verbose);
+        if (tridiag)
+          tf_admm_gauss_tri(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
+              alpha, u, obj+i*max_iter, iter+i, rho * lambda[i],
+              obj_tol, verbose);
+        else
+          tf_admm_gauss(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
+              alpha, u, obj+i*max_iter, iter+i, rho * lambda[i],
+              obj_tol, DktDk, verbose);
+            
         break;
 
       case FAMILY_LOGISTIC:
-        tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
+        tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], tridiag, df+i, beta+i*n,
             alpha, u, obj+i*max_iter_newton, iter+i, rho * lambda[i], obj_tol,
             obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
             DktDk, &logi_b, &logi_b1, &logi_b2, verbose);
         break;
 
       case FAMILY_POISSON:
-        tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
+        tf_admm_glm(x, y, w, n, k, max_iter, lambda[i], tridiag, df+i, beta+i*n,
             alpha, u, obj+i*max_iter_newton, iter+i, rho * lambda[i], obj_tol,
             obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls, max_iter_newton,
             DktDk, &pois_b, &pois_b1, &pois_b2, verbose);
@@ -383,7 +398,6 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
   int it, itbest;
   double *v;
   double *z;
-  double *db;
   double *betabest;
   double *alphabest;
 
@@ -402,9 +416,9 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
     *df = d;
 
     /* Compute objective */
-    db = (double *) malloc(n*sizeof(double));
-    obj[0] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,db);
-    free(db);
+    v = (double *) malloc(n*sizeof(double));
+    obj[0] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,v);
+    free(v);
     return;
   }
 
@@ -448,28 +462,29 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
     obj[it] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,z);
     if (verbose) printf("%i\t%0.3e\n",it+1,obj[it]);
 
-
     /* Stop if relative difference of objective values < obj_tol */
-    if (it > 0 && obj[it] - obj[itbest] <= 0 ) {
+    if (it==0 || (it > 0 && obj[it] - obj[itbest] <= 0 ))
+    {
       memcpy(betabest, beta, n * sizeof(double));
       memcpy(alphabest, alpha, n * sizeof(double));
-
+    }
+    if (it > 0 && obj[it] - obj[itbest] <= 0 ) 
+    {
       if (obj[itbest] - obj[it] <= fabs(obj[itbest]) * obj_tol) {
-        itbest = it;
-        break;
+        itbest = it; break;
       }
       itbest = it;
-    }
+    } 
   }
 
   memcpy(beta, betabest, n * sizeof(double));
-  memcpy(alpha, alphabest, n * sizeof(double));
+  memcpy(alpha, alphabest, n * sizeof(double));  
 
   *iter = it;
 
   /* Compute final df value, based on alpha */
   d = k+1;
-  for (i=0; i<n-k; i++) if (alpha[i] != alpha[i+1]) d += 1;
+  for (i=0; i<n-k-1; i++) if (alpha[i] != alpha[i+1]) d += 1;
   *df = d;
 
   cs_spfree(kernmat);
@@ -479,6 +494,138 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
   free(betabest);
   free(alphabest);
 }
+void tf_admm_gauss_tri (double * x, double * y, double * w, int n, int k,
+    int max_iter, double lam, int * df,
+    double * beta, double * alpha, double * u,
+    double * obj, int * iter,
+    double rho, double obj_tol, int verbose)
+{
+  int i;
+  int j;
+  int d;
+  int it, itbest;
+  double *v;
+  double *z;
+  double *z1;
+  double *betabest;
+  double *alphabest; /* size n, not nk */
+  double *alphanxt;  /* alias to beta */
+
+  /* Special case for k=0: skip the ADMM algorithm */
+  if (k==0)
+  {
+    /* Use Nick's DP algorithm, weighted version */
+    tf_dp_weight(n,y,w,lam,beta);
+
+    /* Compute df value */
+    d = 1;
+    for (i=0; i<n-1; i++) if (beta[i] != beta[i+1]) d += 1;
+    *df = d;
+
+    /* Compute objective */
+    v = (double *) malloc(n*sizeof(double));
+    obj[0] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,v);
+    free(v);
+    return;
+  }
+
+  /* Otherwise we run our ADMM routine */
+
+  /* Other variables that will be useful during our iterations */
+  v = (double*) malloc(n*sizeof(double));
+  z = (double*) malloc(n*sizeof(double));
+  z1 = (double*) malloc(n*sizeof(double));
+  betabest = (double*) malloc(n*sizeof(double));
+  alphabest = (double*) malloc(n*sizeof(double));
+
+  if (verbose) printf("\nlambda=%0.3e\n",lam);
+  if (verbose) printf("Iteration\tObjective\n");
+
+  double * A0;
+  double * A1;
+  double padding;
+  
+  A0 = (double*) malloc(n*k*sizeof(double));
+  A1 = (double*) malloc(n*k*sizeof(double));
+  padding = 1;
+  
+  form_tridiag(x, n, j, rho, padding, A0, A1);
+  for (j=2; j <= k; j++)
+  {
+    form_tridiag(x, n, j, 1, padding, A0+(n*j-n), A1+(n*j-n));
+  }
+  itbest = 0;  
+
+  for (it=0; it < max_iter; it++)
+  {
+    /* Update beta: tridiagonal system solve */
+    for (i=0; i < n-k; i++) v[i] = alpha[i+n*(k-1)] + u[i];
+    tf_dtx1(x, n, 1, v, z);
+    for (i=0; i<n; i++) beta[i] = w[i]*y[i] + rho*z[i];
+    tridiagsolve(n-1, A1, A0, A1, beta, v);    
+    
+    /* Update alpha_1: 1d fused lasso */
+    alphanxt = k > 1 ? (alpha + n) : beta;
+    tf_dx1(x, n, k, alphanxt, v);
+    for (i=0; i<n-k; i++) z[i] = v[i]-u[i];
+    tf_dp(n-k, z, lam/rho, alpha);
+
+    /* Update u_1 */
+    for (i=0; i<n-k; i++) u[i] = u[i]+alpha[i]-v[i];        
+    
+    for (j=2; j <= k; j++)
+    {
+      /* Update alpha_j : tridiagonal system solves */
+      alphanxt = (j<k) ? (alpha + (n*j)) : beta;
+      tf_dx1(x, n, k-j+1, alphanxt, v);
+      for (i=0; i < n-k+j-2; i++) z[i] = alpha[i+n*(j-2)] + u[i+n*(j-2)];
+      tf_dtx1(x, n, k-j+2, z, z1);
+      for (i=0; i < n-k+j-1; i++) alpha[i+n*(j-1)] = v[i] - u[i+n*(j-1)] + z1[i];      
+      tridiagsolve(n-k+j-1, A1+(n*j-n), A0+(n*j-n), A1+(n*j-n), alpha+(n*j-n), z);
+      
+      /* Update u_j */
+      for (i=0; i<n-k+j-1; i++) u[i+n*(j-1)] += alpha[i+n*(j-1)] - v[i];  
+    }
+
+    /* Compute objective */
+    obj[it] = tf_obj(x,y,w,n,k,lam,FAMILY_GAUSSIAN,beta,z);
+    if (verbose) printf("%i\t%0.3e\n",it+1,obj[it]);
+
+    /* Stop if relative difference of objective values < obj_tol */
+    if (it==0 || (it > 0 && obj[it] - obj[itbest] <= 0 ))
+    {
+      memcpy(betabest, beta, n * sizeof(double));
+      memcpy(alphabest, alpha, n * sizeof(double));
+    }
+    if (it > 0 && obj[it] - obj[itbest] <= 0 )
+    {
+      if (obj[itbest] - obj[it] <= fabs(obj[itbest]) * obj_tol) {
+        itbest = it; break;
+      }
+      itbest = it;
+    }
+  }
+
+  memcpy(beta, betabest, n * sizeof(double));
+  memcpy(alpha, alphabest, n * sizeof(double));
+
+
+  *iter = it;
+
+  /* Compute final df value, based on alpha */
+  d = k+1;
+  for (i=0; i<n-k-1; i++) if (alpha[i] != alpha[i+1]) d += 1;
+  *df = d;
+
+  free(v);
+  free(z);
+  free(z1);
+  free(betabest);
+  free(alphabest);
+  free(A0);
+  free(A1);
+}
+
 
 /**
  * @brief Low level fitting routine for non-Gaussian trend filtering problems.
@@ -516,7 +663,7 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
  * @see tf_admm
  */
 void tf_admm_glm (double * x, double * y, double * w, int n, int k,
-    int max_iter, double lam, int * df,
+    int max_iter, double lam, int tridiag, int * df,
     double * beta, double * alpha, double * u,
     double * obj, int * iter,
     double rho, double obj_tol, double obj_tol_newton, 
@@ -537,7 +684,7 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
   int * iter_ls;
   double * Db;
   double * Dd;
-  double t; /* stepsize */
+  double t; /* stepsize */  
 
   dir = (double*) malloc(n*sizeof(double));
   yt  = (double*) malloc(n*sizeof(double));
@@ -570,9 +717,13 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
     /* Prox Newton step */
     iter_admm = 0;
-/*    rho = rho/(double) (it+1);*/
-    tf_admm_gauss(x, yt, H, n, k, max_iter, lam, df, dir, alpha, u,
-        obj_admm, &iter_admm, rho, obj_tol, DktDk, 0);
+    // rho = rho/(double) (it+1);
+    if(tridiag)
+      tf_admm_gauss_tri(x, yt, H, n, k, max_iter, lam, df, dir, alpha, u,
+          obj_admm, &iter_admm, rho, obj_tol, 0);
+    else
+      tf_admm_gauss(x, yt, H, n, k, max_iter, lam, df, dir, alpha, u,
+          obj_admm, &iter_admm, rho, obj_tol, DktDk, 0);
 
     /* Line search */
     for (i=0; i<n; i++) dir[i] = dir[i] - beta[i];
@@ -587,19 +738,20 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
     /* Compute objective */
     obj[it] = tf_obj_glm(x, y, w, n, k, lam, b, beta, yt);
     if (verbose) printf("\t%i\t%0.3e\t%i\t%i\n",it+1,obj[it],iter_admm,*iter_ls);
-
-    if (it > 0 && obj[it] - obj[itbest] <= 0 ) {
+    
+    if (it==0 || (it > 0 && obj[it] - obj[itbest] <= 0 ))
+    {
       memcpy(betabest, beta, n * sizeof(double));
       memcpy(alphabest, alpha, n * sizeof(double));
-
+    }
+    if (it > 0 && obj[it] - obj[itbest] <= 0 )
+    {
       if (obj[itbest] - obj[it] <= fabs(obj[itbest]) * obj_tol_newton) {
-        itbest = it;
-        break;
+        itbest = it; break;
       }
       itbest = it;
     }
-    if (it - itbest >= 4)
-      break;
+    if (it - itbest >= 4) break;
 
     /* Stop if relative difference of objective values < obj_tol */
     /*    if (it > 0 && (fabs(obj[it] - obj[it-1]) < */

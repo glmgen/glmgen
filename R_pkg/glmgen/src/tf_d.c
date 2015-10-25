@@ -321,3 +321,44 @@ void tf_dtxtil(double *x, int n, int k,double *a, double *b)
   tf_dtx(x, n, k, a, b);
 
 }
+
+/* b = j (\Delta_j)^-1 D^(1) a */
+/* j = 1,2,.. */
+void tf_dx1(double *x, int n, int j, double *a, double *b)
+{  
+  int i;
+  
+  for(i=0; i < n-j; i++)
+  {
+    b[i] = j * (a[i+1] - a[i]) / (x[j+i] - x[i]);
+  }
+}
+
+void tf_dtx1(double *x, int n, int j, double *a, double *b)
+{  
+  int i;
+  
+  if(j <= 0)
+  {
+    memcpy(b, a, n * sizeof(double));
+    return;
+  }
+  
+  for(i=0; i < n-j; i++)
+  {
+    b[i] = j * a[i] / (x[j+i] - x[i]);    
+  }
+  
+  /* In place D^(1) b */
+  
+  b[n-j] = b[n-j-1];
+  
+  for(i=n-j-1; i > 0; i--)
+  {
+    b[i] = b[i-1] - b[i];
+  }
+  
+  b[0] = -b[0];
+  
+}
+
