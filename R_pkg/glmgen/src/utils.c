@@ -230,3 +230,11 @@ void form_tridiag(double *x, int n, int j, double rho, double padding,
   d0[n-j] = padding - d1[n-j-1];
 
 }
+
+
+void print_array(double *x, int n)
+{
+  int i;
+  for (i=0; i<n; i++) printf("%.2e  ", x[i]);
+  printf("\n");
+}

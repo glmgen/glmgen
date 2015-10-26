@@ -135,4 +135,6 @@ double line_search(double * y, double * x, double * w, int n, int k, double lam,
 void form_tridiag(double *x, int n, int j, double rho, double padding, 
   double *d0, double *d1);
 
+void print_array(double *x, int n);
+
 #endif

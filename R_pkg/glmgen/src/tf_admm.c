@@ -277,9 +277,6 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
 
     if (tridiag && k>0)
     {
-      /*      for(i=0; i<n*k; i++) alpha[i] = -1000; // DELETE THIS!*/
-      /*      for(i=0; i<n*k; i++) u[i] = -1000;*/
-
       tf_dx1(x, n, 1, beta_max, alpha + (n*k-n));
       for (j=k-1; j >= 1; j--)
         tf_dx1(x, n, k-j+1, alpha + (n*j), alpha + (n*j-n));      
@@ -288,24 +285,24 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
       tf_dxtil(x, n, k, beta_max, alpha);
 
     /* u_max */    
+
     if (tridiag)
       for (j=0; j<k; j++) memset(u + (n*j), 0, (n-k+j) * sizeof(double)); 
     else {
-      for (i = 0; i < n; i++) 
-        /*        u[i] = w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);*/
-        u[i] = 0;
+      /*      for (i = 0; i < n; i++) */
+      /*          u[i] = w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);*/
 
-      if(family == FAMILY_LOGISTIC)
-        for (i = 0; i < n; i++) u[i] *= logi_b2(beta_max[i]);
-      else if(family == FAMILY_POISSON)
-        for (i = 0; i < n; i++) u[i] *= pois_b2(beta_max[i]);
-      glmgen_qrsol (Dkt_qr, u);
+      /*      if(family == FAMILY_LOGISTIC)*/
+      /*        for (i = 0; i < n; i++) u[i] *= logi_b2(beta_max[i]);*/
+      /*      else if(family == FAMILY_POISSON)*/
+      /*        for (i = 0; i < n; i++) u[i] *= pois_b2(beta_max[i]);*/
+      /*      glmgen_qrsol (Dkt_qr, u);*/
+      for (i = 0; i < n-k; i++) u[i] = 0;
     }
   }
 
   /* Augmented Lagrangian parameter */
-  rho = rho * pow((x[n-1] - x[0])/n, (double)k);
-
+  rho = rho * pow((x[n-1] - x[0])/(double)(n-1), (double)k);
 
   if (tridiag && k>0)
   {
@@ -313,28 +310,33 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
     A0 = (double*) malloc(n*k*sizeof(double));
     A1 = (double*) malloc(n*k*sizeof(double));
 
-    form_tridiag(x, n, 1, rho, 0, A0, A1);
-    for (i=0; i < n; i++) A0[i] = A0[i] + w[i];
     for (j=2; j <= k; j++)
     {
-      form_tridiag(x, n, j, 1, 1, A0+(n*j-n), A1+(n*j-n));
+      form_tridiag(x, n, k-j+2, 1, 1, A0+(n*j-n), A1+(n*j-n));
     }
   }  
+
   /* Iterate lower level functions over all lambda values;
    * the alpha and u vectors get used each time of subsequent
    * warm starts */
   for (i = 0; i < nlambda; i++)
-  {
+  {    
     /* warm start */
     double *beta_init = (i == 0) ? beta_max : beta + (i-1)*n;
     for(j = 0; j < n; j++) beta[i*n + j] = beta_init[j];
 
+    if (tridiag)
+    {
+      form_tridiag(x, n, 1, rho * lambda[i], 0, A0, A1);
+      for (j=0; j < n; j++) A0[j] = A0[j] + w[j];
+    }
+
     switch (family) {
       case FAMILY_GAUSSIAN:
-        if (tridiag)
+        if (tridiag)        
           tf_admm_gauss_tri(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
               alpha, u, obj+i*max_iter, iter+i, rho * lambda[i],
-              obj_tol, A0, A1, verbose);
+              obj_tol, A0, A1, verbose);        
         else
           tf_admm_gauss(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
               alpha, u, obj+i*max_iter, iter+i, rho * lambda[i],
@@ -378,6 +380,7 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
       for (j = 0; j < n-k; j++) alpha[j] = 0;
       for (j = 0; j < n; j++) u[j] = w[j] * (beta[i*n+j] - y[j]) / (rho * lambda[i]);
       glmgen_qrsol (Dkt_qr, u);
+      if (tridiag) for (j = 0; j < n*k; j++) alpha[j] = u[j] = 0;
       status[i] = 1;
     }
   }
@@ -586,13 +589,22 @@ void tf_admm_gauss_tri (double * x, double * y, double * w, int n, int k,
 
   itbest = 0;  
 
+  /*  int len;*/
+  /*  for (j=0; j<k; j++)*/
+  /*  {*/
+  /*    printf("A j=%d: rho = %f\n", j, rho);*/
+  /*    len =  (j==0)? n : n-k+j;*/
+  /*    print_array(A0 + j*n, len); */
+  /*    print_array(A1 + j*n, len-1);    */
+  /*  }*/
+
   for (it=0; it < max_iter; it++)
   {
     /* Update beta: tridiagonal system solve */
     for (i=0; i < n-1; i++) v[i] = alpha[i+n*(k-1)] + u[i+n*(k-1)];
     tf_dtx1(x, n, 1, v, z);
     for (i=0; i<n; i++) beta[i] = w[i]*y[i] + rho*z[i];
-    tridiagsolve(n, A1, A0, A1, beta, v);    
+    tridiagsolve(n, A1, A0, A1, beta, v);   
 
     /* Update alpha_1: 1d fused lasso */
     alphanxt = k > 1 ? (alpha + n) : beta;
@@ -624,12 +636,12 @@ void tf_admm_gauss_tri (double * x, double * y, double * w, int n, int k,
     if (verbose) printf("%i\t%0.3e\n",it+1,obj[it]);
 
     /* Stop if relative difference of objective values < obj_tol */
-    if (it==0 || (it > 0 && obj[it] - obj[itbest] <= 0 ))
+    if (it==0 || (it > 0 && obj[it] - obj[itbest] < 0 ))
     {
       memcpy(betabest, beta, n * sizeof(double));
       memcpy(alphabest, alpha, n * sizeof(double));
     }
-    if (it > 0 && obj[it] - obj[itbest] <= 0 )
+    if (it > 0 && obj[it] - obj[itbest] < 0 )
     {
       if (obj[itbest] - obj[it] <= fabs(obj[itbest]) * obj_tol) {
         itbest = it; break;
@@ -641,7 +653,6 @@ void tf_admm_gauss_tri (double * x, double * y, double * w, int n, int k,
   memcpy(beta, betabest, n * sizeof(double));
   memcpy(alpha, alphabest, n * sizeof(double));
 
-  printf("itbest = %d\n", itbest);
   *iter = it;
 
   /* Compute final df value, based on alpha */
