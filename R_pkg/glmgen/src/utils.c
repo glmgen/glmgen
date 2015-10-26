@@ -202,25 +202,31 @@ void calc_beta_max(double * y, double * w, int n, gqr * Dt_qr, cs * Dt,
 /* j = 1,2,... */
 /* d0 and d1 are of sizes n-j+1 and n-j respectively */
 void form_tridiag(double *x, int n, int j, double rho, double padding, 
-  double *d0, double *d1)
+    double *d0, double *d1)
 {
   int i;    
   double jjrho;
-  
+
+  if (j<=0)
+  {
+    printf("Error: j<=0 in form_tridiag\n");
+    return;    
+  }
+
   jjrho = j * j * rho;
-  
+
   for (i=0; i < n-j; i++)
   {
     d1[i] = - jjrho / ((x[j+i] - x[i]) * (x[j+i] - x[i]));
   }
-  
+
   d0[0] = padding - d1[0];
-  
+
   for (i=1; i < n-j; i++)
   {
     d0[i] = padding - d1[i-1] - d1[i];
   }
-  
+
   d0[n-j] = padding - d1[n-j-1];
-  
+
 }

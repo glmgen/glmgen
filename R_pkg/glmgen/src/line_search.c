@@ -53,7 +53,7 @@ double line_search(double * y, double * x, double * w, int n, int k, double lam,
   double ip_yd;
   double theta;
   double t;
-  double descent;
+  double descent; /* f(x+) - f(x) */
   double bound;
 
   tf_dx(x, n, k+1, beta, Db);
@@ -101,6 +101,8 @@ double line_search(double * y, double * x, double * w, int n, int k, double lam,
   }
 
   *iter = it;
+/*  if (descent > fabs(bound) * 0.1)*/
+/*    t = -1;  // Line search failed to find a t which results in descent*/
   return t;
 }
 
