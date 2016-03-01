@@ -58,12 +58,12 @@ void thin(double* x, double* y, double* w, int n, int k,
 
   r = x[n-1] - x[0];
 
-  // Do not thin if minimum separation of x (mindx) is >= tol
+  // Do not thin if minimum separation of x (mindx) is > tol
   mindx = r;
   for(i = 0; i < n-1; i++)
     mindx = MIN(x[i+1] - x[i], mindx);
 
-  if( mindx >= tol ) return;
+  if( mindx > tol ) return;
 
   *xt = *yt = *wt = NULL;	
   m = (int) MAX(1, floor(r/tol));	

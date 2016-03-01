@@ -81,9 +81,10 @@
 trendfilter = function(x, y, weights, k = 2L,
                        family = c("gaussian", "logistic", "poisson"),
                        method = c("admm"),
+                       beta0 = NULL,
                        lambda, nlambda = 50L, lambda.min.ratio = 1e-5,
-                       thinning = NULL, verbose = FALSE,
-                       control = trendfilter.control.list(x_tol=1e-6*IQR(x))) {
+                       thinning = NULL, verbose = F,
+                       control = trendfilter.control.list(x_tol=1e-6*max(IQR(x),diff(range(x))/2))) {
 
   cl = match.call()
   family = match.arg(family)
@@ -121,7 +122,7 @@ trendfilter = function(x, y, weights, k = 2L,
   # If the minimum difference between x points is < 1e-6 times
   # the interquartile range, then apply thinning, unless they
   # explicitly tell us not to
-  if (mindx < 1e-6*IQR(x)) {    
+  if (mindx <= control$x_tol) {
     if (!is.null(thinning) && !thinning) {
       warning("The x values are ill-conditioned. Consider thinning. \nSee ?trendfilter for more info.")
     }
@@ -138,11 +139,21 @@ trendfilter = function(x, y, weights, k = 2L,
       y = z$y
       weights = z$w
       n = z$n
+      
+      if (!is.null(beta0)) {
+        z = .Call("thin_R",
+          sX = as.double(x),
+          sY = as.double(beta0),
+          sW = as.double(weights),
+          sN = length(y),
+          sK = as.integer(k),
+          sControl = control,
+          PACKAGE = "glmgen")
+        beta0 = z$y
+      }
     }
   }
 
-  if (k < 0 || k != floor(k)) stop("k must be a nonnegative integer.")
-  if (n < k+2) stop("y must have length >= k+2 for kth order trend filtering.")
   if (missing(lambda)) {
     if (nlambda < 1L || nlambda != floor(nlambda)) stop("nlambda must be a positive integer.")
     if (lambda.min.ratio <= 0 || lambda.min.ratio >= 1) stop("lamba.min.ratio must be between 0 and 1.")
@@ -160,7 +171,6 @@ trendfilter = function(x, y, weights, k = 2L,
     stop("control must be a named list.")
   control = lapply(control, function(v) ifelse(is.numeric(v),
                    as.double(v[[1]]), stop("Elements of control must be numeric.")))
-
   z = .Call("tf_R",
     sX = as.double(x),
     sY = as.double(y),
@@ -169,6 +179,7 @@ trendfilter = function(x, y, weights, k = 2L,
     sK = as.integer(k),
     sFamily = as.integer(family_cd),
     sMethod = as.integer(method_cd),
+    sBeta0 = beta0,
     sLamFlag = as.integer(lambda_flag),
     sLambda = as.double(lambda),
     sNlambda = as.integer(nlambda),
@@ -181,7 +192,7 @@ trendfilter = function(x, y, weights, k = 2L,
   colnames(z$beta) = as.character(round(z$lambda, 3))
 
   out = structure(list(y = y, x = x, weights = weights, k = as.integer(k),
-    lambda = z$lambda, df = z$df, beta = z$beta, family = family,
+    lambda = z$lambda, beta0 = beta0, df = z$df, beta = z$beta, family = family,
     method = method, n = length(y), p = length(y),
     m = length(y) - as.integer(k) - 1L, obj = z$obj,
     status = z$status, iter = z$iter, family=family, call = cl),
@@ -234,14 +245,14 @@ trendfilter = function(x, y, weights, k = 2L,
 #'
 #' @export
 trendfilter.control.list = function(rho=1, obj_tol=1e-5, obj_tol_newton=obj_tol,
-                                    max_iter=200L, max_iter_newton=50L, 
+									max_iter=200L, max_iter_newton=50L, 
 									x_tol=1e-6, alpha_ls=0.5, gamma_ls=0.8,
 									max_iter_ls=30L, tridiag=0) {
 
   z <- list(rho=rho, obj_tol=obj_tol, obj_tol_newton=obj_tol_newton,
 			max_iter=max_iter, max_iter_newton=max_iter_newton, 
 			x_tol=x_tol, alpha_ls=alpha_ls, gamma_ls=gamma_ls,
-            max_iter_ls=max_iter_ls, tridiag=tridiag)
+      max_iter_ls=max_iter_ls, tridiag=tridiag)
   z
 }
 

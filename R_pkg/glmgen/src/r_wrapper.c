@@ -172,7 +172,7 @@ SEXP thin_R (SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sControl)
 }
 
 SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMethod,
-    SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio,
+    SEXP sBeta0, SEXP sLamFlag, SEXP sLambda, SEXP sNlambda, SEXP sLambdaMinRatio,
     SEXP sVerbose, SEXP sControl )
 {
 
@@ -201,6 +201,7 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   int * iter;
   int * status;
   int verbose;
+  double * beta0;
 
   SEXP sLambdaNew;
   SEXP sDf;
@@ -222,7 +223,7 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   int max_iter_ls;
   int max_iter_newton;
 	int max_iter_outer;
-	int tridiag;
+	int tridiag;			
 
   /* Convert input SEXP variables into C style variables */
   x = REAL(sX);
@@ -242,15 +243,17 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   lambda = REAL(sLambda);
   nlambda = asInteger(sNlambda);
   lambda_min_ratio = asReal(sLambdaMinRatio);
+  beta0 = isNull(sBeta0) ? NULL : REAL(sBeta0);
+  
   PROTECT(sDf = allocVector(INTSXP, nlambda));
   df = INTEGER(sDf);
   for(i = 0; i < nlambda; i++) df[i] = 0;
   PROTECT(sBeta = allocMatrix(REALSXP, n, nlambda));
   beta = REAL(sBeta);
 
-  PROTECT(sObj = allocMatrix(REALSXP, max_iter_outer, nlambda));
+  PROTECT(sObj = allocMatrix(REALSXP, max_iter_outer+1, nlambda));
   obj = REAL(sObj);
-  for(i = 0; i < max_iter_outer * nlambda; i++) obj[i] = 0;
+  for(i = 0; i < (max_iter_outer+1) * nlambda; i++) obj[i] = 0;
   PROTECT(sIter = allocVector(INTSXP, nlambda));
   iter = INTEGER(sIter);
   for(i = 0; i < nlambda; i++) iter[i] = 0;
@@ -268,6 +271,7 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
   swt = REAL(sWt);
   for(i = 0; i < n; i++) swt[i] = w[i];
 
+
   /* Switch on the method, and access low-level C functions */
   switch(method)
   {
@@ -279,8 +283,8 @@ SEXP tf_R ( SEXP sX, SEXP sY, SEXP sW, SEXP sN, SEXP sK, SEXP sFamily, SEXP sMet
       gamma_ls = get_control_value(sControl, "gamma_ls");
       max_iter_ls = get_control_value(sControl, "max_iter_ls");
       tridiag = get_control_value(sControl, "tridiag");
-
-      tf_admm(x, y, w, n, k, family, max_iter, lam_flag, lambda,
+			
+      tf_admm(x, y, w, n, k, family, max_iter, beta0, lam_flag, lambda,
           nlambda, lambda_min_ratio, tridiag, df, beta, obj, iter, status,
           rho, obj_tol, obj_tol_newton, alpha_ls, gamma_ls, max_iter_ls,
           max_iter_newton, verbose);

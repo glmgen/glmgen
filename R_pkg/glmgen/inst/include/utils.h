@@ -125,11 +125,10 @@ void calc_beta_max(double * y, double * w, int n, gqr * Dt_qr, cs * Dt,
 	double * temp_n, double * beta_max);
 
 /* Generic line search */
-double line_search(double * y, double * x, double * w, int n, int k, double lam,
-	func_RtoR b, func_RtoR b1,
-	double * beta, double * d,
-	double alpha, double gamma, int max_iter,
-	int * iter, double * Db, double * Dd);
+double line_search(double * y, double * x, double * w, int n, int k, 
+  double lam, func_RtoR b, func_RtoR b1, double * beta, double * d, 
+  double alpha, double gamma, int max_iter, int * iter, double * Db, 
+  double * Dd);
 	
 /* Utility to form a tridiagonal system */
 void form_tridiag(double *x, int n, int j, double rho, double padding, 
