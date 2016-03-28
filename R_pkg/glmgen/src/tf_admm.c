@@ -238,6 +238,7 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
       for (i=0; i<nlambda; i++) {
         for (j=0; j<n; j++) beta[i*n+j] = y[j];
         obj[i*(max_iter+1)] = 0;
+        df[i] = n;
       }
       cs_spfree(D);
       cs_spfree(Dt);
@@ -539,8 +540,6 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
       if (variation < fabs(obj[itbest]) * 10 * obj_tol)
         break;
     }
-    /* Stop if no improvement for 10 iterations */
-    // if (it > itbest + 10) { break; }
   }
   
   memcpy(beta, betabest, n * sizeof(double));
@@ -557,15 +556,6 @@ void tf_admm_gauss (double * x, double * y, double * w, int n, int k,
   for (i=0; i<n-k-1; i++) if (alpha[i] != alpha[i+1]) d += 1;
   *df = d;
 
-  /* IIf we did not make any progress */
-  /* Ideally D^(1) alpha should be 0 for beta_max, but it is not. set df manually*/
-  /* Wrong when beta0 has df > k+1 */
-  if (itbest == 0) {
-    d = k+1;
-    //for (i=0; i<n-k-1; i++) if ( fabs(alpha[i] - alpha[i+1]) > 1e-3) d += 1;
-    *df = d;
-  }
-  
   cs_spfree(kernmat);
   glmgen_gqr_free(kernmat_qr);
   free(v);
