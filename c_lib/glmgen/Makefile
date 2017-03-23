@@ -1,4 +1,4 @@
-CC=gcc-4.9 
+CC=gcc
 CFLAGS=-O3 -Wall -Wextra -ansi -std=c89 -pedantic
 CFLAGS2=-O3
 OBJ=obj/*.o
