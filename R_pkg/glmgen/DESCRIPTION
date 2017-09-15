@@ -11,3 +11,4 @@ Description: Efficient algorithms for generalized lasso problems.
   Specialized implementations are provided to deal with particular
   problem classes, such as trend filtering.
 License: GPL-2 | GPL-3
+RoxygenNote: 6.0.1
