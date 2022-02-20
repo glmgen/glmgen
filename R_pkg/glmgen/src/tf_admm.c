@@ -85,6 +85,7 @@ double * tf_admm_default(double * y, int n)
   tridiag = 1;
   rho = 1;
   obj_tol = 1e-6;
+  obj_tol_newton = 1e-6;
   alpha_ls = 0.5;
   gamma_ls = 0.9;
   max_iter_ls = 20;
@@ -188,7 +189,6 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
   int j;
   int numDualVars;
   double max_lam;
-  double min_lam;
   double * temp_n;
   double * beta_max;
   double * alpha;
@@ -274,9 +274,11 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
       calc_beta_max(y,w,n,Dt_qr,Dt,temp_n,beta_max);
     else
       memcpy(beta_max, beta0, n*sizeof(double));
+    mean_to_natural_param(beta_max,n,family);
 
     /* Check if beta = weighted mean(y) is better than beta */
     double yc = weighted_mean(y,w,n);
+    mean_to_natural_param(&yc,1,family);
     for (i = 0; i < n; i++) temp_n[i] = yc;
     double obj1 = tf_obj(x,y,w,n,k,max_lam,family,beta_max,v);
     double obj2 = tf_obj(x,y,w,n,k,max_lam,family,temp_n,v);
@@ -771,7 +773,7 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
   itbest = 0;
   obj[0] = tf_obj_glm(x, y, w, n, k, lam, b, beta, yt);
-  
+
   /* One prox Newton step per iteration */
   for (it=0; it < max_iter_newton; it++)
   {
@@ -803,9 +805,10 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
     }
     for (i=0; i<n; i++) beta[i] = beta[i] + t * dir[i];
 
-    /* Compute objective */
+    /* Compute objective. yt is used as a buffer space here. */
     obj[it+1] = tf_obj_glm(x, y, w, n, k, lam, b, beta, yt);
-    if (verbose) printf("\t%i\t%0.3e\t%i\t%i\n",it+1,obj[it],iter_admm,*iter_ls);
+    if (verbose) 
+      Rprintf("\t%i\t%0.3e\t%i\t%i\n",it+1,obj[it],iter_admm,*iter_ls);
 
     if (obj[it+1] - obj[itbest] <= 0 )
     {
@@ -827,8 +830,8 @@ void tf_admm_glm (double * x, double * y, double * w, int n, int k,
 
   /* Compute final df value, based on alpha */
   d = k+1;
-  if (k>0) for (i=0; i<n-k-1; i++) if (alpha[i] != alpha[i+1]) d += 1;
-  else for (i=0; i<n-k-1; i++) if (beta[i] != beta[i+1]) d += 1;
+  if (k>0) {for (i=0; i<n-k-1; i++) if (alpha[i] != alpha[i+1]) d += 1;}
+  else { for (i=0; i<n-k-1; i++) if (beta[i] != beta[i+1]) d += 1; }
   *df = d;
 
   /* Free everything */

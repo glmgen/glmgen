@@ -26,6 +26,7 @@
  */
 
 #include "utils.h"
+#include <float.h>
 #include <math.h>
 
 double glmgen_factorial(int n)
@@ -196,6 +197,39 @@ void calc_beta_max(double * y, double * w, int n, gqr * Dt_qr, cs * Dt,
   /* Dt has a W^{-1/2}, so in the next step divide by sqrt(w) instead of w. */
   for (i = 0; i < n; i++) 
     beta_max[i] = y[i] - beta_max[i]/sqrt(w[i]);
+}
+
+double logi_b1_inv(double beta)
+{
+  if (beta<=0)
+    return -FLT_MAX;
+  if (beta>=1)
+    return FLT_MAX;
+  return log(beta / (1-beta));
+}
+
+double pois_b1_inv(double beta)
+{
+  if (beta <= 0)
+    return -FLT_MAX;
+  return log(beta);
+}
+
+void mean_to_natural_param(double* beta, int n, int family)
+{
+  /* Nothing to do for FAMILY_GAUSSIAN */
+  int i;
+
+  switch (family) {
+    case FAMILY_LOGISTIC:
+      for (i=0; i<n; i++)
+        beta[i] = logi_b1_inv(beta[i]);
+      break;
+    case FAMILY_POISSON:
+      for (i=0; i<n; i++)
+          beta[i] = pois_b1_inv(beta[i]);
+      break;
+  }
 }
 
 /* padding I + rho D^(1)_j^T  D^(1)_j */

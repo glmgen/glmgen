@@ -124,6 +124,9 @@ double weighted_mean(double * y, double * w, int n);
 void calc_beta_max(double * y, double * w, int n, gqr * Dt_qr, cs * Dt,
 	double * temp_n, double * beta_max);
 
+/* Converts mean beta to natural parameter theta for Exponential families */
+void mean_to_natural_param(double* beta, int n, int family);
+
 /* Generic line search */
 double line_search(double * y, double * x, double * w, int n, int k, 
   double lam, func_RtoR b, func_RtoR b1, double * beta, double * d, 
