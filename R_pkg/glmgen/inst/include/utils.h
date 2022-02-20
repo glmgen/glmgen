@@ -102,9 +102,11 @@ void diag_times_sparse(const cs * A, double * w);
 
 double logi_b(double x);
 double logi_b1(double x);
+double logi_b1_inv(double x);
 double logi_b2(double x);
 double pois_b(double x);
 double pois_b1(double x);
+double pois_b1_inv(double x);
 double pois_b2(double x);
 
 void thin(double * x, double * y, double * w,

@@ -196,6 +196,8 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
   double * A0;
   double * A1;
   double * v;
+  double * alpha_init;
+  double * u_init;
 
   cs * D;
   cs * Dt;
@@ -206,28 +208,31 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
   gqr * Dkt_qr;
 
   beta_max = (double *) malloc(n * sizeof(double));
-  temp_n   = (double *) malloc(n * sizeof(double));
-  v        = (double *) malloc(n * sizeof(double));
+  temp_n = (double *) malloc(n * sizeof(double));
+  v = (double *) malloc(n * sizeof(double));
 
   numDualVars = tridiag ? k : 1;
 
   /* we use extra buffer below (n vs n-k) */
-  alpha    = (double *) malloc(n * numDualVars * sizeof(double)); 
-  u        = (double *) malloc(n * numDualVars * sizeof(double)); 
+  alpha = (double *) malloc(n * numDualVars * sizeof(double));
+  u = (double *) malloc(n * numDualVars * sizeof(double));
+  alpha_init = (double *) malloc(n * numDualVars * sizeof(double));
+  u_init = (double *) malloc(n * numDualVars * sizeof(double));
+
 
   /* Assume w does not have zeros */
   for (i = 0; i < n; i++) temp_n[i] = 1/sqrt(w[i]);
 
-  D 	= tf_calc_dk(n, k+1, x);
+  D = tf_calc_dk(n, k+1, x);
   Dk 	= tf_calc_dktil(n, k, x);
   Dt 	= cs_transpose(D, 1);
 
   diag_times_sparse(Dt, temp_n); /* Dt = W^{-1/2} Dt */
 
-  Dkt 	 = cs_transpose(Dk, 1);
-  Dt_qr  = glmgen_qr(Dt);
+  Dkt = cs_transpose(Dk, 1);
+  Dt_qr = glmgen_qr(Dt);
   Dkt_qr = glmgen_qr(Dkt);
-  DktDk  = cs_multiply(Dkt,Dk);
+  DktDk = cs_multiply(Dkt,Dk);
 
 
   /* Determine the maximum lambda in the path */
@@ -249,8 +254,8 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
       glmgen_gqr_free(Dkt_qr);
       free(temp_n);
       free(beta_max);
-      free(alpha);
-      free(u);
+      free(alpha); free(alpha_init);
+      free(u); free(u_init);
       return;
     }
   }
@@ -293,7 +298,7 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
         tf_dx1(x, n, k-j+1, alpha + (n*j), alpha + (n*j-n));      
     }
     else if (k>0)
-      tf_dxtil(x, n, k, beta_max, alpha);
+      tf_dxtil(x, n, k, beta_max, alpha_init);
 
     /* u_max */    
 
@@ -301,14 +306,13 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
       for (j=0; j<k; j++) memset(u + (n*j), 0, (n-k+j) * sizeof(double)); 
     else {
       for (i = 0; i < n; i++) 
-          u[i] = w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
+          u_init[i] = w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
 
       if(family == FAMILY_LOGISTIC)
-        for (i = 0; i < n; i++) u[i] *= logi_b2(beta_max[i]);
+        for (i = 0; i < n; i++) u_init[i] *= logi_b2(beta_max[i]);
       else if(family == FAMILY_POISSON)
-        for (i = 0; i < n; i++) u[i] *= pois_b2(beta_max[i]);
-      glmgen_qrsol (Dkt_qr, u);
-      // for (i = 0; i < n-k; i++) u[i] = 0;
+        for (i = 0; i < n; i++) u_init[i] *= pois_b2(beta_max[i]);
+      glmgen_qrsol (Dkt_qr, u_init);
     }
   }
 
@@ -329,9 +333,12 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
    * warm starts */
   for (i = 0; i < nlambda; i++)
   {    
-    /* warm start */
-    double *beta_init = (i == 0) ? beta_max : beta + (i-1)*n;
+    /* disable warm start */
+    /* double *beta_init = (i == 0) ? beta_max : beta + (i-1)*n; */
+    double *beta_init = beta_max;
     for(j = 0; j < n; j++) beta[i*n + j] = beta_init[j];
+    memcpy(alpha, alpha_init, n*sizeof(double));
+    memcpy(u, u_init, n*sizeof(double));
 
     if (tridiag)
     {
@@ -372,16 +379,16 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
     }
     
 
-    /* If there any NaNs in beta: reset beta, alpha, u */
+    /* If there is any NaN in beta: reset beta, alpha, u */
     if (has_nan(beta + i*n, n))
     {
       double yc = weighted_mean(y,w,n);
       switch(family) {
         case FAMILY_POISSON:
-          yc = (yc > 0) ? log(yc) : -DBL_MAX;
+          yc = pois_b1_inv(yc);
           break;
         case FAMILY_LOGISTIC:
-          yc = (yc > 0) ? ( yc < 1 ? log(yc/(1-yc)) : DBL_MAX) : -DBL_MAX;
+          yc = logi_b1_inv(yc);
           break;
         default: break;
       }
@@ -404,8 +411,8 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
 
   free(beta_max);
   free(temp_n);
-  free(alpha);
-  free(u);
+  free(alpha); free(alpha_init);
+  free(u); free(u_init);
   free(v);
 
   if (tridiag && k>0)
