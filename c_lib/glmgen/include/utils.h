@@ -92,6 +92,7 @@ typedef llnode linkedlist;
 /* Small utility functions found in utils.c */
 double glmgen_factorial(int n);
 double l1norm(double * x, int n);
+double l2norm(double * x, int n);
 int is_nan(double x);
 int has_nan(double * x, int n);
 int count_nans(double * x, int n);
@@ -101,9 +102,11 @@ void diag_times_sparse(const cs * A, double * w);
 
 double logi_b(double x);
 double logi_b1(double x);
+double logi_b1_inv(double x);
 double logi_b2(double x);
 double pois_b(double x);
 double pois_b1(double x);
+double pois_b1_inv(double x);
 double pois_b2(double x);
 
 void thin(double * x, double * y, double * w,
@@ -116,18 +119,26 @@ csi glmgen_qrsol(gqr * B, double * b);
 csi glmgen_gqr_free(gqr * A);
 
 /* Generate equi-spaced points in log-space */
-void genInLogspace( double maxval, double minratio, int npts, double * out);
+void seq_logspace( double maxval, double minratio, int npts, double * out);
 
 double weighted_mean(double * y, double * w, int n);
 
 void calc_beta_max(double * y, double * w, int n, gqr * Dt_qr, cs * Dt,
 	double * temp_n, double * beta_max);
 
+/* Converts mean beta to natural parameter theta for Exponential families */
+void mean_to_natural_param(double* beta, int n, int family);
+
 /* Generic line search */
-double line_search(double * y, double * x, double * w, int n, int k, double lam,
-	func_RtoR b, func_RtoR b1,
-	double * beta, double * d,
-	double alpha, double gamma, int max_iter,
-	int * iter, double * Db, double * Dd);
+double line_search(double * y, double * x, double * w, int n, int k, 
+  double lam, func_RtoR b, func_RtoR b1, double * beta, double * d, 
+  double alpha, double gamma, int max_iter, int * iter, double * Db, 
+  double * Dd);
+	
+/* Utility to form a tridiagonal system */
+void form_tridiag(double *x, int n, int j, double rho, double padding, 
+  double *d0, double *d1);
+
+void print_array(double *x, int n);
 
 #endif

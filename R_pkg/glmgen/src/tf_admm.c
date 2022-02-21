@@ -270,50 +270,45 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
   /* Augmented Lagrangian parameter */
   rho = rho * pow((x[n-1] - x[0])/(double)(n-1), (double)k);
   
-  /* Initiate alpha and u for a warm start */
-  if (lambda[0] < max_lam * 1e-5)  
-    for (i = 0; i < n - k; i++) alpha[i] = u[i] = 0;    
+  /* beta_max */
+  if (beta0 == NULL)
+    calc_beta_max(y,w,n,Dt_qr,Dt,temp_n,beta_max);
+  else
+    memcpy(beta_max, beta0, n*sizeof(double));
+  mean_to_natural_param(beta_max,n,family);
+
+  /* Check if b'(beta) = weighted mean(y) is better than b'(beta) */
+  double yc = weighted_mean(y,w,n);
+  mean_to_natural_param(&yc,1,family);
+  for (i = 0; i < n; i++) temp_n[i] = yc;
+  double obj1 = tf_obj(x,y,w,n,k,max_lam,family,beta_max,v);
+  double obj2 = tf_obj(x,y,w,n,k,max_lam,family,temp_n,v);
+  if(obj2 < obj1) memcpy(beta_max, temp_n, n*sizeof(double));
+
+  /* alpha_max */
+
+  if (tridiag && k>0)
+  {
+    tf_dx1(x, n, 1, beta_max, alpha + (n*k-n));
+    for (j=k-1; j >= 1; j--)
+      tf_dx1(x, n, k-j+1, alpha + (n*j), alpha + (n*j-n));      
+  }
+  else if (k>0)
+    tf_dxtil(x, n, k, beta_max, alpha_init);
+
+  /* u_max */    
+
+  if (tridiag)
+    for (j=0; j<k; j++) memset(u + (n*j), 0, (n-k+j) * sizeof(double)); 
   else {
-    /* beta_max */
-    if (beta0 == NULL)
-      calc_beta_max(y,w,n,Dt_qr,Dt,temp_n,beta_max);
-    else
-      memcpy(beta_max, beta0, n*sizeof(double));
-    mean_to_natural_param(beta_max,n,family);
+    for (i = 0; i < n; i++) 
+        u_init[i] = w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
 
-    /* Check if beta = weighted mean(y) is better than beta */
-    double yc = weighted_mean(y,w,n);
-    mean_to_natural_param(&yc,1,family);
-    for (i = 0; i < n; i++) temp_n[i] = yc;
-    double obj1 = tf_obj(x,y,w,n,k,max_lam,family,beta_max,v);
-    double obj2 = tf_obj(x,y,w,n,k,max_lam,family,temp_n,v);
-    if(obj2 < obj1) memcpy(beta_max, temp_n, n*sizeof(double));
-
-    /* alpha_max */
-
-    if (tridiag && k>0)
-    {
-      tf_dx1(x, n, 1, beta_max, alpha + (n*k-n));
-      for (j=k-1; j >= 1; j--)
-        tf_dx1(x, n, k-j+1, alpha + (n*j), alpha + (n*j-n));      
-    }
-    else if (k>0)
-      tf_dxtil(x, n, k, beta_max, alpha_init);
-
-    /* u_max */    
-
-    if (tridiag)
-      for (j=0; j<k; j++) memset(u + (n*j), 0, (n-k+j) * sizeof(double)); 
-    else {
-      for (i = 0; i < n; i++) 
-          u_init[i] = w[i] * (beta_max[i] - y[i]) / (rho * lambda[0]);
-
-      if(family == FAMILY_LOGISTIC)
-        for (i = 0; i < n; i++) u_init[i] *= logi_b2(beta_max[i]);
-      else if(family == FAMILY_POISSON)
-        for (i = 0; i < n; i++) u_init[i] *= pois_b2(beta_max[i]);
-      glmgen_qrsol (Dkt_qr, u_init);
-    }
+    if(family == FAMILY_LOGISTIC)
+      for (i = 0; i < n; i++) u_init[i] *= logi_b2(beta_max[i]);
+    else if(family == FAMILY_POISSON)
+      for (i = 0; i < n; i++) u_init[i] *= pois_b2(beta_max[i]);
+    glmgen_qrsol (Dkt_qr, u_init);
   }
 
   if (tridiag && k>0)
@@ -333,7 +328,7 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
    * warm starts */
   for (i = 0; i < nlambda; i++)
   {    
-    /* disable warm start */
+    /* Disable warm start of beta, alpha, u. */
     /* double *beta_init = (i == 0) ? beta_max : beta + (i-1)*n; */
     double *beta_init = beta_max;
     for(j = 0; j < n; j++) beta[i*n + j] = beta_init[j];
@@ -356,7 +351,6 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
           tf_admm_gauss(x, y, w, n, k, max_iter, lambda[i], df+i, beta+i*n,
               alpha, u, obj+i*(1+max_iter), iter+i, rho * lambda[i],
               obj_tol, DktDk, verbose);
-
         break;
 
       case FAMILY_LOGISTIC:
@@ -377,8 +371,7 @@ void tf_admm ( double * x, double * y, double * w, int n, int k, int family,
         printf("Unknown family, stopping calculation.\n");
         status[i] = 2;
     }
-    
-
+ 
     /* If there is any NaN in beta: reset beta, alpha, u */
     if (has_nan(beta + i*n, n))
     {

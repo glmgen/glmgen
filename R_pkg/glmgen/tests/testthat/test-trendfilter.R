@@ -49,4 +49,17 @@ for (k in 1:2) {
   print(abs(max(outGenlasso$beta - outGlmgen$beta)))
 }
 
+# Polynomial signal test
+lambda <- 1e4
+n = 4
+ks = c(0, 1, 2)
+for (k in ks) {
+  X = seq.int(0, n)
+  y = X^k
+  mod <- trendfilter(x = X, y = y, k = k, lambda = lambda)
+  out <- predict(mod, lambda = lambda, type = "response")
+  expect_true(abs(max(out - y)) < EPS)
+  print(abs(max(out - y)))
+}
+
 

@@ -10,10 +10,27 @@
 
 void test_admm_gauss(int n, int k);
 
+double max(double a, double b)
+{
+  return a >= b ? a : b; 
+}
+
+double max_diff(double* a, double* b, int n)
+{
+  if(n<=0)
+    return 0.0;
+  double d = 0.0;
+  while(n--)
+  {
+    d = max(d, fabs(a[n] - b[n]));
+  }
+  return d;
+}
+
 int main()
 {
   int n=5;
-  int k=2;
+  int k=0;
   test_admm_gauss(n, k);
   /*for(k = 1; k < 2; k++)
     {
@@ -21,6 +38,8 @@ int main()
     }*/
   return 0;
 }
+
+
 void test_admm_gauss(int n, int k)
 {
   int i;
@@ -47,14 +66,13 @@ void test_admm_gauss(int n, int k)
   int verb;
   int tridiag;
 
-  verb = 0;
+  verb = 1;
   family = FAMILY_GAUSSIAN;
-  /*  family = FAMILY_LOGISTIC;*/
   tridiag = 0;
-  max_iter = 10; // admm iters
+  max_iter = 100; // admm iters
   lam_flag = 1;
   obj_flag = 1;
-  nlambda = 3;
+  nlambda = 1;
   lambda_min_ratio = 1e-4;
   rho = 1;
   obj_tol = 1e-8;
@@ -75,34 +93,18 @@ void test_admm_gauss(int n, int k)
   int max_iter_outer = (family == FAMILY_GAUSSIAN) ? max_iter : max_iter_newton;
   obj = (double *) malloc(max_iter_outer * nlambda * sizeof(double));
 
-  srand(5490);
-  srand(time(NULL));
+  lambda[0] = 1e4;
+  for (i = 0; i < n; i++) x[i] = i;
+  for (i = 0; i < n; i++) y[i] = pow(x[i], (double) k);
+  for (i = 0; i < n; i++) w[i] = 1.0;
 
-  lambda[0] = 100; lambda[1]=1;lambda[2]=0.01;
-  x[0] = 0;
-  /* for (i = 1; i < n; i++) x[i] = x[i-1] + ((rand() % 100)+1)/100.; */
-  for (i = 1; i < n; i++) x[i] = i;
-  /*  for (i = 0; i < n; i++) y[i] = sin(x[i] * 3.*PI/n);*/
-  for (i = 0; i < n; i++) y[i] = i % 2;
-
-  for (i = 0; i < n; i++) w[i] = 1;
-
-  /*  double * A0;*/
-  /*  double * A1;  */
-  /*  */
-  /*  A0 = (double*) malloc(n*k*sizeof(double));*/
-  /*  A1 = (double*) malloc(n*k*sizeof(double));*/
-
-  /*  form_tridiag(x, n, 1, 10, 1, A0, A1);*/
-  /*  print_array(A0,n);*/
-  /*  print_array(A1,n-1);*/
-
+  double* beta0 = NULL;
   /* Call the tf_admm function */
   tf_admm(x,y,w,n,k,family,
-      max_iter,lam_flag,lambda,
+      max_iter,beta0,lam_flag,lambda,
       nlambda,lambda_min_ratio, tridiag, df,
-      beta,	obj, iter, status, rho,
-      obj_tol, obj_tol, alpha_ls, gamma_ls,
+      beta,	obj, iter, status,
+      rho, obj_tol, obj_tol, alpha_ls, gamma_ls,
       max_iter_ls, max_iter_newton, verbose);
 
   /*  printf("\n--------------- (x,y) ---------------------------\n");*/
@@ -114,35 +116,30 @@ void test_admm_gauss(int n, int k)
   /*  printf("\n---------- beta_1 -------------------------------\n");*/
   /*    for (i = 0; i < n; i++) printf("%f\n", beta[i]);*/
 
-  /*  if (nlambda > 1) {*/
-  /*    printf("\n---------- beta_2 -------------------------------\n");  */
-  /*    for (i = 0; i < n; i++) printf("%f\n", beta[i + n]);*/
-  /*  }*/
-
 
   /* Prediction */
-  /*
-     predict_zero_tol = 1e-12;
+  
+  predict_zero_tol = 1e-12;
 
-     double err;
-     for(i = 0; i < nlambda; i++)
-     {
-     int offset = i*n;
-     tf_predict_gauss(beta + offset, x, n, k, x, n, pred, predict_zero_tol);
+  double err;
+  for(i = 0; i < nlambda; i++)
+  {
+  int offset = i*n;
+  tf_predict_gauss(beta + offset, x, n, k, x, n, pred, predict_zero_tol);
 
-     if(verb)
-     {
-     printf("predicted values --------\n");
-     print_array(pred, n);
-     printf("expected values --------\n");
-     print_array(beta + offset, n);
-     }
-     err = max_diff(beta + offset, pred, n);
-     printf("Prediction difference at input points=%E\n", err);
-     if(!(err < 1e-12 ))
-     printf("Prediction failed at input points (n=%d,k=%d,lam=%.4f,err=%E)\n",n,k,lambda[i], err);
-     }
-     */
+  if(verb)
+  {
+    printf("predicted values --------\n");
+    print_array(pred, n);
+    printf("expected values --------\n");
+    print_array(beta + offset, n);
+  }
+  err = max_diff(beta + offset, pred, n);
+  printf("Prediction difference at input points=%E\n", err);
+  if(!(err < 1e-8 ))
+  printf("Prediction failed at input points (n=%d,k=%d,lam=%.4f,err=%E)\n",n,k,lambda[i], err);
+}
+     
 
   /* Logistic loss */
   /*

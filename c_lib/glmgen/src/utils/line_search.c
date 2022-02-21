@@ -53,7 +53,7 @@ double line_search(double * y, double * x, double * w, int n, int k, double lam,
   double ip_yd;
   double theta;
   double t;
-  double descent;
+  double descent; /* f(x+) - f(x) */
   double bound;
 
   tf_dx(x, n, k+1, beta, Db);
@@ -94,13 +94,15 @@ double line_search(double * y, double * x, double * w, int n, int k, double lam,
     descent += lam * (norm_Dbn - norm_Db);
     bound = alpha * t * theta;
 
-    // printf("LINESEARCH %i\t%.3e\t%.3e\n", it, descent, bound);
+    /* printf("LINESEARCH %i\t%.3e\t%.3e\n", it, descent, bound); */
     /* Check if the descent is sufficient */
     if (descent <= bound) break;
     else t = t * gamma;
   }
 
   *iter = it;
+/*  if (descent > fabs(bound) * 0.1)*/
+/*    t = -1;  // Line search failed to find a t which results in descent*/
   return t;
 }
 

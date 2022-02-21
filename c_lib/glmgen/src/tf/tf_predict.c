@@ -61,16 +61,14 @@ void tf_predict(double * x, double * beta, int n, int k, int family,
     case FAMILY_LOGISTIC:
       for (i = 0; i < n0; i++)
       {
-        f = logi_b1(pred[i]);
-        pred[i] = f;
+        pred[i] = logi_b1(pred[i]);
       }
       break;
 
     case FAMILY_POISSON:
       for (i = 0; i < n0; i++)
       {
-        f = pois_b1(pred[i]);
-        pred[i] = f;
+        pred[i] = pois_b1(pred[i]);
       }
       break;
   }

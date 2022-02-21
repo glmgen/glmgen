@@ -26,6 +26,7 @@
  */
 
 #include "utils.h"
+#include <float.h>
 #include <math.h>
 
 double glmgen_factorial(int n)
@@ -70,6 +71,14 @@ double l1norm(double * x, int n) {
   return s;
 }
 
+double l2norm(double * x, int n) {
+  int i;
+  double s;
+  s = 0;
+  for (i=0; i < n; i++) s += x[i] * x[i];
+  return sqrt(s);
+}
+
 /* b(x) = log( 1 + exp(x) ).
  * Avoid computing exp(x) when x >> 0 */
 double logi_b(double x)
@@ -80,14 +89,14 @@ double logi_b(double x)
 /* b1(x) = b'(x), the first derivative */
 double logi_b1(double x)
 {
-  return x > 0 ? 1 / (1 + exp(-x) ) : exp(x)/ (1 + exp(x) );
+  return  1 / (1 + exp(-x) );
 }
 
 /* b2(x) = b''(x), the second derivative */
 double logi_b2(double x)
 {
-  x = -fabs(x);
-  return exp(x-2*log(1+exp(x)));
+  x = exp(-fabs(x));
+  return x/((1+x)*(1+x));
 }
 
 double pois_b(double x)
@@ -150,11 +159,10 @@ cs * scalar_plus_diag (const cs * A, double b, double *D)
   return B;
 }
 
-
-void genInLogspace( double maxval, double minratio, int nvals, double * out)
+void seq_logspace(double maxval, double minratio, int nvals, double * out)
 {
-	int i;
-	double minval;
+  int i;
+  double minval;
 
   minval = maxval * minratio;
   out[0] = maxval;
@@ -164,30 +172,103 @@ void genInLogspace( double maxval, double minratio, int nvals, double * out)
 
 double weighted_mean(double * y, double * w, int n) 
 {
-	double yc;
-	double sumw;
-	int i;
-	yc = sumw = 0;
+  double yc;
+  double sumw;
+  int i;
+  yc = sumw = 0;
 
-	for (i = 0; i < n; i++) yc += w[i] * y[i];
-	for (i = 0; i < n; i++) sumw += w[i];
-	yc /= sumw;
+  for (i = 0; i < n; i++) yc += w[i] * y[i];
+  for (i = 0; i < n; i++) sumw += w[i];
+  yc /= sumw;
 
-	return yc;
+  return yc;
 }
 
 void calc_beta_max(double * y, double * w, int n, gqr * Dt_qr, cs * Dt,
-	double * temp_n, double * beta_max)
+    double * temp_n, double * beta_max)
 {
-	int i;	
+  int i;	
   for (i = 0; i < n; i++) 
-		temp_n[i] = sqrt(w[i]) * y[i];
+    temp_n[i] = sqrt(w[i]) * y[i];
   glmgen_qrsol (Dt_qr, temp_n);
   for (i = 0; i < n; i++) 
-		beta_max[i] = 0;
+    beta_max[i] = 0;
   cs_gaxpy(Dt, temp_n, beta_max);
   /* Dt has a W^{-1/2}, so in the next step divide by sqrt(w) instead of w. */
   for (i = 0; i < n; i++) 
-		beta_max[i] = y[i] - beta_max[i]/sqrt(w[i]);
+    beta_max[i] = y[i] - beta_max[i]/sqrt(w[i]);
 }
 
+double logi_b1_inv(double beta)
+{
+  if (beta<=0)
+    return -FLT_MAX;
+  if (beta>=1)
+    return FLT_MAX;
+  return log(beta / (1-beta));
+}
+
+double pois_b1_inv(double beta)
+{
+  if (beta <= 0)
+    return -FLT_MAX;
+  return log(beta);
+}
+
+void mean_to_natural_param(double* beta, int n, int family)
+{
+  /* Nothing to do for FAMILY_GAUSSIAN */
+  int i;
+
+  switch (family) {
+    case FAMILY_LOGISTIC:
+      for (i=0; i<n; i++)
+        beta[i] = logi_b1_inv(beta[i]);
+      break;
+    case FAMILY_POISSON:
+      for (i=0; i<n; i++)
+          beta[i] = pois_b1_inv(beta[i]);
+      break;
+  }
+}
+
+/* padding I + rho D^(1)_j^T  D^(1)_j */
+/* j = 1,2,... */
+/* d0 and d1 are of sizes n-j+1 and n-j respectively */
+void form_tridiag(double *x, int n, int j, double rho, double padding, 
+    double *d0, double *d1)
+{
+  int i;    
+  double jjrho;
+
+  if (j<=0)
+  {
+    printf("Error: j<=0 in form_tridiag\n");
+    return;    
+  }
+
+  jjrho = j * j * rho;
+
+  for (i=0; i < n-j; i++)
+  {
+    d1[i] = - jjrho / ((x[j+i] - x[i]) * (x[j+i] - x[i]));
+  }
+
+  d0[0] = padding - d1[0];
+
+  for (i=1; i < n-j; i++)
+  {
+    d0[i] = padding - d1[i-1] - d1[i];
+  }
+
+  d0[n-j] = padding - d1[n-j-1];
+
+}
+
+
+void print_array(double *x, int n)
+{
+  int i;
+  for (i=0; i<n; i++) printf("%.2e  ", x[i]);
+  printf("\n");
+}
