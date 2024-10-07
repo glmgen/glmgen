@@ -52,7 +52,7 @@ double get_control_value(SEXP sControlList, const char * param_name)
   {
     outputString = (char *) malloc(sizeof(char) * 100);
     snprintf(outputString, sizeof(char) * 100, "Missing required tuning parameter %s", param_name);
-    Rf_error(outputString);
+    Rf_error("%s", outputString);
   }
 
   return param_output;
